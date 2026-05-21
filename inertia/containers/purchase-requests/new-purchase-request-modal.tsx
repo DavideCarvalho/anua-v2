@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -25,7 +26,7 @@ import { Textarea } from '../../components/ui/textarea'
 import { Label } from '../../components/ui/label'
 import { DatePicker } from '../../components/ui/date-picker'
 
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 import { brazilianRealFormatter } from '../../lib/formatters'
 
@@ -45,6 +46,8 @@ interface NewPurchaseRequestModalProps {
   open: boolean
   onCancel: () => void
   onSubmit: () => void
+  mode?: 'create' | 'edit'
+  purchaseRequestId?: string
 }
 
 export function NewPurchaseRequestModal({
@@ -52,9 +55,20 @@ export function NewPurchaseRequestModal({
   open,
   onCancel,
   onSubmit,
+  mode = 'create',
+  purchaseRequestId,
 }: NewPurchaseRequestModalProps) {
+  const isEditMode = mode === 'edit'
   const queryClient = useQueryClient()
   const createMutation = useMutation(api.api.v1.purchaseRequests.store.mutationOptions())
+  const updateMutation = useMutation(api.api.v1.purchaseRequests.update.mutationOptions())
+
+  const { data: existing } = useQuery({
+    ...api.api.v1.purchaseRequests.show.queryOptions({
+      params: { id: purchaseRequestId ?? '' },
+    }),
+    enabled: open && isEditMode && !!purchaseRequestId,
+  })
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -68,11 +82,66 @@ export function NewPurchaseRequestModal({
     },
   })
 
+  useEffect(() => {
+    if (!open) return
+    if (isEditMode && !existing) return
+
+    form.reset({
+      productName: existing?.productName ?? '',
+      quantity: existing?.quantity ?? 1,
+      unitValue: existing?.unitValue ?? 0,
+      dueDate: existing?.dueDate ? new Date(existing.dueDate) : addDays(new Date(), 2),
+      productUrl: existing?.productUrl ?? '',
+      description: existing?.description ?? '',
+    })
+  }, [open, isEditMode, existing, form])
+
   const watchUnitValue = form.watch('unitValue', 0)
   const watchQuantity = form.watch('quantity', 1)
   const totalValue = watchUnitValue * watchQuantity
 
   async function handleSubmit(data: FormData) {
+    if (isEditMode) {
+      if (!purchaseRequestId) {
+        toast.error('Solicitação inválida para edição')
+        return
+      }
+
+      toast.promise(
+        updateMutation
+          .mutateAsync({
+            params: { id: purchaseRequestId },
+            body: {
+              productName: data.productName,
+              quantity: data.quantity,
+              unitValue: data.unitValue,
+              value: data.unitValue * data.quantity,
+              dueDate: data.dueDate.toISOString(),
+              productUrl: data.productUrl || null,
+              description: data.description || null,
+            },
+          })
+          .then(() => {
+            queryClient.invalidateQueries({ queryKey: ['purchase-requests'] })
+            queryClient.invalidateQueries({
+              queryKey: api.api.v1.purchaseRequests.show
+                .queryOptions({ params: { id: purchaseRequestId } })
+                .queryKey,
+            })
+          }),
+        {
+          loading: 'Salvando alterações...',
+          success: () => {
+            form.reset()
+            onSubmit()
+            return 'Solicitação atualizada com sucesso!'
+          },
+          error: 'Erro ao atualizar solicitação',
+        }
+      )
+      return
+    }
+
     toast.promise(
       createMutation
         .mutateAsync({
@@ -102,13 +171,17 @@ export function NewPurchaseRequestModal({
     )
   }
 
+  const isPending = createMutation.isPending || updateMutation.isPending
+
   return (
     <Dialog open={open} onOpenChange={onCancel}>
       <DialogContent className="sm:max-w-[600px]">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)}>
             <DialogHeader>
-              <DialogTitle>Nova solicitação de compra</DialogTitle>
+              <DialogTitle>
+                {isEditMode ? 'Editar solicitação de compra' : 'Nova solicitação de compra'}
+              </DialogTitle>
             </DialogHeader>
 
             <div className="grid gap-6 py-4">
@@ -188,7 +261,7 @@ export function NewPurchaseRequestModal({
                       <DatePicker
                         date={field.value}
                         onChange={field.onChange}
-                        fromDate={new Date()}
+                        fromDate={isEditMode ? undefined : new Date()}
                       />
                     </FormControl>
                     <FormMessage />
@@ -229,8 +302,8 @@ export function NewPurchaseRequestModal({
               <Button type="button" variant="outline" onClick={onCancel}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={createMutation.isPending}>
-                Criar
+              <Button type="submit" disabled={isPending}>
+                {isEditMode ? 'Salvar' : 'Criar'}
               </Button>
             </DialogFooter>
           </form>

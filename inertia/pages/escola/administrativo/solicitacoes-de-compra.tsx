@@ -20,7 +20,7 @@ export default function SolicitacoesDeCompraPage() {
   const { schoolId } = usePage<PageProps>().props
 
   const [newModalOpen, setNewModalOpen] = useState(false)
-  const [_editModalId, setEditModalId] = useState<string | null>(null)
+  const [editModalId, setEditModalId] = useState<string | null>(null)
   const [approveModalId, setApproveModalId] = useState<string | null>(null)
   const [rejectModalId, setRejectModalId] = useState<string | null>(null)
   const [boughtModalId, setBoughtModalId] = useState<string | null>(null)
@@ -54,7 +54,16 @@ export default function SolicitacoesDeCompraPage() {
           onSubmit={() => setNewModalOpen(false)}
         />
 
-        {/* TODO: Implementar modal de edição similar ao new */}
+        {editModalId && (
+          <NewPurchaseRequestModal
+            schoolId={schoolId}
+            mode="edit"
+            purchaseRequestId={editModalId}
+            open={true}
+            onCancel={() => setEditModalId(null)}
+            onSubmit={() => setEditModalId(null)}
+          />
+        )}
 
         {approveModalId && (
           <Suspense fallback={null}>
