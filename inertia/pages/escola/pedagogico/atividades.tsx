@@ -57,7 +57,11 @@ export default function AtividadesPage() {
                 onValueChange={(v, _event) => v !== null && setSelectedClass(v === 'all' ? '' : v)}
               >
                 <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Todas as turmas" />
+                  <SelectValue placeholder="Todas as turmas">
+                    {selectedClass
+                      ? (classes.find((c) => c.id === selectedClass)?.name ?? 'Todas as turmas')
+                      : 'Todas as turmas'}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas as turmas</SelectItem>
@@ -75,7 +79,12 @@ export default function AtividadesPage() {
                 }
               >
                 <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Todas as matérias" />
+                  <SelectValue placeholder="Todas as matérias">
+                    {selectedSubject
+                      ? (subjects.find((s) => s.id === selectedSubject)?.name ??
+                        'Todas as matérias')
+                      : 'Todas as matérias'}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas as matérias</SelectItem>
