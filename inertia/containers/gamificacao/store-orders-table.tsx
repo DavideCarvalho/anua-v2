@@ -74,7 +74,7 @@ export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
   const handleApprove = async (id: string) => {
     try {
       await approveMutation.mutateAsync({ params: { id } })
-      queryClient.invalidateQueries({ queryKey: ['storeOrders'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.storeOrders.index.pathKey() })
       toast.success('Pedido aprovado!')
     } catch {
       toast.error('Erro ao aprovar pedido')
@@ -84,7 +84,7 @@ export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
   const handleReject = async (id: string) => {
     try {
       await rejectMutation.mutateAsync({ params: { id }, body: { reason: 'Rejeitado' } })
-      queryClient.invalidateQueries({ queryKey: ['storeOrders'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.storeOrders.index.pathKey() })
       toast.success('Pedido rejeitado')
     } catch {
       toast.error('Erro ao rejeitar pedido')
@@ -94,7 +94,7 @@ export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
   const handleDeliver = async (id: string) => {
     try {
       await deliverMutation.mutateAsync({ params: { id } })
-      queryClient.invalidateQueries({ queryKey: ['storeOrders'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.storeOrders.index.pathKey() })
       toast.success('Pedido marcado como entregue!')
     } catch {
       toast.error('Erro ao entregar pedido')
@@ -181,7 +181,7 @@ export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
                             onClick={() => handleApprove(order.id)}
                             disabled={approveMutation.isPending}
                           >
-                            <Check className="h-4 w-4 text-green-600" />
+                            <Check className="h-4 w-4 text-foreground/70" />
                           </Button>
                           <Button
                             size="sm"
@@ -189,7 +189,7 @@ export function StoreOrdersTable({ schoolId, status }: StoreOrdersTableProps) {
                             onClick={() => handleReject(order.id)}
                             disabled={rejectMutation.isPending}
                           >
-                            <X className="h-4 w-4 text-red-600" />
+                            <X className="h-4 w-4 text-destructive" />
                           </Button>
                         </>
                       )}

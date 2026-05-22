@@ -188,7 +188,6 @@ export function registerEscolaPageRoutes() {
       router
         .get('/financeiro/inadimplencia', [escola.ShowInadimplenciaPage])
         .as('financeiro.inadimplencia')
-      router.get('/financeiro/seguros', [escola.ShowSegurosPage]).as('financeiro.seguros')
       router.get('/financeiro/faturas', [escola.ShowFaturasPage]).as('financeiro.faturas')
       router
         .get('/financeiro/configuracao-pagamentos', [escola.ShowConfiguracaoPagamentosPage])

@@ -111,7 +111,7 @@ export function StoreItemsTable({ schoolId }: StoreItemsTableProps) {
           schoolId={schoolId}
           open={showCreateModal}
           onOpenChange={setShowCreateModal}
-          onSuccess={() => queryClient.invalidateQueries({ queryKey: ['store-items'] })}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: api.api.v1.storeItems.index.pathKey() })}
         />
       </>
     )
@@ -198,7 +198,7 @@ export function StoreItemsTable({ schoolId }: StoreItemsTableProps) {
                       onCheckedChange={async () => {
                         try {
                           await toggleMutation.mutateAsync({ params: { id: item.id } })
-                          queryClient.invalidateQueries({ queryKey: ['store-items'] })
+                          queryClient.invalidateQueries({ queryKey: api.api.v1.storeItems.index.pathKey() })
                         } catch {
                           toast.error('Erro ao alterar status do item.')
                         }
@@ -214,14 +214,12 @@ export function StoreItemsTable({ schoolId }: StoreItemsTableProps) {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Editar</DropdownMenuItem>
-                        <DropdownMenuItem>Ver Pedidos</DropdownMenuItem>
                         <DropdownMenuItem
                           className="text-destructive"
                           onClick={async () => {
                             try {
                               await deleteMutation.mutateAsync({ params: { id: item.id } })
-                              queryClient.invalidateQueries({ queryKey: ['store-items'] })
+                              queryClient.invalidateQueries({ queryKey: api.api.v1.storeItems.index.pathKey() })
                               toast.success('Item excluído com sucesso!')
                             } catch {
                               toast.error('Erro ao excluir item.')
@@ -243,7 +241,7 @@ export function StoreItemsTable({ schoolId }: StoreItemsTableProps) {
         schoolId={schoolId}
         open={showCreateModal}
         onOpenChange={setShowCreateModal}
-        onSuccess={() => queryClient.invalidateQueries({ queryKey: ['store-items'] })}
+        onSuccess={() => queryClient.invalidateQueries({ queryKey: api.api.v1.storeItems.index.pathKey() })}
       />
     </>
   )
