@@ -19,7 +19,9 @@ import {
   // Bot, // descomenta junto com o nav item "Assistente IA"
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { buttonVariants } from '../ui/button'
+import { api } from '~/lib/api'
 import type { SharedProps } from '../../lib/types'
 import { cn, ClientOnly } from '../../lib/utils'
 import { formatRoleName } from '../../lib/formatters'
@@ -393,22 +395,13 @@ function EscolaSidebar() {
 }
 
 function UnreadMessagesBadge() {
-  const [count, setCount] = useState<number | null>(null)
+  // Fetches up to 50 inquiries to get a meaningful unread count for the badge.
+  const { data } = useQuery(
+    api.api.v1.escola.inquiries.inquiries.list.queryOptions({ query: { limit: 50 } })
+  )
 
-  useEffect(() => {
-    fetch('/api/v1/escola/inquiries?limit=50', { credentials: 'include' })
-      .then((res) => res.json())
-      .then((data) => {
-        const unreadCount = (data.data ?? []).filter(
-          (i: { hasUnread: boolean }) => i.hasUnread
-        ).length
-        // Fetches up to 50 inquiries to get a meaningful unread count for the badge.
-        setCount(unreadCount)
-      })
-      .catch(() => setCount(0))
-  }, [])
-
-  if (!count || count === 0) return null
+  const count = data?.data?.filter((i) => i.hasUnread).length ?? 0
+  if (count === 0) return null
 
   return (
     <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-semibold text-destructive-foreground">

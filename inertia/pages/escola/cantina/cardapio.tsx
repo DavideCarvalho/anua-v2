@@ -226,8 +226,8 @@ export default function CardapioPage() {
       ? Number.parseInt(createForm.maxReservations, 10)
       : undefined
 
-    await toast.promise(
-      createMeal.mutateAsync({
+    try {
+      await createMeal.mutateAsync({
         body: {
           canteenId,
           name: createForm.name.trim(),
@@ -237,18 +237,15 @@ export default function CardapioPage() {
           mealType: createForm.mealType,
           maxReservations,
         },
-      }),
-      {
-        loading: 'Criando refeição...',
-        success: () => {
-          queryClient.invalidateQueries({ queryKey: api.api.v1.canteenMeals.index.pathKey() })
-          setCreateOpen(false)
-          setCreateForm(emptyMealForm)
-          return 'Refeição criada com sucesso'
-        },
-        error: (err) => (err instanceof Error ? err.message : 'Erro ao criar refeição'),
-      }
-    )
+      })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.canteenMeals.index.pathKey() })
+      setCreateOpen(false)
+      setCreateForm(emptyMealForm)
+      toast.success('Refeição criada com sucesso')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao criar refeição'
+      toast.error(message)
+    }
   }
 
   const handleEdit = async () => {
@@ -266,8 +263,8 @@ export default function CardapioPage() {
       ? Number.parseInt(editForm.maxReservations, 10)
       : undefined
 
-    await toast.promise(
-      updateMeal.mutateAsync({
+    try {
+      await updateMeal.mutateAsync({
         params: { id: editingMeal.id },
         body: {
           name: editForm.name.trim(),
@@ -277,17 +274,14 @@ export default function CardapioPage() {
           mealType: editForm.mealType,
           maxReservations,
         },
-      }),
-      {
-        loading: 'Atualizando refeição...',
-        success: () => {
-          queryClient.invalidateQueries({ queryKey: api.api.v1.canteenMeals.index.pathKey() })
-          setEditingMeal(null)
-          return 'Refeição atualizada'
-        },
-        error: (err) => (err instanceof Error ? err.message : 'Erro ao atualizar refeição'),
-      }
-    )
+      })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.canteenMeals.index.pathKey() })
+      setEditingMeal(null)
+      toast.success('Refeição atualizada')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao atualizar refeição'
+      toast.error(message)
+    }
   }
 
   const handleDelete = async (meal: CanteenMeal) => {
@@ -295,14 +289,14 @@ export default function CardapioPage() {
       return
     }
 
-    await toast.promise(deleteMeal.mutateAsync({ params: { id: meal.id } }), {
-      loading: 'Excluindo refeição...',
-      success: () => {
-        queryClient.invalidateQueries({ queryKey: api.api.v1.canteenMeals.index.pathKey() })
-        return 'Refeição excluída'
-      },
-      error: (err) => (err instanceof Error ? err.message : 'Erro ao excluir refeição'),
-    })
+    try {
+      await deleteMeal.mutateAsync({ params: { id: meal.id } })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.canteenMeals.index.pathKey() })
+      toast.success('Refeição excluída')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao excluir refeição'
+      toast.error(message)
+    }
   }
 
   return (

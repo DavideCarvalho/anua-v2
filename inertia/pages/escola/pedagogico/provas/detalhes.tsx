@@ -40,13 +40,13 @@ export default function ProvaDetalhesPage({ examId }: Props) {
         return <Badge variant="default">Em andamento</Badge>
       case 'COMPLETED':
         return (
-          <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
-            Concluida
+          <Badge variant="outline" className="bg-muted/60 text-muted-foreground">
+            Concluída
           </Badge>
         )
       case 'CANCELLED':
         return (
-          <Badge variant="outline" className="bg-rose-50 text-rose-700 border-rose-200">
+          <Badge variant="destructive">
             Cancelada
           </Badge>
         )

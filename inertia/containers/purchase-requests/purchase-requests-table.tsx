@@ -157,15 +157,11 @@ export function PurchaseRequestsTable({
                         <HoverCardTrigger>
                           <div className="flex items-center gap-1 cursor-help">
                             {row.finalQuantity > row.quantity ? (
-                              <ArrowUp className="h-4 w-4 text-green-500" />
+                              <ArrowUp className="h-4 w-4 text-muted-foreground" />
                             ) : (
-                              <ArrowDown className="h-4 w-4 text-red-500" />
+                              <ArrowDown className="h-4 w-4 text-muted-foreground" />
                             )}
-                            <span
-                              className={
-                                row.finalQuantity > row.quantity ? 'text-green-500' : 'text-red-500'
-                              }
-                            >
+                            <span className="text-foreground">
                               {row.finalQuantity}*
                             </span>
                           </div>
@@ -185,17 +181,13 @@ export function PurchaseRequestsTable({
                         <HoverCardTrigger>
                           <div className="flex items-center gap-1 cursor-help">
                             {row.finalValue > row.value ? (
-                              <ArrowUp className="h-4 w-4 text-red-500" />
+                              <ArrowUp className="h-4 w-4 text-destructive" />
                             ) : row.finalValue < row.value ? (
-                              <ArrowDown className="h-4 w-4 text-green-500" />
+                              <ArrowDown className="h-4 w-4 text-muted-foreground" />
                             ) : null}
                             <span
                               className={
-                                row.finalValue > row.value
-                                  ? 'text-red-500'
-                                  : row.finalValue < row.value
-                                    ? 'text-green-500'
-                                    : ''
+                                row.finalValue > row.value ? 'text-destructive' : 'text-foreground'
                               }
                             >
                               {brazilianRealFormatter(row.finalValue)}*
@@ -248,7 +240,7 @@ export function PurchaseRequestsTable({
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="text-red-500 hover:text-red-700"
+                                  className="text-destructive hover:text-destructive/80"
                                   onClick={() => handleDelete(row.id)}
                                 >
                                   <Trash2 className="h-4 w-4" />
@@ -268,7 +260,7 @@ export function PurchaseRequestsTable({
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="text-red-500 hover:text-red-700"
+                                  className="text-destructive hover:text-destructive/80"
                                   onClick={() => onReject(row.id)}
                                 >
                                   <X className="h-4 w-4" />
@@ -284,7 +276,7 @@ export function PurchaseRequestsTable({
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="text-green-500 hover:text-green-700"
+                                  className="text-foreground/70 hover:text-foreground"
                                   onClick={() => onApprove(row.id)}
                                 >
                                   <Check className="h-4 w-4" />
@@ -303,7 +295,7 @@ export function PurchaseRequestsTable({
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="text-green-500 hover:text-green-700"
+                                className="text-foreground/70 hover:text-foreground"
                                 onClick={() => onMarkBought(row.id)}
                               >
                                 <ShoppingCart className="h-4 w-4" />
@@ -321,7 +313,7 @@ export function PurchaseRequestsTable({
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="text-green-500 hover:text-green-700"
+                                className="text-foreground/70 hover:text-foreground"
                                 onClick={() => onMarkArrived(row.id)}
                               >
                                 <MapPin className="h-4 w-4" />

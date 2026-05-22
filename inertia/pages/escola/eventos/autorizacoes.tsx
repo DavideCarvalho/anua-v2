@@ -10,10 +10,10 @@ import {
   EventConsentsTracking,
   EventConsentsTrackingSkeleton,
 } from '../../../containers/events/event-consents-tracking'
+import type { SharedProps } from '../../../lib/types'
 
-interface PageProps {
+interface PageProps extends SharedProps {
   eventId: string
-  [key: string]: any
 }
 
 export default function EventoAutorizacoesPage() {
