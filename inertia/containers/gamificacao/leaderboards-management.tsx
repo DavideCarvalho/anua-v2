@@ -137,7 +137,6 @@ export function LeaderboardsManagement({
                       <DropdownMenuItem onClick={() => onViewEntries?.(lb.id)}>
                         Ver Classificação
                       </DropdownMenuItem>
-                      <DropdownMenuItem>Editar</DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive"
                         onClick={() =>
@@ -146,7 +145,7 @@ export function LeaderboardsManagement({
                             {
                               onSuccess: () =>
                                 queryClient.invalidateQueries({
-                                  queryKey: ['leaderboards'],
+                                  queryKey: api.api.v1.leaderboards.index.pathKey(),
                                 }),
                             }
                           )

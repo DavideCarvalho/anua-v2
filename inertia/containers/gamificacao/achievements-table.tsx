@@ -117,7 +117,7 @@ export function AchievementsTable() {
         criteria: {},
       },
     })
-    queryClient.invalidateQueries({ queryKey: ['achievements'] })
+    queryClient.invalidateQueries({ queryKey: api.api.v1.achievements.index.pathKey() })
     setIsCreateOpen(false)
     setFormData(defaultFormData)
   }
@@ -149,7 +149,7 @@ export function AchievementsTable() {
         isActive: formData.isActive,
       },
     })
-    queryClient.invalidateQueries({ queryKey: ['achievements'] })
+    queryClient.invalidateQueries({ queryKey: api.api.v1.achievements.index.pathKey() })
     setEditingId(null)
     setFormData(defaultFormData)
   }
@@ -157,7 +157,7 @@ export function AchievementsTable() {
   const handleDelete = async (id: string) => {
     if (!confirm('Tem certeza que deseja excluir esta conquista?')) return
     await deleteAchievement.mutateAsync({ params: { id } })
-    queryClient.invalidateQueries({ queryKey: ['achievements'] })
+    queryClient.invalidateQueries({ queryKey: api.api.v1.achievements.index.pathKey() })
   }
 
   const achievementsList = achievements?.data ?? []

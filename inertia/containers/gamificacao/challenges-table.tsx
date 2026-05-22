@@ -104,7 +104,7 @@ export function ChallengesTable() {
   const schoolId = user?.schoolId
 
   const queryClient = useQueryClient()
-  const { data: challenges } = useQuery(
+  const { data: challenges, isLoading } = useQuery(
     api.api.v1.challenges.index.queryOptions({
       query: { schoolId: schoolId || undefined },
     })
@@ -141,7 +141,7 @@ export function ChallengesTable() {
         isActive: formData.isActive,
       },
     })
-    queryClient.invalidateQueries({ queryKey: ['challenges'] })
+    queryClient.invalidateQueries({ queryKey: api.api.v1.challenges.index.pathKey() })
     setIsCreateOpen(false)
     setFormData(defaultFormData)
   }
@@ -180,7 +180,7 @@ export function ChallengesTable() {
         isActive: formData.isActive,
       },
     })
-    queryClient.invalidateQueries({ queryKey: ['challenges'] })
+    queryClient.invalidateQueries({ queryKey: api.api.v1.challenges.index.pathKey() })
     setEditingId(null)
     setFormData(defaultFormData)
   }
@@ -188,7 +188,7 @@ export function ChallengesTable() {
   const handleDelete = async () => {
     if (!deletingId) return
     await deleteChallenge.mutateAsync({ params: { id: deletingId } })
-    queryClient.invalidateQueries({ queryKey: ['challenges'] })
+    queryClient.invalidateQueries({ queryKey: api.api.v1.challenges.index.pathKey() })
     setDeletingId(null)
   }
 
@@ -230,7 +230,12 @@ export function ChallengesTable() {
         </Dialog>
       </CardHeader>
       <CardContent>
-        {challengesList.length === 0 ? (
+        {isLoading ? (
+          <div className="py-10 text-center text-muted-foreground">
+            <Flag className="mx-auto h-12 w-12 opacity-50 animate-pulse" />
+            <p className="mt-2">Carregando desafios...</p>
+          </div>
+        ) : challengesList.length === 0 ? (
           <div className="py-10 text-center text-muted-foreground">
             <Flag className="mx-auto h-12 w-12 opacity-50" />
             <p className="mt-2">Nenhum desafio cadastrado</p>
@@ -359,7 +364,7 @@ export function ChallengesTable() {
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir desafio</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir este desafio? Esta acao nao pode ser desfeita.
+              Tem certeza que deseja excluir este desafio? Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

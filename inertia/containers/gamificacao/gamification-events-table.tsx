@@ -143,7 +143,7 @@ function GamificationEventsTableContent() {
 
   const handleRetry = async (id: string) => {
     await retryEvent.mutateAsync({ params: { id } })
-    queryClient.invalidateQueries({ queryKey: ['gamification-events'] })
+    queryClient.invalidateQueries({ queryKey: api.api.v1.gamificationEvents.index.pathKey() })
   }
 
   return (

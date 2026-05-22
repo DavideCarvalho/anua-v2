@@ -82,7 +82,7 @@ export function CreateRecompensaItemModal({ schoolId, open, onOpenChange, onSucc
           requiresApproval: false,
         },
       })
-      queryClient.invalidateQueries({ queryKey: ['store-items'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.storeItems.index.pathKey() })
       toast.success('Item criado com sucesso!')
       resetForm()
       onOpenChange(false)

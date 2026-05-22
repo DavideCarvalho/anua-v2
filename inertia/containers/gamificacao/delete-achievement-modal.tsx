@@ -34,7 +34,7 @@ export function DeleteAchievementModal({
   async function handleDelete() {
     try {
       await deleteAchievement({ params: { id: achievementId } })
-      queryClient.invalidateQueries({ queryKey: ['achievements'] })
+      queryClient.invalidateQueries({ queryKey: api.api.v1.achievements.index.pathKey() })
       toast.success('Conquista excluída com sucesso!')
       onOpenChange(false)
     } catch (error) {
