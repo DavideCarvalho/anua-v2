@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Loader2, BookOpen } from 'lucide-react'
 
@@ -80,13 +80,8 @@ export default function TurmaNotasPage({
   }, [classData])
 
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null)
-  const selectedSubject = subjects.find((s) => s.id === selectedSubjectId)
-
-  useEffect(() => {
-    if (subjects.length > 0 && !selectedSubjectId) {
-      setSelectedSubjectId(subjects[0].id)
-    }
-  }, [subjects, selectedSubjectId])
+  const effectiveSubjectId = selectedSubjectId ?? subjects[0]?.id ?? null
+  const selectedSubject = subjects.find((s) => s.id === effectiveSubjectId)
 
   return (
     <TurmaLayout
@@ -112,7 +107,7 @@ export default function TurmaNotasPage({
             {subjects.length > 0 && (
               <div className="w-64">
                 <Select
-                  value={selectedSubjectId ?? ''}
+                  value={effectiveSubjectId ?? ''}
                   onValueChange={(value) => setSelectedSubjectId(value)}
                 >
                   <SelectTrigger>
@@ -137,7 +132,7 @@ export default function TurmaNotasPage({
             <NotasSkeleton />
           ) : subjects.length === 0 ? (
             <NotasEmpty />
-          ) : !selectedSubjectId ? (
+          ) : !effectiveSubjectId ? (
             <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
               <BookOpen className="h-12 w-12 mb-4" />
               <p>Selecione uma matéria para ver as notas.</p>
@@ -145,7 +140,7 @@ export default function TurmaNotasPage({
           ) : (
             <SubjectGradesTable
               classId={classId}
-              subjectId={selectedSubjectId}
+              subjectId={effectiveSubjectId}
               courseId={courseId}
               academicPeriodId={academicPeriodId}
             />
