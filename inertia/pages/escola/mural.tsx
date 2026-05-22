@@ -7,11 +7,11 @@ import { Button } from '../../components/ui/button'
 
 import { PostsFeed, PostsFeedSkeleton } from '../../containers/posts/posts-feed'
 import { NewPostModal } from '../../containers/posts/new-post-modal'
+import type { SharedProps } from '../../lib/types'
 
-interface PageProps {
+interface PageProps extends SharedProps {
   schoolId: string
   currentUserId?: string
-  [key: string]: any
 }
 
 export default function MuralPage() {

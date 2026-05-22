@@ -10,10 +10,10 @@ import { ApprovePurchaseRequestModal } from '../../../containers/purchase-reques
 import { RejectPurchaseRequestModal } from '../../../containers/purchase-requests/reject-purchase-request-modal'
 import { BoughtPurchaseRequestModal } from '../../../containers/purchase-requests/bought-purchase-request-modal'
 import { ArrivedPurchaseRequestModal } from '../../../containers/purchase-requests/arrived-purchase-request-modal'
+import type { SharedProps } from '../../../lib/types'
 
-interface PageProps {
+interface PageProps extends SharedProps {
   schoolId: string
-  [key: string]: any
 }
 
 export default function SolicitacoesDeCompraPage() {
