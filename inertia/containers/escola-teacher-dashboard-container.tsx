@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { Link } from '@adonisjs/inertia/react'
 import {
   AlertCircle,
   AlertTriangle,
@@ -130,9 +131,9 @@ function TeacherDashboardContent() {
             </div>
           ) : (
             data.alerts.map((alert) => (
-              <a
+              <Link
                 key={alert.id}
-                href={alert.href}
+                route="web.escola.pedagogico.turmas"
                 className="flex items-start gap-3 rounded-lg border p-3 transition-colors hover:bg-muted"
               >
                 <AlertTriangle
@@ -142,7 +143,7 @@ function TeacherDashboardContent() {
                   <p className="font-medium text-sm">{alert.title}</p>
                   <p className="text-xs text-muted-foreground">{alert.description}</p>
                 </div>
-              </a>
+              </Link>
             ))
           )}
         </CardContent>

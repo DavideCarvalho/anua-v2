@@ -34,19 +34,17 @@ export function ApprovePurchaseRequestModal({
   const approveMutation = useMutation(api.api.v1.purchaseRequests.approve.mutationOptions())
 
   async function handleApprove() {
-    toast.promise(
-      approveMutation.mutateAsync({ params: { id: purchaseRequestId } }).then(() => {
-        queryClient.invalidateQueries({ queryKey: ['purchase-requests'] })
-      }),
-      {
-        loading: 'Aprovando solicitação...',
-        success: () => {
-          onClose()
-          return 'Solicitação aprovada com sucesso!'
-        },
-        error: 'Erro ao aprovar solicitação',
-      }
-    )
+    try {
+      await approveMutation.mutateAsync({ params: { id: purchaseRequestId } })
+      queryClient.invalidateQueries({
+        queryKey: api.api.v1.purchaseRequests.index.pathKey(),
+      })
+      toast.success('Solicitação aprovada com sucesso!')
+      onClose()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao aprovar solicitação'
+      toast.error(message)
+    }
   }
 
   return (

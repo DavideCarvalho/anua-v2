@@ -156,19 +156,10 @@ export function registerEscolaPageRoutes() {
       router
         .get('/pedagogico/registro-diario', [escola.ShowOcorrenciasPage])
         .as('pedagogico.ocorrencias')
-      router.get('/pedagogico/atividades', [escola.ShowAtividadesPage]).as('pedagogico.atividades')
       router
         .get('/pedagogico/atividades/:id', [escola.ShowAtividadePage])
         .as('pedagogico.atividades.show')
-      router
-        .get('/pedagogico/atividades/:id/editar', [escola.ShowEditAtividadePage])
-        .as('pedagogico.atividades.edit')
-      router.get('/pedagogico/provas', [escola.ShowProvasPage]).as('pedagogico.provas')
       router.get('/pedagogico/provas/:id', [escola.ShowProvaPage]).as('pedagogico.provas.show')
-      router
-        .get('/pedagogico/provas/:id/editar', [escola.ShowEditProvaPage])
-        .as('pedagogico.provas.edit')
-      router.get('/pedagogico/presenca', [escola.ShowPresencaPage]).as('pedagogico.presenca')
       router
         .get('/pedagogico/aulas-avulsas', [escola.ShowAulasAvulsasPage])
         .as('pedagogico.aulasAvulsas')
