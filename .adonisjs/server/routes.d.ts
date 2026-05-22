@@ -99,13 +99,8 @@ export type ScannedRoutes = {
     'web.escola.pedagogico.horarios': { paramsTuple?: []; params?: {} }
     'web.escola.pedagogico.quadro': { paramsTuple?: []; params?: {} }
     'web.escola.pedagogico.ocorrencias': { paramsTuple?: []; params?: {} }
-    'web.escola.pedagogico.atividades': { paramsTuple?: []; params?: {} }
     'web.escola.pedagogico.atividades.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'web.escola.pedagogico.atividades.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'web.escola.pedagogico.provas': { paramsTuple?: []; params?: {} }
     'web.escola.pedagogico.provas.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'web.escola.pedagogico.provas.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'web.escola.pedagogico.presenca': { paramsTuple?: []; params?: {} }
     'web.escola.pedagogico.aulasAvulsas': { paramsTuple?: []; params?: {} }
     'web.escola.pedagogico.calendario': { paramsTuple?: []; params?: {} }
     'web.escola.pedagogico.cursosNiveis': { paramsTuple?: []; params?: {} }
@@ -118,7 +113,6 @@ export type ScannedRoutes = {
     'web.escola.cantina.recorrencias': { paramsTuple?: []; params?: {} }
     'web.escola.cantina.transferencias': { paramsTuple?: []; params?: {} }
     'web.escola.financeiro.inadimplencia': { paramsTuple?: []; params?: {} }
-    'web.escola.financeiro.seguros': { paramsTuple?: []; params?: {} }
     'web.escola.financeiro.faturas': { paramsTuple?: []; params?: {} }
     'web.escola.financeiro.configuracaoPagamentos': { paramsTuple?: []; params?: {} }
     'web.escola.lojas.index': { paramsTuple?: []; params?: {} }
@@ -200,6 +194,7 @@ export type ScannedRoutes = {
     'api.v1.dashboard.escola_teacher_dashboard': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.escola_pedagogical_alerts': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.responsavel_stats': { paramsTuple?: []; params?: {} }
+    'api.v1.dashboard.responsavel_alerts': { paramsTuple?: []; params?: {} }
     'api.v1.responsavel.api.student_academic_periods': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_grades': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_attendance': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
@@ -720,6 +715,9 @@ export type ScannedRoutes = {
     'api.v1.pedagogical_calendar.index': { paramsTuple?: []; params?: {} }
     'api.v1.pedagogical_calendar.creation_context': { paramsTuple?: []; params?: {} }
     'api.v1.game.create_character': { paramsTuple?: []; params?: {} }
+    'api.v1.student_farms.claim_daily': { paramsTuple?: []; params?: {} }
+    'api.v1.student_farms.plant': { paramsTuple?: []; params?: {} }
+    'api.v1.student_farms.harvest': { paramsTuple?: []; params?: {} }
     'api.v1.escola.inquiries.inquiries.list': { paramsTuple?: []; params?: {} }
     'api.v1.escola.inquiries.inquiries.show': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
     'api.v1.escola.inquiries.inquiries.messages.create': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
@@ -835,13 +833,8 @@ export type ScannedRoutes = {
     'web.escola.pedagogico.horarios': { paramsTuple?: []; params?: {} }
     'web.escola.pedagogico.quadro': { paramsTuple?: []; params?: {} }
     'web.escola.pedagogico.ocorrencias': { paramsTuple?: []; params?: {} }
-    'web.escola.pedagogico.atividades': { paramsTuple?: []; params?: {} }
     'web.escola.pedagogico.atividades.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'web.escola.pedagogico.atividades.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'web.escola.pedagogico.provas': { paramsTuple?: []; params?: {} }
     'web.escola.pedagogico.provas.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'web.escola.pedagogico.provas.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'web.escola.pedagogico.presenca': { paramsTuple?: []; params?: {} }
     'web.escola.pedagogico.aulasAvulsas': { paramsTuple?: []; params?: {} }
     'web.escola.pedagogico.calendario': { paramsTuple?: []; params?: {} }
     'web.escola.pedagogico.cursosNiveis': { paramsTuple?: []; params?: {} }
@@ -854,7 +847,6 @@ export type ScannedRoutes = {
     'web.escola.cantina.recorrencias': { paramsTuple?: []; params?: {} }
     'web.escola.cantina.transferencias': { paramsTuple?: []; params?: {} }
     'web.escola.financeiro.inadimplencia': { paramsTuple?: []; params?: {} }
-    'web.escola.financeiro.seguros': { paramsTuple?: []; params?: {} }
     'web.escola.financeiro.faturas': { paramsTuple?: []; params?: {} }
     'web.escola.financeiro.configuracaoPagamentos': { paramsTuple?: []; params?: {} }
     'web.escola.lojas.index': { paramsTuple?: []; params?: {} }
@@ -932,6 +924,7 @@ export type ScannedRoutes = {
     'api.v1.dashboard.escola_teacher_dashboard': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.escola_pedagogical_alerts': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.responsavel_stats': { paramsTuple?: []; params?: {} }
+    'api.v1.dashboard.responsavel_alerts': { paramsTuple?: []; params?: {} }
     'api.v1.responsavel.api.student_academic_periods': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_grades': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_attendance': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
@@ -1287,13 +1280,8 @@ export type ScannedRoutes = {
     'web.escola.pedagogico.horarios': { paramsTuple?: []; params?: {} }
     'web.escola.pedagogico.quadro': { paramsTuple?: []; params?: {} }
     'web.escola.pedagogico.ocorrencias': { paramsTuple?: []; params?: {} }
-    'web.escola.pedagogico.atividades': { paramsTuple?: []; params?: {} }
     'web.escola.pedagogico.atividades.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'web.escola.pedagogico.atividades.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'web.escola.pedagogico.provas': { paramsTuple?: []; params?: {} }
     'web.escola.pedagogico.provas.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'web.escola.pedagogico.provas.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'web.escola.pedagogico.presenca': { paramsTuple?: []; params?: {} }
     'web.escola.pedagogico.aulasAvulsas': { paramsTuple?: []; params?: {} }
     'web.escola.pedagogico.calendario': { paramsTuple?: []; params?: {} }
     'web.escola.pedagogico.cursosNiveis': { paramsTuple?: []; params?: {} }
@@ -1306,7 +1294,6 @@ export type ScannedRoutes = {
     'web.escola.cantina.recorrencias': { paramsTuple?: []; params?: {} }
     'web.escola.cantina.transferencias': { paramsTuple?: []; params?: {} }
     'web.escola.financeiro.inadimplencia': { paramsTuple?: []; params?: {} }
-    'web.escola.financeiro.seguros': { paramsTuple?: []; params?: {} }
     'web.escola.financeiro.faturas': { paramsTuple?: []; params?: {} }
     'web.escola.financeiro.configuracaoPagamentos': { paramsTuple?: []; params?: {} }
     'web.escola.lojas.index': { paramsTuple?: []; params?: {} }
@@ -1384,6 +1371,7 @@ export type ScannedRoutes = {
     'api.v1.dashboard.escola_teacher_dashboard': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.escola_pedagogical_alerts': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.responsavel_stats': { paramsTuple?: []; params?: {} }
+    'api.v1.dashboard.responsavel_alerts': { paramsTuple?: []; params?: {} }
     'api.v1.responsavel.api.student_academic_periods': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_grades': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_attendance': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
@@ -1853,6 +1841,9 @@ export type ScannedRoutes = {
     'api.v1.admin.schools.onboarding': { paramsTuple?: []; params?: {} }
     'api.v1.admin.jobs.generate_missing_payments': { paramsTuple?: []; params?: {} }
     'api.v1.game.create_character': { paramsTuple?: []; params?: {} }
+    'api.v1.student_farms.claim_daily': { paramsTuple?: []; params?: {} }
+    'api.v1.student_farms.plant': { paramsTuple?: []; params?: {} }
+    'api.v1.student_farms.harvest': { paramsTuple?: []; params?: {} }
     'api.v1.escola.inquiries.inquiries.messages.create': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
     'api.v1.escola.inquiries.inquiries.resolve': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
     'api.v1.escola.inquiries.inquiries.mark-read': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }

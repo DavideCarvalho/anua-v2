@@ -134,15 +134,12 @@ export interface ApiDefinition {
         horarios: typeof routes['web.escola.pedagogico.horarios']
         quadro: typeof routes['web.escola.pedagogico.quadro']
         ocorrencias: typeof routes['web.escola.pedagogico.ocorrencias']
-        atividades: typeof routes['web.escola.pedagogico.atividades'] & {
+        atividades: {
           show: typeof routes['web.escola.pedagogico.atividades.show']
-          edit: typeof routes['web.escola.pedagogico.atividades.edit']
         }
-        provas: typeof routes['web.escola.pedagogico.provas'] & {
+        provas: {
           show: typeof routes['web.escola.pedagogico.provas.show']
-          edit: typeof routes['web.escola.pedagogico.provas.edit']
         }
-        presenca: typeof routes['web.escola.pedagogico.presenca']
         aulasAvulsas: typeof routes['web.escola.pedagogico.aulasAvulsas']
         calendario: typeof routes['web.escola.pedagogico.calendario']
         cursosNiveis: typeof routes['web.escola.pedagogico.cursosNiveis']
@@ -159,7 +156,6 @@ export interface ApiDefinition {
       }
       financeiro: {
         inadimplencia: typeof routes['web.escola.financeiro.inadimplencia']
-        seguros: typeof routes['web.escola.financeiro.seguros']
         faturas: typeof routes['web.escola.financeiro.faturas']
         configuracaoPagamentos: typeof routes['web.escola.financeiro.configuracaoPagamentos']
       }
@@ -276,6 +272,7 @@ export interface ApiDefinition {
         escolaTeacherDashboard: typeof routes['api.v1.dashboard.escola_teacher_dashboard']
         escolaPedagogicalAlerts: typeof routes['api.v1.dashboard.escola_pedagogical_alerts']
         responsavelStats: typeof routes['api.v1.dashboard.responsavel_stats']
+        responsavelAlerts: typeof routes['api.v1.dashboard.responsavel_alerts']
         adminStats: typeof routes['api.v1.dashboard.admin_stats']
         serverStats: typeof routes['api.v1.dashboard.server_stats']
       }
@@ -1043,6 +1040,11 @@ export interface ApiDefinition {
       }
       game: {
         createCharacter: typeof routes['api.v1.game.create_character']
+      }
+      studentFarms: {
+        claimDaily: typeof routes['api.v1.student_farms.claim_daily']
+        plant: typeof routes['api.v1.student_farms.plant']
+        harvest: typeof routes['api.v1.student_farms.harvest']
       }
       escola: {
         inquiries: {

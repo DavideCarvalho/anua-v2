@@ -1147,18 +1147,6 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_ocorrencias_page_controller').default['handle']>>>
     }
   }
-  'web.escola.pedagogico.atividades': {
-    methods: ["GET","HEAD"]
-    pattern: '/escola/pedagogico/atividades'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_atividades_page_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_atividades_page_controller').default['handle']>>>
-    }
-  }
   'web.escola.pedagogico.atividades.show': {
     methods: ["GET","HEAD"]
     pattern: '/escola/pedagogico/atividades/:id'
@@ -1171,30 +1159,6 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_atividade_page_controller').default['handle']>>>
     }
   }
-  'web.escola.pedagogico.atividades.edit': {
-    methods: ["GET","HEAD"]
-    pattern: '/escola/pedagogico/atividades/:id/editar'
-    types: {
-      body: {}
-      paramsTuple: [ParamValue]
-      params: { id: ParamValue }
-      query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_edit_atividade_page_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_edit_atividade_page_controller').default['handle']>>>
-    }
-  }
-  'web.escola.pedagogico.provas': {
-    methods: ["GET","HEAD"]
-    pattern: '/escola/pedagogico/provas'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_provas_page_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_provas_page_controller').default['handle']>>>
-    }
-  }
   'web.escola.pedagogico.provas.show': {
     methods: ["GET","HEAD"]
     pattern: '/escola/pedagogico/provas/:id'
@@ -1205,30 +1169,6 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_prova_page_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_prova_page_controller').default['handle']>>>
-    }
-  }
-  'web.escola.pedagogico.provas.edit': {
-    methods: ["GET","HEAD"]
-    pattern: '/escola/pedagogico/provas/:id/editar'
-    types: {
-      body: {}
-      paramsTuple: [ParamValue]
-      params: { id: ParamValue }
-      query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_edit_prova_page_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_edit_prova_page_controller').default['handle']>>>
-    }
-  }
-  'web.escola.pedagogico.presenca': {
-    methods: ["GET","HEAD"]
-    pattern: '/escola/pedagogico/presenca'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_presenca_page_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_presenca_page_controller').default['handle']>>>
     }
   }
   'web.escola.pedagogico.aulasAvulsas': {
@@ -1373,18 +1313,6 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_inadimplencia_page_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_inadimplencia_page_controller').default['handle']>>>
-    }
-  }
-  'web.escola.financeiro.seguros': {
-    methods: ["GET","HEAD"]
-    pattern: '/escola/financeiro/seguros'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_seguros_page_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_seguros_page_controller').default['handle']>>>
     }
   }
   'web.escola.financeiro.faturas': {
@@ -2357,6 +2285,18 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/dashboard/get_responsavel_stats_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/dashboard/get_responsavel_stats_controller').default['handle']>>>
+    }
+  }
+  'api.v1.dashboard.responsavel_alerts': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/responsavel/alerts'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/dashboard/get_responsavel_alerts_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/dashboard/get_responsavel_alerts_controller').default['handle']>>>
     }
   }
   'api.v1.responsavel.api.student_academic_periods': {
@@ -8597,6 +8537,42 @@ export interface Registry {
       query: ExtractQuery<InferInput<(typeof import('#validators/game_character').createGameCharacterValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/api/game/create_game_character_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/api/game/create_game_character_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.student_farms.claim_daily': {
+    methods: ["POST"]
+    pattern: '/api/v1/student-farms/claim-daily'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/student_farms/claim_daily_seeds_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/student_farms/claim_daily_seeds_controller').default['handle']>>>
+    }
+  }
+  'api.v1.student_farms.plant': {
+    methods: ["POST"]
+    pattern: '/api/v1/student-farms/plant'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/farm').plotActionValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/farm').plotActionValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/student_farms/plant_plot_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/student_farms/plant_plot_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.student_farms.harvest': {
+    methods: ["POST"]
+    pattern: '/api/v1/student-farms/harvest'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/farm').plotActionValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/farm').plotActionValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/student_farms/harvest_plot_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/student_farms/harvest_plot_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'api.v1.escola.inquiries.inquiries.list': {

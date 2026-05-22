@@ -41,6 +41,7 @@ declare module '@adonisjs/inertia/types' {
     'aluno/dashboard': ExtractProps<(typeof import('../../inertia/pages/aluno/dashboard.tsx'))['default']>
     'aluno/idle': ExtractProps<(typeof import('../../inertia/pages/aluno/idle.tsx'))['default']>
     'aluno/jogo/create-character': ExtractProps<(typeof import('../../inertia/pages/aluno/jogo/create-character.tsx'))['default']>
+    'aluno/jogo/fazendinha': ExtractProps<(typeof import('../../inertia/pages/aluno/jogo/fazendinha.tsx'))['default']>
     'aluno/jogo/tavern': ExtractProps<(typeof import('../../inertia/pages/aluno/jogo/tavern.tsx'))['default']>
     'aluno/kids_dashboard': ExtractProps<(typeof import('../../inertia/pages/aluno/kids_dashboard.tsx'))['default']>
     'aluno/loja/carrinho': ExtractProps<(typeof import('../../inertia/pages/aluno/loja/carrinho.tsx'))['default']>
@@ -109,19 +110,14 @@ declare module '@adonisjs/inertia/types' {
     'escola/mural': ExtractProps<(typeof import('../../inertia/pages/escola/mural.tsx'))['default']>
     'escola/notificacoes': ExtractProps<(typeof import('../../inertia/pages/escola/notificacoes.tsx'))['default']>
     'escola/notificacoes/preferencias': ExtractProps<(typeof import('../../inertia/pages/escola/notificacoes/preferencias.tsx'))['default']>
-    'escola/pedagogico/atividades': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/atividades.tsx'))['default']>
     'escola/pedagogico/atividades/detalhes': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/atividades/detalhes.tsx'))['default']>
-    'escola/pedagogico/atividades/editar': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/atividades/editar.tsx'))['default']>
     'escola/pedagogico/aulas-avulsas': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/aulas-avulsas.tsx'))['default']>
     'escola/pedagogico/calendario': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/calendario.tsx'))['default']>
     'escola/pedagogico/cursos-niveis': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/cursos-niveis.tsx'))['default']>
     'escola/pedagogico/grade': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/grade.tsx'))['default']>
     'escola/pedagogico/horarios': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/horarios.tsx'))['default']>
     'escola/pedagogico/ocorrencias': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/ocorrencias.tsx'))['default']>
-    'escola/pedagogico/presenca': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/presenca.tsx'))['default']>
-    'escola/pedagogico/provas': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/provas.tsx'))['default']>
     'escola/pedagogico/provas/detalhes': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/provas/detalhes.tsx'))['default']>
-    'escola/pedagogico/provas/editar': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/provas/editar.tsx'))['default']>
     'escola/pedagogico/quadro': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/quadro.tsx'))['default']>
     'escola/pedagogico/turmas': ExtractProps<(typeof import('../../inertia/pages/escola/pedagogico/turmas.tsx'))['default']>
     'escola/pergunta-detail': ExtractProps<(typeof import('../../inertia/pages/escola/pergunta-detail.tsx'))['default']>
@@ -135,7 +131,6 @@ declare module '@adonisjs/inertia/types' {
     'escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/index': ExtractProps<(typeof import('../../inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/index.tsx'))['default']>
     'escola/periodos-letivos/[slug]/cursos/[cursoSlug]/visao-geral': ExtractProps<(typeof import('../../inertia/pages/escola/periodos-letivos/[slug]/cursos/[cursoSlug]/visao-geral.tsx'))['default']>
     'escola/periodos-letivos/detalhes': ExtractProps<(typeof import('../../inertia/pages/escola/periodos-letivos/detalhes.tsx'))['default']>
-    'escola/seguros': ExtractProps<(typeof import('../../inertia/pages/escola/seguros.tsx'))['default']>
     'home': ExtractProps<(typeof import('../../inertia/pages/home.tsx'))['default']>
     'loja/financeiro': ExtractProps<(typeof import('../../inertia/pages/loja/financeiro.tsx'))['default']>
     'loja/index': ExtractProps<(typeof import('../../inertia/pages/loja/index.tsx'))['default']>

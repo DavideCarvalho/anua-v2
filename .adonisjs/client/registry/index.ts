@@ -576,47 +576,17 @@ const routes = {
     tokens: [{"old":"/escola/pedagogico/registro-diario","type":0,"val":"escola","end":""},{"old":"/escola/pedagogico/registro-diario","type":0,"val":"pedagogico","end":""},{"old":"/escola/pedagogico/registro-diario","type":0,"val":"registro-diario","end":""}],
     types: placeholder as Registry['web.escola.pedagogico.ocorrencias']['types'],
   },
-  'web.escola.pedagogico.atividades': {
-    methods: ["GET","HEAD"],
-    pattern: '/escola/pedagogico/atividades',
-    tokens: [{"old":"/escola/pedagogico/atividades","type":0,"val":"escola","end":""},{"old":"/escola/pedagogico/atividades","type":0,"val":"pedagogico","end":""},{"old":"/escola/pedagogico/atividades","type":0,"val":"atividades","end":""}],
-    types: placeholder as Registry['web.escola.pedagogico.atividades']['types'],
-  },
   'web.escola.pedagogico.atividades.show': {
     methods: ["GET","HEAD"],
     pattern: '/escola/pedagogico/atividades/:id',
     tokens: [{"old":"/escola/pedagogico/atividades/:id","type":0,"val":"escola","end":""},{"old":"/escola/pedagogico/atividades/:id","type":0,"val":"pedagogico","end":""},{"old":"/escola/pedagogico/atividades/:id","type":0,"val":"atividades","end":""},{"old":"/escola/pedagogico/atividades/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['web.escola.pedagogico.atividades.show']['types'],
   },
-  'web.escola.pedagogico.atividades.edit': {
-    methods: ["GET","HEAD"],
-    pattern: '/escola/pedagogico/atividades/:id/editar',
-    tokens: [{"old":"/escola/pedagogico/atividades/:id/editar","type":0,"val":"escola","end":""},{"old":"/escola/pedagogico/atividades/:id/editar","type":0,"val":"pedagogico","end":""},{"old":"/escola/pedagogico/atividades/:id/editar","type":0,"val":"atividades","end":""},{"old":"/escola/pedagogico/atividades/:id/editar","type":1,"val":"id","end":""},{"old":"/escola/pedagogico/atividades/:id/editar","type":0,"val":"editar","end":""}],
-    types: placeholder as Registry['web.escola.pedagogico.atividades.edit']['types'],
-  },
-  'web.escola.pedagogico.provas': {
-    methods: ["GET","HEAD"],
-    pattern: '/escola/pedagogico/provas',
-    tokens: [{"old":"/escola/pedagogico/provas","type":0,"val":"escola","end":""},{"old":"/escola/pedagogico/provas","type":0,"val":"pedagogico","end":""},{"old":"/escola/pedagogico/provas","type":0,"val":"provas","end":""}],
-    types: placeholder as Registry['web.escola.pedagogico.provas']['types'],
-  },
   'web.escola.pedagogico.provas.show': {
     methods: ["GET","HEAD"],
     pattern: '/escola/pedagogico/provas/:id',
     tokens: [{"old":"/escola/pedagogico/provas/:id","type":0,"val":"escola","end":""},{"old":"/escola/pedagogico/provas/:id","type":0,"val":"pedagogico","end":""},{"old":"/escola/pedagogico/provas/:id","type":0,"val":"provas","end":""},{"old":"/escola/pedagogico/provas/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['web.escola.pedagogico.provas.show']['types'],
-  },
-  'web.escola.pedagogico.provas.edit': {
-    methods: ["GET","HEAD"],
-    pattern: '/escola/pedagogico/provas/:id/editar',
-    tokens: [{"old":"/escola/pedagogico/provas/:id/editar","type":0,"val":"escola","end":""},{"old":"/escola/pedagogico/provas/:id/editar","type":0,"val":"pedagogico","end":""},{"old":"/escola/pedagogico/provas/:id/editar","type":0,"val":"provas","end":""},{"old":"/escola/pedagogico/provas/:id/editar","type":1,"val":"id","end":""},{"old":"/escola/pedagogico/provas/:id/editar","type":0,"val":"editar","end":""}],
-    types: placeholder as Registry['web.escola.pedagogico.provas.edit']['types'],
-  },
-  'web.escola.pedagogico.presenca': {
-    methods: ["GET","HEAD"],
-    pattern: '/escola/pedagogico/presenca',
-    tokens: [{"old":"/escola/pedagogico/presenca","type":0,"val":"escola","end":""},{"old":"/escola/pedagogico/presenca","type":0,"val":"pedagogico","end":""},{"old":"/escola/pedagogico/presenca","type":0,"val":"presenca","end":""}],
-    types: placeholder as Registry['web.escola.pedagogico.presenca']['types'],
   },
   'web.escola.pedagogico.aulasAvulsas': {
     methods: ["GET","HEAD"],
@@ -689,12 +659,6 @@ const routes = {
     pattern: '/escola/financeiro/inadimplencia',
     tokens: [{"old":"/escola/financeiro/inadimplencia","type":0,"val":"escola","end":""},{"old":"/escola/financeiro/inadimplencia","type":0,"val":"financeiro","end":""},{"old":"/escola/financeiro/inadimplencia","type":0,"val":"inadimplencia","end":""}],
     types: placeholder as Registry['web.escola.financeiro.inadimplencia']['types'],
-  },
-  'web.escola.financeiro.seguros': {
-    methods: ["GET","HEAD"],
-    pattern: '/escola/financeiro/seguros',
-    tokens: [{"old":"/escola/financeiro/seguros","type":0,"val":"escola","end":""},{"old":"/escola/financeiro/seguros","type":0,"val":"financeiro","end":""},{"old":"/escola/financeiro/seguros","type":0,"val":"seguros","end":""}],
-    types: placeholder as Registry['web.escola.financeiro.seguros']['types'],
   },
   'web.escola.financeiro.faturas': {
     methods: ["GET","HEAD"],
@@ -1181,6 +1145,12 @@ const routes = {
     pattern: '/api/v1/responsavel/stats',
     tokens: [{"old":"/api/v1/responsavel/stats","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/stats","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/stats","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/stats","type":0,"val":"stats","end":""}],
     types: placeholder as Registry['api.v1.dashboard.responsavel_stats']['types'],
+  },
+  'api.v1.dashboard.responsavel_alerts': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/responsavel/alerts',
+    tokens: [{"old":"/api/v1/responsavel/alerts","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/alerts","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/alerts","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/alerts","type":0,"val":"alerts","end":""}],
+    types: placeholder as Registry['api.v1.dashboard.responsavel_alerts']['types'],
   },
   'api.v1.responsavel.api.student_academic_periods': {
     methods: ["GET","HEAD"],
@@ -4301,6 +4271,24 @@ const routes = {
     pattern: '/api/v1/game/characters',
     tokens: [{"old":"/api/v1/game/characters","type":0,"val":"api","end":""},{"old":"/api/v1/game/characters","type":0,"val":"v1","end":""},{"old":"/api/v1/game/characters","type":0,"val":"game","end":""},{"old":"/api/v1/game/characters","type":0,"val":"characters","end":""}],
     types: placeholder as Registry['api.v1.game.create_character']['types'],
+  },
+  'api.v1.student_farms.claim_daily': {
+    methods: ["POST"],
+    pattern: '/api/v1/student-farms/claim-daily',
+    tokens: [{"old":"/api/v1/student-farms/claim-daily","type":0,"val":"api","end":""},{"old":"/api/v1/student-farms/claim-daily","type":0,"val":"v1","end":""},{"old":"/api/v1/student-farms/claim-daily","type":0,"val":"student-farms","end":""},{"old":"/api/v1/student-farms/claim-daily","type":0,"val":"claim-daily","end":""}],
+    types: placeholder as Registry['api.v1.student_farms.claim_daily']['types'],
+  },
+  'api.v1.student_farms.plant': {
+    methods: ["POST"],
+    pattern: '/api/v1/student-farms/plant',
+    tokens: [{"old":"/api/v1/student-farms/plant","type":0,"val":"api","end":""},{"old":"/api/v1/student-farms/plant","type":0,"val":"v1","end":""},{"old":"/api/v1/student-farms/plant","type":0,"val":"student-farms","end":""},{"old":"/api/v1/student-farms/plant","type":0,"val":"plant","end":""}],
+    types: placeholder as Registry['api.v1.student_farms.plant']['types'],
+  },
+  'api.v1.student_farms.harvest': {
+    methods: ["POST"],
+    pattern: '/api/v1/student-farms/harvest',
+    tokens: [{"old":"/api/v1/student-farms/harvest","type":0,"val":"api","end":""},{"old":"/api/v1/student-farms/harvest","type":0,"val":"v1","end":""},{"old":"/api/v1/student-farms/harvest","type":0,"val":"student-farms","end":""},{"old":"/api/v1/student-farms/harvest","type":0,"val":"harvest","end":""}],
+    types: placeholder as Registry['api.v1.student_farms.harvest']['types'],
   },
   'api.v1.escola.inquiries.inquiries.list': {
     methods: ["GET","HEAD"],

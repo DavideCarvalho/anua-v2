@@ -104,6 +104,7 @@ import { registerDashboardApiRoutes } from './dashboard.js'
 import { registerResponsavelApiRoutes as registerResponsavelDashboardApiRoutes } from './responsavel.js'
 import { registerPedagogicalCalendarApiRoutes } from './pedagogical_calendar.js'
 import { registerGameApiRoutes } from './game.js'
+import { registerStudentFarmsApiRoutes } from './student_farms.js'
 import { registerEscolaInquiriesApiRoutes } from './escola_inquiries.js'
 import { registerAcademicSubPeriodApiRoutes } from './academic_sub_periods.js'
 import { registerAiApiRoutes } from './ai.js'
@@ -194,6 +195,7 @@ export function registerApiRoutes() {
   registerAdminJobsApiRoutes()
   registerPedagogicalCalendarApiRoutes()
   registerGameApiRoutes()
+  registerStudentFarmsApiRoutes()
   registerEscolaInquiriesApiRoutes()
   registerAcademicSubPeriodApiRoutes()
   registerAiApiRoutes()
