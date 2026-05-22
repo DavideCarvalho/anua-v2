@@ -134,10 +134,10 @@ const statusConfig: Record<
 }
 
 const badgeColors = {
-  default: 'bg-muted text-muted-foreground',
-  warning: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200',
-  success: 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200',
-  destructive: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200',
+  default: 'bg-foreground/5 text-foreground ring-1 ring-foreground/10',
+  warning: 'bg-foreground/5 text-foreground ring-1 ring-foreground/10',
+  success: 'bg-foreground/5 text-foreground ring-1 ring-foreground/10',
+  destructive: 'bg-destructive/10 text-destructive ring-1 ring-destructive/20',
 }
 
 export default function ConfiguracaoPagamentosPage() {
@@ -254,8 +254,8 @@ export default function ConfiguracaoPagamentosPage() {
 
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Configuracao de Pagamentos</h1>
-          <p className="text-muted-foreground">Gerencie a integracao de pagamentos da sua escola</p>
+          <h1 className="text-2xl font-bold tracking-tight">Configuração de Pagamentos</h1>
+          <p className="text-muted-foreground">Gerencie a integração de pagamentos da sua escola</p>
         </div>
 
         {isLoading ? (

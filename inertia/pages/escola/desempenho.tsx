@@ -19,13 +19,13 @@ import {
 export default function DesempenhoPage() {
   return (
     <EscolaLayout>
-      <Head title="Desempenho Academico" />
+      <Head title="Desempenho Acadêmico" />
 
       <div className="flex flex-col gap-6">
         <div>
-          <h1 className="text-2xl font-bold">Desempenho Academico</h1>
+          <h1 className="text-2xl font-bold">Desempenho Acadêmico</h1>
           <p className="text-sm text-muted-foreground">
-            Visao geral do desempenho academico dos alunos
+            Visão geral do desempenho acadêmico dos alunos
           </p>
         </div>
 

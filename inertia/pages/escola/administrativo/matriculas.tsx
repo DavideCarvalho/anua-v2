@@ -22,7 +22,7 @@ export default function MatriculasPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="hover:bg-muted/30 transition-colors cursor-pointer">
             <CardHeader>
               <UserPlus className="h-8 w-8 text-primary mb-2" />
               <CardTitle>Nova Matrícula</CardTitle>
@@ -33,7 +33,7 @@ export default function MatriculasPage() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="hover:bg-muted/30 transition-colors cursor-pointer">
             <CardHeader>
               <ClipboardList className="h-8 w-8 text-primary mb-2" />
               <CardTitle>Matrículas Pendentes</CardTitle>
@@ -46,7 +46,7 @@ export default function MatriculasPage() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="hover:bg-muted/30 transition-colors cursor-pointer">
             <CardHeader>
               <FileText className="h-8 w-8 text-primary mb-2" />
               <CardTitle>Rematrículas</CardTitle>

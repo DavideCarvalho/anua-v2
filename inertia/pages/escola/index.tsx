@@ -451,7 +451,7 @@ export default function EscolaDashboard() {
               <Link
                 key={action.label}
                 route={action.route}
-                className="group relative flex flex-col items-center gap-2 rounded-lg border bg-card p-4 text-center transition-all hover:border-primary/30 hover:bg-muted/50 hover:shadow-sm sm:p-5"
+                className="group relative flex flex-col items-center gap-2 rounded-lg border bg-card p-4 text-center transition-colors hover:border-primary/30 hover:bg-muted/50 sm:p-5"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-md bg-muted text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
                   <action.icon className="h-5 w-5" />

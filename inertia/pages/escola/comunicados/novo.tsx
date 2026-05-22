@@ -446,7 +446,7 @@ export default function NovoComunicadoPage() {
               </div>
 
               <div className="flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/30 px-6 py-8 text-center transition-colors hover:bg-muted/50">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background shadow-sm">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background ring-1 ring-foreground/10">
                   <UploadCloud className="h-6 w-6 text-muted-foreground" />
                 </div>
                 <div className="space-y-1">
@@ -760,14 +760,14 @@ export default function NovoComunicadoPage() {
             </div>
 
             <div className="space-y-4 rounded-md border p-4">
-              <p className="text-sm font-semibold">Ciencia do responsavel</p>
+              <p className="text-sm font-semibold">Ciência do responsável</p>
               <label className="flex items-center gap-2 text-sm">
                 <input
                   type="checkbox"
                   checked={requiresAcknowledgement}
                   onChange={(event) => setRequiresAcknowledgement(event.target.checked)}
                 />
-                Exigir que o responsavel marque "Li e estou ciente"
+                Exigir que o responsável marque "Li e estou ciente"
               </label>
 
               {requiresAcknowledgement && (
