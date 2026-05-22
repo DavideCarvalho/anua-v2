@@ -15,8 +15,10 @@ export interface AttentionItem {
   title: string
   subtitle?: string
   count: number
-  route: LinkRouteProp
-  destinationLabel: string
+  // route + destinationLabel são opcionais: itens com pedagogicalAlertKey
+  // abrem a sheet inline pelo attention-drawer, sem precisar navegar.
+  route?: LinkRouteProp
+  destinationLabel?: string
   action: string
   // Present when the item maps to a row in the pedagogical-alerts payload —
   // the drawer can then show the rich student/exam/activity table.

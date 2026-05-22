@@ -367,7 +367,7 @@ export function StoreOrdersTab({ storeId }: StoreOrdersTabProps) {
               value={paymentMode ?? 'all'}
               onValueChange={(value) =>
                 setFilters({
-                  paymentMode: isStoreOrderPaymentMode(value) ? value : null,
+                  paymentMode: value && isStoreOrderPaymentMode(value) ? value : null,
                 })
               }
             >
@@ -385,12 +385,12 @@ export function StoreOrdersTab({ storeId }: StoreOrdersTabProps) {
             <Select
               value={status ?? 'all'}
               onValueChange={(value) =>
-                setFilters({ status: isStoreOrderStatus(value) ? value : null })
+                setFilters({ status: value && isStoreOrderStatus(value) ? value : null })
               }
             >
               <SelectTrigger className="w-full md:w-[220px]">
                 <SelectValue>
-                  {status && status !== 'all' ? (statusLabels[status] ?? status) : 'Status'}
+                  {status ? (statusLabels[status] ?? status) : 'Status'}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>

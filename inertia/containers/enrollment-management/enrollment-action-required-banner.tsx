@@ -50,7 +50,7 @@ export function EnrollmentActionRequiredBanner({ schoolId, academicPeriodId }: P
       key: 'signature',
       count: data.counts.needsOfflineSignature,
       icon: PenLine,
-      title: (n) =>
+      title: (n: number) =>
         n === 1
           ? 'matrícula esperando agendar a assinatura presencial'
           : 'matrículas esperando agendar a assinatura presencial',
@@ -61,7 +61,7 @@ export function EnrollmentActionRequiredBanner({ schoolId, academicPeriodId }: P
       key: 'class',
       count: data.counts.needsClassAllocation,
       icon: Users,
-      title: (n) =>
+      title: (n: number) =>
         n === 1
           ? 'matrícula sem turma alocada há mais de 3 dias'
           : 'matrículas sem turma alocada há mais de 3 dias',
@@ -71,7 +71,7 @@ export function EnrollmentActionRequiredBanner({ schoolId, academicPeriodId }: P
       key: 'payment-setup',
       count: data.counts.needsManualPaymentCollection,
       icon: CreditCard,
-      title: (n) =>
+      title: (n: number) =>
         n === 1
           ? 'matrícula com taxa pendente que você precisa cobrar manualmente'
           : 'matrículas com taxa pendente que você precisa cobrar manualmente',
@@ -83,7 +83,7 @@ export function EnrollmentActionRequiredBanner({ schoolId, academicPeriodId }: P
       key: 'docs',
       count: data.counts.waitingDocumentResubmit,
       icon: FileText,
-      title: (n) =>
+      title: (n: number) =>
         n === 1
           ? 'matrícula com documento rejeitado aguardando reenvio'
           : 'matrículas com documentos rejeitados aguardando reenvio',

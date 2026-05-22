@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@adonisjs/inertia/react'
 import type { Route } from '@tuyau/core/types'
 import { toast } from 'sonner'
@@ -87,7 +87,14 @@ export function MatriculaAxesContainer({ matriculaId }: MatriculaAxesContainerPr
 
 type AxesData = Route.Response<'api.v1.responsavel.api.enrollment_axes'>
 type StudentDocumentsData = Route.Response<'api.v1.responsavel.api.student_documents'>
-type DocsQuery = UseQueryResult<StudentDocumentsData>
+type DocsQuery = ReturnType<typeof useDocumentsQuery>
+
+function useDocumentsQuery(studentId: string, enabled: boolean) {
+  return useQuery({
+    ...api.api.v1.responsavel.api.studentDocuments.queryOptions({ params: { studentId } }),
+    enabled,
+  })
+}
 
 function MatriculaAxesContent({ data }: { data: AxesData }) {
   const queryClient = useQueryClient()
@@ -111,10 +118,10 @@ function MatriculaAxesContent({ data }: { data: AxesData }) {
 
   // Documents query — só renderiza inline quando a seção Documentação for aberta
   // (mas pra simplificar, faço pre-fetch sempre, é leve)
-  const documentsQuery = useQuery({
-    ...api.api.v1.responsavel.api.studentDocuments.queryOptions({ params: { studentId: data.studentId } }),
-    enabled: !!data.studentId && axes.docs.required > 0,
-  })
+  const documentsQuery = useDocumentsQuery(
+    data.studentId,
+    !!data.studentId && axes.docs.required > 0
+  )
 
   return (
     <div className="space-y-6">
