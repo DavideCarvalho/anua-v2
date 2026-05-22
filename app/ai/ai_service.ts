@@ -103,7 +103,8 @@ export class AiService {
             inputTokens: step.usage?.inputTokens ?? 0,
             outputTokens: step.usage?.outputTokens ?? 0,
             totalTokens:
-              step.usage?.totalTokens ?? (step.usage?.inputTokens ?? 0) + (step.usage?.outputTokens ?? 0),
+              step.usage?.totalTokens ??
+              (step.usage?.inputTokens ?? 0) + (step.usage?.outputTokens ?? 0),
             toolCallNames: step.toolCalls.map((c) => c.toolName),
             toolCallCount: step.toolCalls.length,
             textLength: step.text.length,
@@ -159,7 +160,7 @@ export class AiService {
             (s.content ?? [])
               .filter((p: { type: string }) => p.type === 'tool-error')
               .map((p) => {
-                const err = (p as { toolCallId: string; toolName: string; error: unknown })
+                const err = p as { toolCallId: string; toolName: string; error: unknown }
                 return {
                   toolCallId: err.toolCallId,
                   toolName: err.toolName,

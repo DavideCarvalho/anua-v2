@@ -80,7 +80,14 @@ export default class ChatController {
     const abortController = new AbortController()
     const unregisterFromBroker = registerStreamController(threadId, abortController)
 
-    const scopeWithScreen: ChatScope = screen ? { ...scope, screen } : scope
+    const resolvedScreen: ChatScope['screen'] = screen
+      ? {
+          id: screen.id,
+          filters: screen.filters,
+          mode: screen.mode === 'compact' ? 'compact' : screen.mode === 'full' ? 'full' : undefined,
+        }
+      : undefined
+    const scopeWithScreen: ChatScope = resolvedScreen ? { ...scope, screen: resolvedScreen } : scope
     const resolvedSurface: ChatRequest['surface'] =
       surface === 'sheet' ? 'sheet' : surface === 'page' ? 'page' : undefined
 

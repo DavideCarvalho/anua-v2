@@ -224,27 +224,24 @@ export function useResponsavelAskAnuaContext(input: {
   mode: 'compact' | 'full'
 }): AskAnuaContext {
   const { screenId, selectedStudentId, mode } = input
-  return useMemo<AskAnuaContext>(
-    () => {
-      const filters: Record<string, string> = {}
-      if (selectedStudentId) filters.studentId = selectedStudentId
-      return {
-        screen: {
-          id: screenId,
-          filters: Object.keys(filters).length > 0 ? filters : undefined,
-          mode,
-        },
-        contextLabel: selectedStudentId
-          ? `Filho selecionado · ${RESPONSAVEL_TAB_LABEL[screenId]}`
-          : `Todos os filhos · ${RESPONSAVEL_TAB_LABEL[screenId]}`,
-        suggestions: RESPONSAVEL_SUGGESTIONS[screenId],
-        // namespace por screen+filho — sheets de telas/filhos diferentes não
-        // compartilham thread. 'all' quando default escopo todos os filhos.
-        storageNamespace: `${screenId}:${selectedStudentId ?? 'all'}:${mode}`,
-      }
-    },
-    [screenId, selectedStudentId, mode]
-  )
+  return useMemo<AskAnuaContext>(() => {
+    const filters: Record<string, string> = {}
+    if (selectedStudentId) filters.studentId = selectedStudentId
+    return {
+      screen: {
+        id: screenId,
+        filters: Object.keys(filters).length > 0 ? filters : undefined,
+        mode,
+      },
+      contextLabel: selectedStudentId
+        ? `Filho selecionado · ${RESPONSAVEL_TAB_LABEL[screenId]}`
+        : `Todos os filhos · ${RESPONSAVEL_TAB_LABEL[screenId]}`,
+      suggestions: RESPONSAVEL_SUGGESTIONS[screenId],
+      // namespace por screen+filho — sheets de telas/filhos diferentes não
+      // compartilham thread. 'all' quando default escopo todos os filhos.
+      storageNamespace: `${screenId}:${selectedStudentId ?? 'all'}:${mode}`,
+    }
+  }, [screenId, selectedStudentId, mode])
 }
 
 export function useTurmaAskAnuaContext(input: {

@@ -43,9 +43,7 @@ export type EscolaDashboardPersistedFilters = {
 // mesmo período. Versão anterior tinha bucket por academicPeriodId, mas no
 // boot o filter inicial era 'all', então a hidratação só lia o bucket 'all'
 // e o período selecionado se perdia.
-export function getEscolaDashboardFiltersKey(
-  userId: string | null | undefined
-): string | null {
+export function getEscolaDashboardFiltersKey(userId: string | null | undefined): string | null {
   if (!userId) return null
   return `${DASHBOARD_FILTERS_STORAGE_KEY_PREFIX}:${userId}`
 }

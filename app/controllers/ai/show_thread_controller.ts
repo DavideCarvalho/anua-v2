@@ -10,10 +10,7 @@ export default class ShowThreadController {
   async handle({ params, request, response, auth, effectiveUser, serialize }: HttpContext) {
     const user = effectiveUser ?? auth.user!
 
-    const thread = await AiThread.query()
-      .where('id', params.id)
-      .where('userId', user.id)
-      .first()
+    const thread = await AiThread.query().where('id', params.id).where('userId', user.id).first()
 
     if (!thread) {
       return response.notFound({ message: 'Thread não encontrada' })

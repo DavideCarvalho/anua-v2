@@ -9,7 +9,7 @@ import { computeChatScope } from './chat_scope.js'
 import { toolRegistry } from './tool_registry.js'
 import { loadHistoryForChat } from './thread_history.js'
 import { maybeSummarizeThread } from './summarize_thread_service.js'
-import { recordToolCalls } from './record_tool_calls.js'
+import { recordToolCalls, type StoredToolError } from './record_tool_calls.js'
 import { checkQuotaOrDeny } from './usage_quota_service.js'
 import { resolveSchoolForUser } from './resolve_school.js'
 import './tools/index.js'
@@ -157,6 +157,23 @@ export class WhatsappChatService {
           output: r.output,
         }))
       )
+      const allToolErrors: StoredToolError[] = steps.flatMap((s) =>
+        (s.content ?? [])
+          .filter((p: { type: string }) => p.type === 'tool-error')
+          .map((p) => {
+            const err = p as { toolCallId: string; toolName: string; error: unknown }
+            return {
+              toolCallId: err.toolCallId,
+              toolName: err.toolName,
+              error:
+                err.error instanceof Error
+                  ? err.error.message
+                  : typeof err.error === 'string'
+                    ? err.error
+                    : JSON.stringify(err.error),
+            }
+          })
+      )
 
       const replyText =
         (text ?? '').trim() ||
@@ -192,6 +209,7 @@ export class WhatsappChatService {
         schoolId: user.schoolId,
         toolCalls: allToolCalls,
         toolResults: allToolResults,
+        toolErrors: allToolErrors,
       })
 
       // Fire-and-forget — threads de WhatsApp são perenes, sumarização

@@ -51,10 +51,7 @@ export function resolvePersonaId(
 // Regra: prefixo `responsavel_` exige persona 'responsavel'; prefixo
 // `escola_` exige qualquer persona não-responsavel. Não é vetor de leak
 // de dado (scope continua vindo do role real), é defesa de integridade.
-export function isScreenAllowedForPersona(
-  screenId: string,
-  persona: ChatPersonaRole
-): boolean {
+export function isScreenAllowedForPersona(screenId: string, persona: ChatPersonaRole): boolean {
   if (screenId.startsWith('responsavel_')) return persona === 'responsavel'
   if (screenId.startsWith('escola_')) return persona !== 'responsavel'
   // Screens sem prefixo conhecido: o validator não deixa chegar aqui hoje,

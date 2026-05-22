@@ -82,9 +82,7 @@ export default class GetEnrollmentAxesController {
             invoiceUrl: enrollmentPayment.invoiceUrl ?? null,
           }
         : null,
-      allocatedClass: allocatedClass
-        ? { id: allocatedClass.id, name: allocatedClass.name }
-        : null,
+      allocatedClass: allocatedClass ? { id: allocatedClass.id, name: allocatedClass.name } : null,
       createdAt: matricula.createdAt.toISO(),
       axes,
     })

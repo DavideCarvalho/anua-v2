@@ -13,9 +13,7 @@ export function registerAiApiRoutes() {
       router.delete('/threads/:id', [controllers.ai.DeleteThread]).as('ai.threads.delete')
       // Promove uma thread surface='sheet' pra surface='page' (passa a
       // aparecer na lista do chat fullscreen).
-      router
-        .post('/threads/:id/promote', [controllers.ai.PromoteThread])
-        .as('ai.threads.promote')
+      router.post('/threads/:id/promote', [controllers.ai.PromoteThread]).as('ai.threads.promote')
       // Aprovação/rejeição de action tools acontece no próprio chat. O
       // :toolCallId aqui é o identificador do Vercel AI SDK (não a PK do
       // row de auditoria), porque é isso que o cliente tem na UIMessage.
