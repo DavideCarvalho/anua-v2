@@ -16,13 +16,13 @@ Levar o chat contextual da Anuá pros pais nas 5 rotas mais usadas do `/responsa
 
 ## Decisões (alinhadas com Davi)
 
-| # | Decisão | Justificativa |
-|---|---|---|
-| 1 | **Surfaces:** 5 rotas (`/responsavel`, `/atividades`, `/comunicados`, `/calendario`, `/registro-diario`) | Cobrir o cluster de maior tráfego de pai |
-| 2 | **Tools:** só leitura — sem write | Tirar fricção operacional ("avisa a escola" precisa de fluxo de aprovação que não temos) |
-| 3 | **Multi-filho:** default escopo "todos os filhos" | Família com 1 filho (caso comum) sem fricção; pai narrowa por nome quando precisa |
-| 4 | **Tom:** dois modos — `compact` (mobile/sheet bottom) e `full` (desktop/inline) | Pai checa rápido no celular à noite; gráficos atrapalham. Desktop pode ter tabelas |
-| 5 | **Gate role:** diferenciar `studentIdsPedagogical` vs `studentIdsFinancial` | Pai só-financeiro NÃO vê tools pedagógicas e vice-versa. Já existe `denyIfResponsavelLacksPedagogicalAccess` no scope_check; persona prompt precisa explicar amigável |
+| #   | Decisão                                                                                                  | Justificativa                                                                                                                                                         |
+| --- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Surfaces:** 5 rotas (`/responsavel`, `/atividades`, `/comunicados`, `/calendario`, `/registro-diario`) | Cobrir o cluster de maior tráfego de pai                                                                                                                              |
+| 2   | **Tools:** só leitura — sem write                                                                        | Tirar fricção operacional ("avisa a escola" precisa de fluxo de aprovação que não temos)                                                                              |
+| 3   | **Multi-filho:** default escopo "todos os filhos"                                                        | Família com 1 filho (caso comum) sem fricção; pai narrowa por nome quando precisa                                                                                     |
+| 4   | **Tom:** dois modos — `compact` (mobile/sheet bottom) e `full` (desktop/inline)                          | Pai checa rápido no celular à noite; gráficos atrapalham. Desktop pode ter tabelas                                                                                    |
+| 5   | **Gate role:** diferenciar `studentIdsPedagogical` vs `studentIdsFinancial`                              | Pai só-financeiro NÃO vê tools pedagógicas e vice-versa. Já existe `denyIfResponsavelLacksPedagogicalAccess` no scope_check; persona prompt precisa explicar amigável |
 
 ## Plano técnico (5 fases atomáveis)
 

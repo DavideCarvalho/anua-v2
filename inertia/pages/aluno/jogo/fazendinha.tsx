@@ -59,7 +59,12 @@ export default function FazendinhaPage(props: FazendinhaProps) {
     try {
       const res = await claimMutation.mutateAsync({})
       setFarm(res.farm)
-      confetti({ particleCount: 60, spread: 55, origin: { y: 0.7 }, colors: ['#fcd34d', '#0d9488'] })
+      confetti({
+        particleCount: 60,
+        spread: 55,
+        origin: { y: 0.7 },
+        colors: ['#fcd34d', '#0d9488'],
+      })
       toast.success(`+${props.config.dailySeeds} sementes diárias!`)
     } catch (err: any) {
       toast.error(err?.message || 'Não consegui pegar as sementes')
@@ -92,11 +97,14 @@ export default function FazendinhaPage(props: FazendinhaProps) {
           origin: { y: 0.55 },
           colors: ['#f97066', '#fcd34d', '#0d9488', '#7c3aed'],
         })
-        toast.success(`+${res.harvest.pointsAwarded} ponto${res.harvest.pointsAwarded > 1 ? 's' : ''} ⭐`, {
-          description: res.harvest.cappedOut
-            ? `+${res.harvest.seedsAwarded} sementes (bônus do teto diário!)`
-            : `+${res.harvest.seedsAwarded} semente${res.harvest.seedsAwarded > 1 ? 's' : ''}`,
-        })
+        toast.success(
+          `+${res.harvest.pointsAwarded} ponto${res.harvest.pointsAwarded > 1 ? 's' : ''} ⭐`,
+          {
+            description: res.harvest.cappedOut
+              ? `+${res.harvest.seedsAwarded} sementes (bônus do teto diário!)`
+              : `+${res.harvest.seedsAwarded} semente${res.harvest.seedsAwarded > 1 ? 's' : ''}`,
+          }
+        )
       } else {
         toast.success(`+${res.harvest.seedsAwarded} sementes 🌱`, {
           description: 'Você bateu o teto de pontos hoje. Volte amanhã pra ganhar mais!',

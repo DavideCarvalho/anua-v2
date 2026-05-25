@@ -6,10 +6,7 @@ import { Sparkles } from 'lucide-react'
 import { AskAnuaSheet } from '../../containers/ai/ask-anua-sheet'
 import { Button } from '../ui/button'
 import { useIsMobile } from '../../hooks/use_mobile'
-import {
-  useResponsavelAskAnuaContext,
-  type ResponsavelScreenId,
-} from '../../lib/ask-anua-context'
+import { useResponsavelAskAnuaContext, type ResponsavelScreenId } from '../../lib/ask-anua-context'
 import { useResponsavelStore } from '../../stores/responsavel_store'
 import {
   LayoutDashboard,
@@ -378,11 +375,7 @@ export function ResponsavelLayout({ children }: PropsWithChildren) {
           <main className="p-4 lg:p-6">{children}</main>
         </div>
         {canShowAskAnua && (
-          <AskAnuaSheet
-            open={isAskAnuaOpen}
-            onOpenChange={setIsAskAnuaOpen}
-            {...askAnuaContext}
-          />
+          <AskAnuaSheet open={isAskAnuaOpen} onOpenChange={setIsAskAnuaOpen} {...askAnuaContext} />
         )}
       </div>
     </PostHogProvider>

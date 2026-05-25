@@ -1,6 +1,7 @@
 # Anuá v2 - Contexto do Projeto
 
 ## Stack
+
 - **Backend**: AdonisJS 7 (TypeScript) + Inertia.js + React 19
 - **Banco**: PostgreSQL (Lucid ORM)
 - **Fila**: `@adonisjs/queue` (database driver)
@@ -14,23 +15,26 @@
 ## Infraestrutura (Guara Cloud)
 
 ### Projeto: `anu` (slug)
+
 - **Plano**: Business (R$199/mês)
 - **Região**: br-gru (Brasil)
 
 ### Serviços
 
-| Serviço | Slug | Tipo | Função |
-|---------|------|------|--------|
-| App-prod | `app-e0fd51` | Web | HTTP + schedules |
-| Queue-prod | `queue-prod-174a07` | Worker | `queue:work` + schedules |
-| anua-db | `anua-db-7a642d` | PostgreSQL 17 | Banco de dados (5GB) |
-| anua-storage | `anua-storage-28cfda` | MinIO | Storage S3 (10GB) |
+| Serviço      | Slug                  | Tipo          | Função                   |
+| ------------ | --------------------- | ------------- | ------------------------ |
+| App-prod     | `app-e0fd51`          | Web           | HTTP + schedules         |
+| Queue-prod   | `queue-prod-174a07`   | Worker        | `queue:work` + schedules |
+| anua-db      | `anua-db-7a642d`      | PostgreSQL 17 | Banco de dados (5GB)     |
+| anua-storage | `anua-storage-28cfda` | MinIO         | Storage S3 (10GB)        |
 
 ### Domínio
+
 - **www.anuaapp.com.br** → CNAME `app-e0fd51-anu.guaracloud.com` (Cloudflare proxy)
 - **anuaapp.com.br** → redirect 301 para www (Page Rule no Cloudflare)
 
 ### CLI Guara
+
 ```bash
 guara login                    # Autenticar
 guara projects list            # Listar projetos
@@ -52,6 +56,7 @@ guara scale --autoscaling on   # Habilitar autoscaling
 ```
 
 ### Env vars importantes
+
 - `DB_HOST` / `DB_PORT` / `DB_USER` / `DB_PASSWORD` / `DB_DATABASE` → PostgreSQL
 - `DRIVE_DISK=s3` / `S3_KEY` / `S3_SECRET` / `S3_BUCKET` / `S3_ENDPOINT` → MinIO
 - `RESEND_API_KEY` → Email (Resend API)
@@ -61,24 +66,26 @@ guara scale --autoscaling on   # Habilitar autoscaling
 - `EVLOG_ENABLED=true` / `EVLOG_DRAIN_TARGET=posthog` → Observabilidade
 
 ## Schedules (@adonisjs/queue nativo)
+
 Definidos em `start/scheduler.ts`. O próprio worker (`queue:work`) do `@adonisjs/queue` verifica schedules a cada 30s.
 
-| Horário | Job |
-|---------|-----|
-| 00:00 | `update_streaks` (gamificação) |
-| 02:00 | `generate_missing_payments` |
-| 03:00 | `generate_invoices` |
-| 04:00 (dia 1) | `generate_subscription_invoices` |
-| 04:30 | `retry_subscription_invoice_charges` |
-| 05:00 | `refresh_overdue_invoices` |
-| 05:30 | `create_meal_recurrence_reservations` |
-| 06:00 | `create_invoice_asaas_charges` |
-| 06:30 | `send_invoice_notifications` |
-| 08:00 | `sweep_pending_asaas_documents` |
-| 09:00 (seg-sex) | `send_occurrence_ack_reminders` |
-| */15 * * * * | `retry_pending_events` (gamificação) |
+| Horário         | Job                                   |
+| --------------- | ------------------------------------- |
+| 00:00           | `update_streaks` (gamificação)        |
+| 02:00           | `generate_missing_payments`           |
+| 03:00           | `generate_invoices`                   |
+| 04:00 (dia 1)   | `generate_subscription_invoices`      |
+| 04:30           | `retry_subscription_invoice_charges`  |
+| 05:00           | `refresh_overdue_invoices`            |
+| 05:30           | `create_meal_recurrence_reservations` |
+| 06:00           | `create_invoice_asaas_charges`        |
+| 06:30           | `send_invoice_notifications`          |
+| 08:00           | `sweep_pending_asaas_documents`       |
+| 09:00 (seg-sex) | `send_occurrence_ack_reminders`       |
+| _/15 _ \* \* \* | `retry_pending_events` (gamificação)  |
 
 ## Migração GCP → Guara
+
 - GCP Cloud SQL → PostgreSQL no Guara (dump manual com `pg_dump` + `guara proxy`)
 - GCP Cloud Run (API + Worker + Scheduler) → Serviços no Guara
 - GCS (Google Cloud Storage) → MinIO no Guara
@@ -130,6 +137,7 @@ fetch('/api/v1/auth/verify-code', {
 **Nota:** O `guara proxy` do banco Guara Cloud (`anua-db-7a642d`) só aceita **uma conexão por vez**, então usar o old DB (34.39.158.54) pra dev + queries é mais prático quando precisa de múltiplas consultas.
 
 ## Comandos úteis
+
 ```bash
 # Executar migrations
 guara exec --service app-e0fd51 -- node ace migration:run --force

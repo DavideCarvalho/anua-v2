@@ -49,10 +49,7 @@ export function SortableHead<TKey extends string>({
     >
       <span>{label}</span>
       <Icon
-        className={cn(
-          'h-3 w-3 shrink-0 transition-opacity',
-          active ? 'opacity-100' : 'opacity-50'
-        )}
+        className={cn('h-3 w-3 shrink-0 transition-opacity', active ? 'opacity-100' : 'opacity-50')}
       />
     </button>
   )

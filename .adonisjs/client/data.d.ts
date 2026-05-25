@@ -330,7 +330,8 @@ export namespace Data {
   export namespace Leaderboard {
     export type Variants = InferVariants<LeaderboardTransformer>
   }
-  export type LevelAssignedToCourseHasAcademicPeriod = InferData<LevelAssignedToCourseHasAcademicPeriodTransformer>
+  export type LevelAssignedToCourseHasAcademicPeriod =
+    InferData<LevelAssignedToCourseHasAcademicPeriodTransformer>
   export namespace LevelAssignedToCourseHasAcademicPeriod {
     export type Variants = InferVariants<LevelAssignedToCourseHasAcademicPeriodTransformer>
   }

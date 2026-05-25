@@ -18,7 +18,11 @@ import {
 
 import { Button } from '../../components/ui/button'
 import { Skeleton } from '../../components/ui/skeleton'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../components/ui/collapsible'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '../../components/ui/collapsible'
 import { cn } from '../../lib/utils'
 
 import { api } from '~/lib/api'
@@ -54,9 +58,19 @@ function relativeDeadlineLabel(iso: string | null) {
   const d = new Date(iso)
   const days = daysBetween(d)
   const formatted = brazilianDateFormatter(d)
-  if (days < 0) return { text: `Venceu há ${Math.abs(days)} dia${Math.abs(days) === 1 ? '' : 's'}`, tone: 'attention' as Tone, formatted }
+  if (days < 0)
+    return {
+      text: `Venceu há ${Math.abs(days)} dia${Math.abs(days) === 1 ? '' : 's'}`,
+      tone: 'attention' as Tone,
+      formatted,
+    }
   if (days === 0) return { text: 'Vence hoje', tone: 'attention' as Tone, formatted }
-  if (days <= 7) return { text: `Faltam ${days} dia${days === 1 ? '' : 's'}`, tone: 'attention' as Tone, formatted }
+  if (days <= 7)
+    return {
+      text: `Faltam ${days} dia${days === 1 ? '' : 's'}`,
+      tone: 'attention' as Tone,
+      formatted,
+    }
   return { text: `Faltam ${days} dias`, tone: 'pending' as Tone, formatted }
 }
 
@@ -108,7 +122,11 @@ function MatriculaAxesContent({ data }: { data: AxesData }) {
   const completeFlags: Array<{ key: string; done: boolean; applicable: boolean }> = [
     { key: 'docs', done: axes.docs.status === 'COMPLETE', applicable: axes.docs.required > 0 },
     { key: 'signature', done: axes.signature === 'COMPLETED', applicable: true },
-    { key: 'payment', done: axes.payment === 'PAID', applicable: axes.payment !== 'NOT_APPLICABLE' },
+    {
+      key: 'payment',
+      done: axes.payment === 'PAID',
+      applicable: axes.payment !== 'NOT_APPLICABLE',
+    },
     { key: 'classAllocation', done: axes.classAllocation === 'ALLOCATED', applicable: true },
   ]
   const applicable = completeFlags.filter((f) => f.applicable)
@@ -214,7 +232,10 @@ function firstPendingKey(axes: AxesData['axes']): string | null {
   return null
 }
 
-function toneFor(axis: 'docs' | 'signature' | 'payment' | 'classAllocation', axes: AxesData['axes']): Tone {
+function toneFor(
+  axis: 'docs' | 'signature' | 'payment' | 'classAllocation',
+  axes: AxesData['axes']
+): Tone {
   if (axis === 'docs') {
     if (axes.docs.status === 'COMPLETE') return 'done'
     if (axes.docs.status === 'REJECTED') return 'attention'
@@ -239,7 +260,8 @@ function toneFor(axis: 'docs' | 'signature' | 'payment' | 'classAllocation', axe
 
 function docsSummary(axes: AxesData['axes']) {
   if (axes.docs.required === 0) return 'Sem documentos requeridos'
-  if (axes.docs.status === 'COMPLETE') return `${axes.docs.approved} de ${axes.docs.required} aprovados`
+  if (axes.docs.status === 'COMPLETE')
+    return `${axes.docs.approved} de ${axes.docs.required} aprovados`
   if (axes.docs.rejected > 0) {
     const r = axes.docs.rejected
     return `${r} rejeitado${r === 1 ? '' : 's'} · reenvie os arquivos`
@@ -419,7 +441,12 @@ function DocsContent({
       fd.append('file', file)
       const res = await fetch(
         `/api/v1/responsavel/students/${studentId}/submissions/${submissionId}/files`,
-        { method: 'POST', credentials: 'include', headers: { Accept: 'application/json' }, body: fd }
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: { Accept: 'application/json' },
+          body: fd,
+        }
       )
       if (!res.ok) {
         const payload = await res.json().catch(() => null)
@@ -614,13 +641,15 @@ function SignatureContent({ status }: { status: AxesData['axes']['signature'] })
   if (status === 'NOT_APPLICABLE') {
     return (
       <p className="text-sm text-muted-foreground">
-        A assinatura do contrato é presencial. A secretaria da escola vai entrar
-        em contato pra agendar o melhor dia e horário.
+        A assinatura do contrato é presencial. A secretaria da escola vai entrar em contato pra
+        agendar o melhor dia e horário.
       </p>
     )
   }
   if (status === 'COMPLETED') {
-    return <p className="text-sm text-muted-foreground">Contrato assinado por todos os responsáveis.</p>
+    return (
+      <p className="text-sm text-muted-foreground">Contrato assinado por todos os responsáveis.</p>
+    )
   }
   if (status === 'PARTIALLY_SIGNED') {
     return (
@@ -639,8 +668,8 @@ function SignatureContent({ status }: { status: AxesData['axes']['signature'] })
   }
   return (
     <p className="text-sm text-muted-foreground">
-      A escola vai enviar o contrato pra assinatura digital em breve. Você receberá um e-mail
-      assim que estiver disponível.
+      A escola vai enviar o contrato pra assinatura digital em breve. Você receberá um e-mail assim
+      que estiver disponível.
     </p>
   )
 }
@@ -664,7 +693,10 @@ function PaymentContent({ data }: { data: AxesData }) {
         </p>
         {contract?.enrollmentValue ? (
           <p className="text-muted-foreground">
-            Valor previsto: <strong className="text-foreground">{brazilianRealFormatter(contract.enrollmentValue)}</strong>
+            Valor previsto:{' '}
+            <strong className="text-foreground">
+              {brazilianRealFormatter(contract.enrollmentValue)}
+            </strong>
           </p>
         ) : null}
       </div>
@@ -696,11 +728,13 @@ function PaymentContent({ data }: { data: AxesData }) {
               {due}
               {daysToDue !== null && (
                 <span className="ml-1.5 text-xs text-muted-foreground">
-                  ({daysToDue < 0
+                  (
+                  {daysToDue < 0
                     ? `${Math.abs(daysToDue)} dia${Math.abs(daysToDue) === 1 ? '' : 's'} de atraso`
                     : daysToDue === 0
                       ? 'hoje'
-                      : `em ${daysToDue} dia${daysToDue === 1 ? '' : 's'}`})
+                      : `em ${daysToDue} dia${daysToDue === 1 ? '' : 's'}`}
+                  )
                 </span>
               )}
             </p>
@@ -766,4 +800,3 @@ export function MatriculaAxesSkeleton() {
     </div>
   )
 }
-

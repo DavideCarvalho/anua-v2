@@ -32,8 +32,10 @@ function InboxContent({
   showEnrollment,
   ...filters
 }: AttentionInboxProps) {
-  const { items, isLoading, pedagogicalAlerts, overdueAging, enrollmentFunnel } =
-    useAttentionItems(filters, { showFinancial, showEnrollment })
+  const { items, isLoading, pedagogicalAlerts, overdueAging, enrollmentFunnel } = useAttentionItems(
+    filters,
+    { showFinancial, showEnrollment }
+  )
   const [visibleCount, setVisibleCount] = useState(initialVisible)
   const [selectedItem, setSelectedItem] = useState<AttentionItemType | null>(null)
 

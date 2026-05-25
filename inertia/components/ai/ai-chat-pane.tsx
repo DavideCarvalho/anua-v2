@@ -2,12 +2,7 @@ import { useState, useRef, useEffect, useMemo } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport, type UIMessage, type ToolUIPart } from 'ai'
 import { Streamdown } from 'streamdown'
-import {
-  keepPreviousData,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Bot, Send, User, Loader2, StopCircle, BrainCircuit } from 'lucide-react'
 import { toolComponents } from './ai-components'
 import { ToolStepGroup } from './ai-task'
@@ -116,8 +111,9 @@ type ThreadMessageRow = {
 
 function rowsToUIMessages(rows: ThreadMessageRow[]): UIMessage[] {
   return rows
-    .filter((m): m is ThreadMessageRow & { role: 'user' | 'assistant' } =>
-      m.role === 'user' || m.role === 'assistant'
+    .filter(
+      (m): m is ThreadMessageRow & { role: 'user' | 'assistant' } =>
+        m.role === 'user' || m.role === 'assistant'
     )
     .map((m): UIMessage => {
       const parts: UIMessage['parts'] = []
@@ -199,8 +195,7 @@ export function AiChatPane({
 
   const messageRows = (threadDetail?.messages ?? []) as ThreadMessageRow[]
   const initialMessages = threadDetail ? rowsToUIMessages(messageRows) : []
-  const headerTitle =
-    threadDetail?.thread?.title ?? (isNewThread ? 'Nova conversa' : 'Conversa')
+  const headerTitle = threadDetail?.thread?.title ?? (isNewThread ? 'Nova conversa' : 'Conversa')
   const initialHasMore = Boolean(threadDetail?.hasMore)
   const initialOldestCursor = threadDetail?.oldestCursor ?? null
 
@@ -291,8 +286,7 @@ function ActiveChat({
           queryKey: api.api.v1.ai.threads.list.queryOptions().queryKey,
         }),
         queryClient.invalidateQueries({
-          queryKey: api.api.v1.ai.threads.show.queryOptions({ params: { id: threadId } })
-            .queryKey,
+          queryKey: api.api.v1.ai.threads.show.queryOptions({ params: { id: threadId } }).queryKey,
         }),
       ])
       // Promote draft → persisted: parent flips URL to /conversa/:id only
@@ -313,8 +307,7 @@ function ActiveChat({
   // sobrescreve form).
   const latestCanvasTool = findLatestCanvasTool(messages)
   const [canvasDismissedFor, setCanvasDismissedFor] = useState<string | null>(null)
-  const canvasOpen =
-    latestCanvasTool !== null && latestCanvasTool.toolCallId !== canvasDismissedFor
+  const canvasOpen = latestCanvasTool !== null && latestCanvasTool.toolCallId !== canvasDismissedFor
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -393,11 +386,7 @@ function ActiveChat({
               </div>
             )}
             {messages.map((message) => (
-              <MessageRow
-                key={message.id}
-                message={message}
-                addToolOutput={addToolOutput}
-              />
+              <MessageRow key={message.id} message={message} addToolOutput={addToolOutput} />
             ))}
             {isBusy && messages[messages.length - 1]?.role === 'user' && <ThinkingRow />}
             {error && (
@@ -446,16 +435,19 @@ function ActiveChat({
                 // generating tokens (and getting billed) until the run
                 // finishes naturally.
                 stop()
-                await cancelMutation
-                  .mutateAsync({ params: { threadId } })
-                  .catch(() => {})
+                await cancelMutation.mutateAsync({ params: { threadId } }).catch(() => {})
               }}
               className="h-10 w-10 shrink-0"
             >
               <StopCircle className="h-4 w-4" />
             </Button>
           ) : (
-            <Button type="submit" size="icon" disabled={!input.trim()} className="h-10 w-10 shrink-0">
+            <Button
+              type="submit"
+              size="icon"
+              disabled={!input.trim()}
+              className="h-10 w-10 shrink-0"
+            >
               <Send className="h-4 w-4" />
             </Button>
           )}
@@ -475,9 +467,7 @@ function ChatHeader({ title }: { title: string | null }) {
         <BrainCircuit className="h-4 w-4 text-primary" />
       </div>
       <div className="min-w-0 flex-1">
-        <h1 className="truncate text-sm font-semibold text-foreground">
-          {title ?? 'Carregando…'}
-        </h1>
+        <h1 className="truncate text-sm font-semibold text-foreground">{title ?? 'Carregando…'}</h1>
         <p className="truncate text-[11px] text-muted-foreground">Assistente Anua</p>
       </div>
     </header>
@@ -502,13 +492,7 @@ function ChatLoadingState({ hideHeader }: { hideHeader: boolean }) {
   )
 }
 
-function MessageSkeleton({
-  align,
-  widths,
-}: {
-  align: 'left' | 'right'
-  widths: string[]
-}) {
+function MessageSkeleton({ align, widths }: { align: 'left' | 'right'; widths: string[] }) {
   return (
     <div className={cn('flex flex-col gap-1.5', align === 'right' ? 'items-end' : 'items-start')}>
       {widths.map((w, i) => (
@@ -575,9 +559,7 @@ function MessageRow({
                     toolName={toolNameOf(block.tool)}
                     input={block.tool.input}
                     state={block.tool.state}
-                    output={
-                      block.tool.state === 'output-available' ? block.tool.output : undefined
-                    }
+                    output={block.tool.state === 'output-available' ? block.tool.output : undefined}
                     addToolOutput={addToolOutput}
                   />
                 )

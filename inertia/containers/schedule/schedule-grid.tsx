@@ -1259,10 +1259,7 @@ export function ScheduleGrid({
                         const slotKey = `${day.number}_${timeSlot}`
                         const slot = slotAssignments.get(slotKey)
                         return (
-                          <ReadOnlySlotCell
-                            key={day.key}
-                            teacherHasClass={slot?.teacherHasClass}
-                          />
+                          <ReadOnlySlotCell key={day.key} teacherHasClass={slot?.teacherHasClass} />
                         )
                       })}
                     </TableRow>

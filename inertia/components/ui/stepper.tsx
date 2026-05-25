@@ -34,10 +34,7 @@ export function Stepper({
           const isCurrent = currentStep === index
           const isFuture = currentStep < index
           return (
-            <li
-              key={step.title}
-              className="relative flex flex-1 flex-col items-center min-w-0"
-            >
+            <li key={step.title} className="relative flex flex-1 flex-col items-center min-w-0">
               {/* Connector line — fica atrás do círculo (z-0) */}
               {index < steps.length - 1 && (
                 <div

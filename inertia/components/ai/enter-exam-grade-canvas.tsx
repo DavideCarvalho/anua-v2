@@ -90,7 +90,7 @@ export function EnterExamGradeCanvas({ threadId, toolPart, onClose }: Props) {
     queryFn: async (): Promise<ResolvedNames> => {
       const res = await fetch('/api/v1/ai/resolve-names', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         credentials: 'include',
         body: JSON.stringify(idsForResolve),
       })
@@ -114,9 +114,7 @@ export function EnterExamGradeCanvas({ threadId, toolPart, onClose }: Props) {
     refetchOnMount: 'always',
   })
   const names = resolved ?? EMPTY_NAMES
-  const studentLabel = fields.studentId
-    ? names.students[fields.studentId]?.name ?? null
-    : null
+  const studentLabel = fields.studentId ? (names.students[fields.studentId]?.name ?? null) : null
   const examLabel = fields.examId
     ? (() => {
         const exam = names.exams[fields.examId]
@@ -128,10 +126,7 @@ export function EnterExamGradeCanvas({ threadId, toolPart, onClose }: Props) {
   const queryClient = useQueryClient()
   const submitMutation = useMutation(api.api.v1.ai.canvas.submit.mutationOptions())
 
-  function setField<K extends keyof EnterExamGradeFields>(
-    key: K,
-    value: EnterExamGradeFields[K]
-  ) {
+  function setField<K extends keyof EnterExamGradeFields>(key: K, value: EnterExamGradeFields[K]) {
     setFields((prev) => ({ ...prev, [key]: value }))
     if (submitState.kind !== 'idle') setSubmitState({ kind: 'idle' })
   }
