@@ -12,6 +12,7 @@ export enum AppErrorCode {
   STORE_ORDER_NOT_FOUND = 'STORE_ORDER_NOT_FOUND',
   STORE_ORDER_INVALID_STATUS = 'STORE_ORDER_INVALID_STATUS',
   CONTRACT_NOT_FOUND = 'CONTRACT_NOT_FOUND',
+  SCHEDULE_HAS_ATTENDANCE = 'SCHEDULE_HAS_ATTENDANCE',
 }
 
 export const APP_ERROR_MESSAGES: Record<AppErrorCode, string> = {
@@ -29,4 +30,6 @@ export const APP_ERROR_MESSAGES: Record<AppErrorCode, string> = {
   [AppErrorCode.STORE_ORDER_NOT_FOUND]: 'Pedido da loja não encontrado',
   [AppErrorCode.STORE_ORDER_INVALID_STATUS]: 'Status do pedido da loja inválido para esta operação',
   [AppErrorCode.CONTRACT_NOT_FOUND]: 'Contrato não encontrado',
+  [AppErrorCode.SCHEDULE_HAS_ATTENDANCE]:
+    'Existem presenças registradas em horários que seriam removidos',
 }

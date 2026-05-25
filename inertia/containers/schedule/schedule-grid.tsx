@@ -477,6 +477,24 @@ export function ScheduleGrid({
   const [isDirty, setIsDirty] = useState(false)
   const [isGenerateDialogOpen, setIsGenerateDialogOpen] = useState(false)
   const [activeDragItem, setActiveDragItem] = useState<string | null>(null)
+  const [attendanceConflict, setAttendanceConflict] = useState<{
+    attendanceCount: number
+    affectedAttendances: Array<{
+      date: string
+      dayOfWeek: number
+      startTime: string
+      endTime: string
+      subjectName: string | null
+      studentCount: number
+    }>
+    saveInput: Array<{
+      teacherHasClassId: string | null
+      classWeekDay: number
+      startTime: string
+      endTime: string
+      isBreak: boolean
+    }>
+  } | null>(null)
   const prevReorganizeTrigger = useRef(reorganizeTrigger)
   const [originalConfig, setOriginalConfig] = useState<ScheduleConfig | null>(null)
   const needsReorganizationAfterInitRef = useRef(false)
@@ -934,11 +952,67 @@ export function ScheduleGrid({
       queryClient.invalidateQueries({ queryKey: ['classSchedule', classId, academicPeriodId] })
       toast.success('Horários salvos com sucesso!')
       setIsDirty(false)
+
+      const originalPositions = new Set(
+        originalSlots.map(
+          (s) =>
+            `${s.classWeekDay}_${normalizeTime(s.startTime)}_${normalizeTime(s.endTime)}`
+        )
+      )
+      const newSlotCount = saveInput.filter(
+        (s) =>
+          !s.isBreak &&
+          s.teacherHasClassId &&
+          !originalPositions.has(
+            `${s.classWeekDay}_${normalizeTime(s.startTime)}_${normalizeTime(s.endTime)}`
+          )
+      ).length
+
+      if (newSlotCount > 0) {
+        toast.info(
+          `${newSlotCount} novo(s) horário(s) adicionado(s) à grade. Lembre-se de registrar as presenças.`,
+          { duration: 6000 }
+        )
+      }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro ao salvar horários'
-      toast.error(errorMessage)
+      const errResponse = (error as { response?: { code?: string; meta?: { attendanceCount?: number; affectedAttendances?: Array<{ date: string; dayOfWeek: number; startTime: string; endTime: string; subjectName: string | null; studentCount: number }> } } })?.response
+      if (errResponse?.code === 'SCHEDULE_HAS_ATTENDANCE') {
+        setAttendanceConflict({
+          attendanceCount: errResponse.meta?.attendanceCount ?? 0,
+          affectedAttendances: errResponse.meta?.affectedAttendances ?? [],
+          saveInput,
+        })
+        return
+      }
+      const description = (error as { response?: { description?: string } })?.response?.description
+      toast.error(description || (error instanceof Error ? error.message : 'Erro ao salvar horários'))
     }
-  }, [pendingClasses, localSlots, saveMutation, classId, academicPeriodId])
+  }, [pendingClasses, localSlots, originalSlots, saveMutation, classId, academicPeriodId])
+
+  const handleForceRemoveAttendance = useCallback(async () => {
+    if (!attendanceConflict) return
+    try {
+      await saveMutation.mutateAsync({
+        params: { classId },
+        body: {
+          academicPeriodId,
+          slots: attendanceConflict.saveInput,
+          forceRemoveAttendance: true,
+        },
+      } as any)
+      queryClient.invalidateQueries({ queryKey: ['classSchedule', classId, academicPeriodId] })
+      toast.success('Horários salvos. Presenças dos horários removidos foram apagadas.')
+      setIsDirty(false)
+      setAttendanceConflict(null)
+    } catch (error) {
+      const description = (error as { response?: { description?: string } })?.response
+        ?.description
+      toast.error(
+        description || (error instanceof Error ? error.message : 'Erro ao salvar horários')
+      )
+      setAttendanceConflict(null)
+    }
+  }, [attendanceConflict, saveMutation, classId, academicPeriodId, queryClient])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 10 } }),
@@ -1323,6 +1397,72 @@ export function ScheduleGrid({
           )}
         </Button>
       </div>
+
+      <AlertDialog
+        open={!!attendanceConflict}
+        onOpenChange={(open) => {
+          if (!open) setAttendanceConflict(null)
+        }}
+      >
+        <AlertDialogContent className="z-[110] !max-w-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Presenças serão perdidas</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3">
+                <p>
+                  {attendanceConflict?.attendanceCount} presença(s) registrada(s) em horários que
+                  serão removidos serão perdidas permanentemente.
+                </p>
+                {attendanceConflict && attendanceConflict.affectedAttendances.length > 0 && (
+                  <div className="max-h-48 overflow-auto rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="h-8 text-xs">Data</TableHead>
+                          <TableHead className="h-8 text-xs">Horário</TableHead>
+                          <TableHead className="h-8 text-xs">Disciplina</TableHead>
+                          <TableHead className="h-8 text-right text-xs">Alunos</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {attendanceConflict.affectedAttendances.map((a, i) => (
+                          <TableRow key={i}>
+                            <TableCell className="whitespace-nowrap py-1.5 text-xs">
+                              {a.date}{' '}
+                              <span className="text-muted-foreground">
+                                ({DAYS_OF_WEEK.find((d) => d.number === a.dayOfWeek)?.label})
+                              </span>
+                            </TableCell>
+                            <TableCell className="whitespace-nowrap py-1.5 text-xs">
+                              {a.startTime}–{a.endTime}
+                            </TableCell>
+                            <TableCell className="py-1.5 text-xs">
+                              {a.subjectName ?? '—'}
+                            </TableCell>
+                            <TableCell className="py-1.5 text-right text-xs">
+                              {a.studentCount}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={saveMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleForceRemoveAttendance}
+              disabled={saveMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {saveMutation.isPending ? 'Salvando...' : 'Remover presenças e salvar'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <DndContext
         sensors={sensors}

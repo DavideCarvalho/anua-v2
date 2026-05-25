@@ -9,6 +9,7 @@ export const getClassScheduleValidator = vine.compile(
 export const saveClassScheduleValidator = vine.compile(
   vine.object({
     academicPeriodId: vine.string(),
+    forceRemoveAttendance: vine.boolean().optional(),
     slots: vine.array(
       vine.object({
         teacherHasClassId: vine.string().nullable(),
