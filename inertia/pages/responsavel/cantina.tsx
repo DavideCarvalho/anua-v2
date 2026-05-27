@@ -5,6 +5,7 @@ import { UtensilsCrossed, XCircle, User } from 'lucide-react'
 
 import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent } from '../../components/ui/card'
+import { EmptyState } from '../../components/ui/empty-state'
 
 import { useSelectedStudent } from '../../hooks/use_selected_student'
 import { StudentSelectorWithData } from '../../components/responsavel/student-selector'
@@ -40,12 +41,12 @@ function CantinaContent() {
           <StudentSelectorWithData />
         </div>
         <Card>
-          <CardContent className="py-12 text-center">
-            <UtensilsCrossed className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-4 text-lg font-semibold">Nenhum aluno vinculado</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Você não possui alunos vinculados à sua conta.
-            </p>
+          <CardContent>
+            <EmptyState
+              icon={UtensilsCrossed}
+              title="Nenhum aluno vinculado"
+              description="Você não possui alunos vinculados à sua conta."
+            />
           </CardContent>
         </Card>
       </>

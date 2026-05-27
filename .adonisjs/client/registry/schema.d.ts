@@ -979,6 +979,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_novo_comunicado_page_controller').default['handle']>>>
     }
   }
+  'web.escola.comunicados.preview': {
+    methods: ["GET","HEAD"]
+    pattern: '/escola/comunicados/preview'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_comunicado_preview_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_comunicado_preview_page_controller').default['handle']>>>
+    }
+  }
   'web.escola.comunicados.editar': {
     methods: ["GET","HEAD"]
     pattern: '/escola/comunicados/:id/editar'
@@ -2023,6 +2035,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/admin/show_admin_analytics_page_controller').default['rh']>>>
     }
   }
+  'web.admin.analytics.school_health': {
+    methods: ["GET","HEAD"]
+    pattern: '/admin/analytics/school-health'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/admin/show_admin_analytics_page_controller').default['schoolHealth']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/admin/show_admin_analytics_page_controller').default['schoolHealth']>>>
+    }
+  }
   'web.loja.dashboard': {
     methods: ["GET","HEAD"]
     pattern: '/loja'
@@ -2527,6 +2551,30 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/get_student_calendar_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'api.v1.responsavel.api.student_calendar_feed_url': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/responsavel/students/:studentId/calendar-feed-url'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { studentId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/calendars/get_calendar_feed_url_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/calendars/get_calendar_feed_url_controller').default['handle']>>>
+    }
+  }
+  'api.v1.responsavel.api.enrollment_certificate': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/responsavel/matriculas/:matriculaId/certificate'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { matriculaId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/responsavel/get_enrollment_certificate_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/get_enrollment_certificate_controller').default['handle']>>>
+    }
+  }
   'api.v1.responsavel.api.notifications': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/responsavel/notifications'
@@ -2719,6 +2767,30 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/mark_inquiry_read_controller').default['handle']>>>
     }
   }
+  'api.v1.calendar_feed': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/calendars/:token'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { token: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/calendars/get_calendar_feed_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/calendars/get_calendar_feed_controller').default['handle']>>>
+    }
+  }
+  'api.v1.verify_enrollment': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/verify-enrollment/:token'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { token: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/public/verify_enrollment_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/public/verify_enrollment_controller').default['handle']>>>
+    }
+  }
   'api.v1.dashboard.admin_stats': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/admin/stats'
@@ -2741,6 +2813,30 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/get_server_stats_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/get_server_stats_controller').default['handle']>>>
+    }
+  }
+  'api.v1.admin.school_health': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/admin/school-health'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/get_school_health_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/get_school_health_controller').default['handle']>>>
+    }
+  }
+  'api.v1.admin.send_changelog_digest': {
+    methods: ["POST"]
+    pattern: '/api/v1/admin/send-changelog-digest'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/send_changelog_digest_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/send_changelog_digest_controller').default['handle']>>>
     }
   }
   'api.v1.admin.ai.tool_calls': {
@@ -3113,6 +3209,30 @@ export interface Registry {
       query: ExtractQueryForGet<InferInput<(typeof import('#validators/student').listStudentsValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/students/index').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/students/index').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.students.export_csv': {
+    methods: ["POST"]
+    pattern: '/api/v1/students/export-csv'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/students/export_students_csv_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/students/export_students_csv_controller').default['handle']>>>
+    }
+  }
+  'api.v1.students.export_csv_download': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/students/export-csv/download/:token'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { token: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/students/export_students_csv_controller').default['download']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/students/export_students_csv_controller').default['download']>>>
     }
   }
   'api.v1.students.store': {
@@ -5071,6 +5191,42 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/notification_preferences/update_notification_preferences_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'api.v1.push.vapid_key': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/push/vapid-key'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/notifications/push_subscription_controller').default['getVapidKey']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/notifications/push_subscription_controller').default['getVapidKey']>>>
+    }
+  }
+  'api.v1.push.subscribe': {
+    methods: ["POST"]
+    pattern: '/api/v1/push/subscribe'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/notifications/push_subscription_controller').default['subscribe']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/notifications/push_subscription_controller').default['subscribe']>>>
+    }
+  }
+  'api.v1.push.unsubscribe': {
+    methods: ["POST"]
+    pattern: '/api/v1/push/unsubscribe'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/notifications/push_subscription_controller').default['unsubscribe']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/notifications/push_subscription_controller').default['unsubscribe']>>>
+    }
+  }
   'api.v1.school_announcements.list': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/school-announcements'
@@ -5153,6 +5309,42 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/school_announcements/list_school_announcement_students_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/school_announcements/list_school_announcement_students_controller').default['handle']>>>
+    }
+  }
+  'api.v1.announcement_templates.list': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/announcement-templates'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/announcement_templates/list_announcement_templates_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/announcement_templates/list_announcement_templates_controller').default['handle']>>>
+    }
+  }
+  'api.v1.announcement_templates.create': {
+    methods: ["POST"]
+    pattern: '/api/v1/announcement-templates'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/announcement_templates/create_announcement_template_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/announcement_templates/create_announcement_template_controller').default['handle']>>>
+    }
+  }
+  'api.v1.announcement_templates.delete': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/announcement-templates/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/announcement_templates/delete_announcement_template_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/announcement_templates/delete_announcement_template_controller').default['handle']>>>
     }
   }
   'api.v1.posts.index': {

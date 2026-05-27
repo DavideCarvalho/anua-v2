@@ -4,16 +4,18 @@ import { DateTime } from 'luxon'
 
 export default class TrackActivityMiddleware {
   async handle(ctx: HttpContext, next: NextFn) {
+    const response = await next()
+
     if (ctx.auth.isAuthenticated) {
       const user = ctx.auth.user!
       const now = DateTime.now()
 
       if (!user.lastLoggedInAt || now.diff(user.lastLoggedInAt, 'minutes').minutes >= 5) {
         user.lastLoggedInAt = now
-        user.save().catch(() => {}) // fire-and-forget, don't block the response
+        user.save().catch(() => {})
       }
     }
 
-    return next()
+    return response
   }
 }

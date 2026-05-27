@@ -27,10 +27,14 @@ export interface AxesStatus {
     rejected: number
     pending: number
     required: number
+    lastUpdatedAt: string | null
   }
   signature: SignatureAxisStatus
+  signatureLastUpdatedAt: string | null
   payment: PaymentAxisStatus
+  paymentLastUpdatedAt: string | null
   classAllocation: ClassAxisStatus
+  classAllocatedAt: string | null
   isComplete: boolean
 }
 
@@ -56,10 +60,13 @@ export async function computeAxesStatus(studentHasLevelId: string): Promise<Axes
     SELECT
       shl."docusealSignatureStatus" AS docuseal_signature_status,
       shl."classId" AS class_id,
+      shl."updatedAt" AS shl_updated_at,
       COALESCE(docs.approved_count, 0) AS docs_approved,
       COALESCE(docs.rejected_count, 0) AS docs_rejected,
       COALESCE(docs.pending_count, 0) AS docs_pending,
       COALESCE(req.required_count, 0) AS docs_required,
+      docs.last_doc_update AS docs_last_updated_at,
+      sp."updatedAt" AS payment_last_updated_at,
       CASE
         WHEN c."enrollmentValue" IS NULL OR c."enrollmentValue" = 0 THEN 'NOT_APPLICABLE'
         WHEN sp.status = 'PAID' THEN 'PAID'
@@ -75,7 +82,8 @@ export async function computeAxesStatus(studentHasLevelId: string): Promise<Axes
       SELECT
         COUNT(*) FILTER (WHERE sds.status = 'APPROVED') AS approved_count,
         COUNT(*) FILTER (WHERE sds.status = 'REJECTED') AS rejected_count,
-        COUNT(*) FILTER (WHERE sds.status = 'PENDING') AS pending_count
+        COUNT(*) FILTER (WHERE sds.status = 'PENDING') AS pending_count,
+        MAX(sds."updatedAt") AS last_doc_update
       FROM "StudentDocumentSubmission" sds
       WHERE sds."studentId" = shl."studentId"
     ) docs ON true
@@ -93,10 +101,13 @@ export async function computeAxesStatus(studentHasLevelId: string): Promise<Axes
     | {
         docuseal_signature_status: string | null
         class_id: string | null
+        shl_updated_at: string | null
         docs_approved: string | number | null
         docs_rejected: string | number | null
         docs_pending: string | number | null
         docs_required: string | number | null
+        docs_last_updated_at: string | null
+        payment_last_updated_at: string | null
         payment_status: PaymentAxisStatus
       }
     | undefined
@@ -110,7 +121,7 @@ export async function computeAxesStatus(studentHasLevelId: string): Promise<Axes
 
   let docsStatus: DocsAxisStatus
   if (rejected > 0) docsStatus = 'REJECTED'
-  else if (required > 0 && approved >= required) docsStatus = 'COMPLETE'
+  else if (required === 0 || approved >= required) docsStatus = 'COMPLETE'
   else docsStatus = 'PENDING'
 
   const signature = mapLegacySignatureStatus(row.docuseal_signature_status)
@@ -123,10 +134,20 @@ export async function computeAxesStatus(studentHasLevelId: string): Promise<Axes
   const classOk = classAllocation === 'ALLOCATED'
 
   return {
-    docs: { status: docsStatus, approved, rejected, pending, required },
+    docs: {
+      status: docsStatus,
+      approved,
+      rejected,
+      pending,
+      required,
+      lastUpdatedAt: row.docs_last_updated_at ?? null,
+    },
     signature,
+    signatureLastUpdatedAt: row.shl_updated_at ?? null,
     payment,
+    paymentLastUpdatedAt: row.payment_last_updated_at ?? null,
     classAllocation,
+    classAllocatedAt: classAllocation === 'ALLOCATED' ? (row.shl_updated_at ?? null) : null,
     isComplete: docsOk && sigOk && payOk && classOk,
   }
 }

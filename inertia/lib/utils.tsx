@@ -23,3 +23,9 @@ const currencyFormatter = new Intl.NumberFormat('pt-BR', {
 export function formatCurrency(cents: number): string {
   return currencyFormatter.format(cents / 100)
 }
+
+export function compactQuery<T extends Record<string, unknown>>(obj: T): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([_, v]) => v !== undefined)
+  ) as Partial<T>
+}

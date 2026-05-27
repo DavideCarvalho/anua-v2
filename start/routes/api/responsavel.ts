@@ -2,6 +2,18 @@ import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
 import { controllers } from '#generated/controllers'
 
+export function registerVerifyEnrollmentRoute() {
+  router
+    .get('/verify-enrollment/:token', [controllers.public.VerifyEnrollment])
+    .as('verify_enrollment')
+}
+
+export function registerCalendarFeedRoutes() {
+  router
+    .get('/calendars/:token', [controllers.calendars.GetCalendarFeed])
+    .as('calendar_feed')
+}
+
 export function registerResponsavelApiRoutes() {
   router
     .get('/responsavel/stats', [controllers.dashboard.GetResponsavelStats])
@@ -84,6 +96,16 @@ export function registerResponsavelApiRoutes() {
       router
         .get('/students/:studentId/calendar', [controllers.responsavel.GetStudentCalendar])
         .as('student_calendar')
+      router
+        .get('/students/:studentId/calendar-feed-url', [
+          controllers.calendars.GetCalendarFeedUrl,
+        ])
+        .as('student_calendar_feed_url')
+      router
+        .get('/matriculas/:matriculaId/certificate', [
+          controllers.responsavel.GetEnrollmentCertificate,
+        ])
+        .as('enrollment_certificate')
       router.get('/notifications', [controllers.responsavel.GetNotifications]).as('notifications')
       router.get('/comunicados', [controllers.responsavel.ListComunicados]).as('comunicados.list')
       router

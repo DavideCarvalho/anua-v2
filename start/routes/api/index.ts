@@ -35,6 +35,7 @@ import {
 import {
   registerNotificationApiRoutes,
   registerNotificationPreferenceApiRoutes,
+  registerPushSubscriptionApiRoutes,
 } from './notifications.js'
 import { registerSchoolAnnouncementApiRoutes } from './school_announcements.js'
 import { registerPostApiRoutes, registerCommentApiRoutes } from './posts.js'
@@ -101,7 +102,11 @@ import {
   registerAdminAiObservabilityRoutes,
 } from './admin.js'
 import { registerDashboardApiRoutes } from './dashboard.js'
-import { registerResponsavelApiRoutes as registerResponsavelDashboardApiRoutes } from './responsavel.js'
+import {
+  registerResponsavelApiRoutes as registerResponsavelDashboardApiRoutes,
+  registerCalendarFeedRoutes,
+  registerVerifyEnrollmentRoute,
+} from './responsavel.js'
 import { registerPedagogicalCalendarApiRoutes } from './pedagogical_calendar.js'
 import { registerGameApiRoutes } from './game.js'
 import { registerStudentFarmsApiRoutes } from './student_farms.js'
@@ -114,6 +119,8 @@ export function registerApiRoutes() {
   registerAuthApiRoutes()
   registerDashboardApiRoutes()
   registerResponsavelDashboardApiRoutes()
+  registerCalendarFeedRoutes()
+  registerVerifyEnrollmentRoute()
   registerAdminStatsApiRoutes()
   registerAdminAiObservabilityRoutes()
   registerAsaasWebhookApiRoutes()
@@ -145,6 +152,7 @@ export function registerApiRoutes() {
   registerEnrollmentManagementApiRoutes()
   registerNotificationApiRoutes()
   registerNotificationPreferenceApiRoutes()
+  registerPushSubscriptionApiRoutes()
   registerSchoolAnnouncementApiRoutes()
   registerPostApiRoutes()
   registerCommentApiRoutes()

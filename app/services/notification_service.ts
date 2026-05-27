@@ -80,6 +80,26 @@ export class NotificationService {
       )
     }
 
+    const enablePush = pref ? pref.enablePush : true
+    if (enablePush && user.pushSubscription) {
+      const { sendPushNotification } = await import('#services/push_notification_service')
+      dispatches.push(
+        safeDispatch(
+          sendPushNotification(userId, {
+            title,
+            body: message,
+            url: actionUrl,
+          }).then((sent) => {
+            if (sent) {
+              notification.sentViaPush = true
+              return notification.save()
+            }
+          }),
+          notification.id
+        )
+      )
+    }
+
     await Promise.all(dispatches)
 
     return notification

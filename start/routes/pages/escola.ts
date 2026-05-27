@@ -125,6 +125,9 @@ export function registerEscolaPageRoutes() {
       router.get('/comunicados', [escola.ShowComunicadosPage]).as('comunicados')
       router.get('/comunicados/novo', [escola.ShowNovoComunicadoPage]).as('comunicados.novo')
       router
+        .get('/comunicados/preview', [escola.ShowComunicadoPreviewPage])
+        .as('comunicados.preview')
+      router
         .get('/comunicados/:id/editar', [escola.ShowEditarComunicadoPage])
         .as('comunicados.editar')
 

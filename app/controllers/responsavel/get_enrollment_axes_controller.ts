@@ -5,11 +5,8 @@ import StudentPayment from '#models/student_payment'
 import Class_ from '#models/class'
 import AppException from '#exceptions/app_exception'
 import { computeAxesStatus } from '#services/enrollment_axes_service'
+import EnrollmentAxesTransformer from '#transformers/enrollment_axes_transformer'
 
-/**
- * Retorna os 4 eixos + dados básicos de uma matrícula específica pra um
- * responsável. Usado pela página `/responsavel/matricula/:id` (Wave 6).
- */
 export default class GetEnrollmentAxesController {
   async handle({ params, effectiveUser, response }: HttpContext) {
     if (!effectiveUser) {
@@ -29,7 +26,6 @@ export default class GetEnrollmentAxesController {
       throw AppException.notFound('Matrícula não encontrada')
     }
 
-    // Autoriza: responsável precisa estar vinculado a este aluno
     const relation = await StudentHasResponsible.query()
       .where('responsibleId', effectiveUser.id)
       .where('studentId', matricula.studentId)
@@ -43,48 +39,22 @@ export default class GetEnrollmentAxesController {
       throw AppException.notFound('Não foi possível calcular o status da matrícula')
     }
 
-    // Pagamento da taxa de matrícula — pra renderizar inline na seção Pagamento
     const enrollmentPayment = matricula.enrollmentPaymentId
       ? await StudentPayment.find(matricula.enrollmentPaymentId)
       : null
 
-    // Nome da turma alocada — pra renderizar inline na seção Alocação de turma
     const allocatedClass = matricula.classId ? await Class_.find(matricula.classId) : null
 
-    // Prazo de matrícula: o usuário tem até essa data pra concluir tudo.
-    // Fonte única — AcademicPeriod.enrollmentEndDate (mesma que get_school_enrollment_info usa).
     const enrollmentDeadline = matricula.academicPeriod?.enrollmentEndDate?.toISO() ?? null
 
-    return response.ok({
-      id: matricula.id,
-      studentId: matricula.studentId,
-      studentName: matricula.student?.user?.name ?? null,
-      levelName: matricula.level?.name ?? null,
-      academicPeriodName: matricula.academicPeriod?.name ?? null,
-      academicPeriodSegment: matricula.academicPeriod?.segment ?? null,
-      enrollmentDeadline,
-      contract: matricula.contract
-        ? {
-            id: matricula.contract.id,
-            name: matricula.contract.name,
-            enrollmentValue: matricula.contract.enrollmentValue,
-            enrollmentPaymentUntilDays: matricula.contract.enrollmentPaymentUntilDays,
-          }
-        : null,
-      enrollmentPayment: enrollmentPayment
-        ? {
-            id: enrollmentPayment.id,
-            amount: enrollmentPayment.amount,
-            totalAmount: enrollmentPayment.totalAmount,
-            status: enrollmentPayment.status,
-            dueDate: enrollmentPayment.dueDate?.toISO() ?? null,
-            paidAt: enrollmentPayment.paidAt?.toISO() ?? null,
-            invoiceUrl: enrollmentPayment.invoiceUrl ?? null,
-          }
-        : null,
-      allocatedClass: allocatedClass ? { id: allocatedClass.id, name: allocatedClass.name } : null,
-      createdAt: matricula.createdAt.toISO(),
-      axes,
-    })
+    return response.ok(
+      EnrollmentAxesTransformer.transform({
+        matricula,
+        axes,
+        enrollmentPayment,
+        allocatedClass,
+        enrollmentDeadline,
+      })
+    )
   }
 }

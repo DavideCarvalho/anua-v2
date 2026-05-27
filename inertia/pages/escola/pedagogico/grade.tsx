@@ -29,7 +29,7 @@ export default function GradePage() {
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {!isSchoolTeacher && (
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="transition-colors hover:bg-muted/40">
               <CardHeader>
                 <Calendar className="h-8 w-8 text-primary mb-2" />
                 <CardTitle>Horários</CardTitle>
@@ -46,7 +46,7 @@ export default function GradePage() {
             </Card>
           )}
 
-          <Card className="hover:shadow-md transition-shadow">
+          <Card className="transition-colors hover:bg-muted/40">
             <CardHeader>
               <BookOpen className="h-8 w-8 text-primary mb-2" />
               <CardTitle>Disciplinas</CardTitle>
@@ -62,7 +62,7 @@ export default function GradePage() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow">
+          <Card className="transition-colors hover:bg-muted/40">
             <CardHeader>
               <Clock className="h-8 w-8 text-primary mb-2" />
               <CardTitle>Quadro Geral</CardTitle>

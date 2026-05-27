@@ -34,7 +34,7 @@ export function AuditDiffCard({ audit, entityType }: AuditDiffCardProps) {
   const changedFields = getChangedFields(audit, entityType)
 
   return (
-    <Card className="border-l-4 border-l-primary/20">
+    <Card className="ring-1 ring-primary/20">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

@@ -41,10 +41,12 @@ export const controllers = {
     GetAiTokenUsageSummary: () => import('#controllers/admin/get_ai_token_usage_summary_controller'),
     GetImpersonationConfig: () => import('#controllers/admin/get_impersonation_config_controller'),
     GetImpersonationStatus: () => import('#controllers/admin/get_impersonation_status_controller'),
+    GetSchoolHealth: () => import('#controllers/admin/get_school_health_controller'),
     GetServerStats: () => import('#controllers/admin/get_server_stats_controller'),
     ListAiToolCalls: () => import('#controllers/admin/list_ai_tool_calls_controller'),
     SetImpersonation: () => import('#controllers/admin/set_impersonation_controller'),
     TriggerMissingPayments: () => import('#controllers/admin/trigger_missing_payments_controller'),
+    SendChangelogDigest: () => import('#controllers/admin/send_changelog_digest_controller'),
   },
   agreements: {
     CreateAgreement: () => import('#controllers/agreements/create_agreement_controller'),
@@ -78,6 +80,11 @@ export const controllers = {
     GetHrOverview: () => import('#controllers/analytics/get_hr_overview_controller'),
     GetIncidentsOverview: () => import('#controllers/analytics/get_incidents_overview_controller'),
     GetPaymentsOverview: () => import('#controllers/analytics/get_payments_overview_controller'),
+  },
+  announcementTemplates: {
+    CreateAnnouncementTemplate: () => import('#controllers/announcement_templates/create_announcement_template_controller'),
+    DeleteAnnouncementTemplate: () => import('#controllers/announcement_templates/delete_announcement_template_controller'),
+    ListAnnouncementTemplates: () => import('#controllers/announcement_templates/list_announcement_templates_controller'),
   },
   api: {
     game: {
@@ -129,6 +136,10 @@ export const controllers = {
     Me: () => import('#controllers/auth/me'),
     SendCode: () => import('#controllers/auth/send_code'),
     VerifyCode: () => import('#controllers/auth/verify_code'),
+  },
+  calendars: {
+    GetCalendarFeed: () => import('#controllers/calendars/get_calendar_feed_controller'),
+    GetCalendarFeedUrl: () => import('#controllers/calendars/get_calendar_feed_url_controller'),
   },
   canteenFinancialSettings: {
     ShowCanteenFinancialSettings: () => import('#controllers/canteen_financial_settings/show_canteen_financial_settings_controller'),
@@ -389,6 +400,7 @@ export const controllers = {
     MarkAllRead: () => import('#controllers/notifications/mark_all_read_controller'),
     MarkNotificationRead: () => import('#controllers/notifications/mark_notification_read_controller'),
     ShowNotification: () => import('#controllers/notifications/show_notification_controller'),
+    PushSubscription: () => import('#controllers/notifications/push_subscription_controller'),
   },
   occurrences: {
     CreateOccurrence: () => import('#controllers/occurrences/create_occurrence_controller'),
@@ -446,6 +458,7 @@ export const controllers = {
       ShowCantinaReservasPage: () => import('#controllers/pages/escola/show_cantina_reservas_page_controller'),
       ShowCantinaTransferenciasPage: () => import('#controllers/pages/escola/show_cantina_transferencias_page_controller'),
       ShowCantinaVendasPage: () => import('#controllers/pages/escola/show_cantina_vendas_page_controller'),
+      ShowComunicadoPreviewPage: () => import('#controllers/pages/escola/show_comunicado_preview_page_controller'),
       ShowComunicadosPage: () => import('#controllers/pages/escola/show_comunicados_page_controller'),
       ShowConfiguracaoPagamentosPage: () => import('#controllers/pages/escola/show_configuracao_pagamentos_page_controller'),
       ShowConfiguracoesPage: () => import('#controllers/pages/escola/show_configuracoes_page_controller'),
@@ -573,6 +586,9 @@ export const controllers = {
     ReviewPrintRequest: () => import('#controllers/print_requests/review_print_request_controller'),
     ShowPrintRequest: () => import('#controllers/print_requests/show_print_request_controller'),
   },
+  public: {
+    VerifyEnrollment: () => import('#controllers/public/verify_enrollment_controller'),
+  },
   purchaseRequests: {
     ApprovePurchaseRequest: () => import('#controllers/purchase_requests/approve_purchase_request_controller'),
     CreatePurchaseRequest: () => import('#controllers/purchase_requests/create_purchase_request_controller'),
@@ -590,6 +606,7 @@ export const controllers = {
     CreateInquiryMessage: () => import('#controllers/responsavel/create_inquiry_message_controller'),
     CreateStudentInquiry: () => import('#controllers/responsavel/create_student_inquiry_controller'),
     GetEnrollmentAxes: () => import('#controllers/responsavel/get_enrollment_axes_controller'),
+    GetEnrollmentCertificate: () => import('#controllers/responsavel/get_enrollment_certificate_controller'),
     GetNotifications: () => import('#controllers/responsavel/get_notifications_controller'),
     GetStudentAcademicPeriods: () => import('#controllers/responsavel/get_student_academic_periods_controller'),
     GetStudentAssignments: () => import('#controllers/responsavel/get_student_assignments_controller'),
@@ -792,6 +809,7 @@ export const controllers = {
     CheckMealRecurrence: () => import('#controllers/students/check_meal_recurrence_controller'),
     Destroy: () => import('#controllers/students/destroy'),
     EnrollStudent: () => import('#controllers/students/enroll_student_controller'),
+    ExportStudentsCsv: () => import('#controllers/students/export_students_csv_controller'),
     FullUpdateStudent: () => import('#controllers/students/full_update_student_controller'),
     GetStudentStatus: () => import('#controllers/students/get_student_status_controller'),
     Index: () => import('#controllers/students/index'),

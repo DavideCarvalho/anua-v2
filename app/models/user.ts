@@ -106,6 +106,9 @@ export default class User extends BaseModel {
   @column.dateTime({ columnName: 'lastLoggedInAt' })
   declare lastLoggedInAt: DateTime | null
 
+  @column()
+  declare pushSubscription: string | null
+
   @column.dateTime({ autoCreate: true, columnName: 'createdAt' })
   declare createdAt: DateTime
 

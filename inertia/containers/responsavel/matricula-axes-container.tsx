@@ -14,6 +14,7 @@ import {
   Download,
   FileImage,
   File,
+  Printer,
 } from 'lucide-react'
 
 import { Button } from '../../components/ui/button'
@@ -151,6 +152,66 @@ function MatriculaAxesContent({ data }: { data: AxesData }) {
         </div>
 
         <ProgressBar completed={completed} total={total} isComplete={isComplete} />
+
+        {isComplete && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              const res = await fetch(`/api/v1/responsavel/matriculas/${data.id}/certificate`)
+              if (!res.ok) {
+                toast.error('Erro ao gerar comprovante')
+                return
+              }
+              const cert = await res.json()
+              const w = window.open('', '_blank')
+              if (!w) return
+              w.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                  <title>Comprovante de Matrícula</title>
+                  <style>
+                    body { font-family: Inter, system-ui, sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; color: #1a1a1a; }
+                    h1 { font-size: 20px; margin-bottom: 4px; }
+                    h2 { font-size: 14px; font-weight: normal; color: #666; margin-top: 0; }
+                    .fields { margin: 24px 0; }
+                    .field { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+                    .field-label { color: #666; }
+                    .qr { text-align: center; margin: 32px 0; }
+                    .qr img { width: 160px; height: 160px; }
+                    .qr p { font-size: 11px; color: #999; margin-top: 8px; }
+                    .footer { text-align: center; font-size: 11px; color: #999; margin-top: 32px; border-top: 1px solid #eee; padding-top: 16px; }
+                    @media print { body { margin: 20px; } }
+                  </style>
+                </head>
+                <body>
+                  <h1>${cert.schoolName ?? 'Escola'}</h1>
+                  <h2>Comprovante de Matrícula</h2>
+                  <div class="fields">
+                    <div class="field"><span class="field-label">Aluno</span><span>${cert.studentName}</span></div>
+                    <div class="field"><span class="field-label">Série</span><span>${cert.levelName ?? '-'}</span></div>
+                    <div class="field"><span class="field-label">Período</span><span>${cert.academicPeriodName ?? '-'}</span></div>
+                    <div class="field"><span class="field-label">Status</span><span>Concluída</span></div>
+                  </div>
+                  <div class="qr">
+                    <img src="${cert.qrCodeDataUrl}" alt="QR de verificação" />
+                    <p>Escaneie pra verificar autenticidade</p>
+                  </div>
+                  <div class="footer">
+                    Documento gerado em ${new Date().toLocaleDateString('pt-BR')} pelo sistema Anuá.<br/>
+                    Verificação: ${cert.verificationUrl}
+                  </div>
+                </body>
+                </html>
+              `)
+              w.document.close()
+            }}
+          >
+            <Printer className="mr-2 h-3.5 w-3.5" />
+            Comprovante de Matrícula
+          </Button>
+        )}
       </header>
 
       <div className="space-y-3">
@@ -158,6 +219,8 @@ function MatriculaAxesContent({ data }: { data: AxesData }) {
           tone={toneFor('docs', axes)}
           title="Documentação"
           summary={docsSummary(axes)}
+          sla="· análise em até 2 dias úteis"
+          lastUpdatedAt={axes.docs.lastUpdatedAt}
           defaultOpen={axes.docs.status !== 'COMPLETE'}
           highlightNext={firstPendingKey(axes) === 'docs'}
         >
@@ -172,6 +235,8 @@ function MatriculaAxesContent({ data }: { data: AxesData }) {
           tone={toneFor('signature', axes)}
           title="Assinatura do contrato"
           summary={signatureSummary(axes)}
+          sla="· escola entra em contato em até 3 dias úteis"
+          lastUpdatedAt={axes.signatureLastUpdatedAt}
           defaultOpen={false}
           highlightNext={firstPendingKey(axes) === 'signature'}
         >
@@ -182,6 +247,7 @@ function MatriculaAxesContent({ data }: { data: AxesData }) {
           tone={toneFor('payment', axes)}
           title="Pagamento da taxa de matrícula"
           summary={paymentSummary(axes, data)}
+          lastUpdatedAt={axes.paymentLastUpdatedAt}
           defaultOpen={axes.payment === 'PENDING' || axes.payment === 'OVERDUE'}
           highlightNext={firstPendingKey(axes) === 'payment'}
         >
@@ -196,6 +262,8 @@ function MatriculaAxesContent({ data }: { data: AxesData }) {
               ? `Turma ${data.allocatedClass?.name ?? 'definida'}`
               : 'Aguardando a escola'
           }
+          sla="· definição até o início das aulas"
+          lastUpdatedAt={axes.classAllocatedAt}
           defaultOpen={false}
           highlightNext={firstPendingKey(axes) === 'classAllocation'}
         >
@@ -284,10 +352,28 @@ function paymentSummary(axes: AxesData['axes'], data: AxesData) {
   return 'Aguardando geração da cobrança'
 }
 
+function formatRelativeTime(iso: string | null): string | null {
+  if (!iso) return null
+  const d = new Date(iso)
+  const now = new Date()
+  const diffMs = now.getTime() - d.getTime()
+  const diffMin = Math.floor(diffMs / 60000)
+  if (diffMin < 1) return 'agora'
+  if (diffMin < 60) return `há ${diffMin}min`
+  const diffH = Math.floor(diffMin / 60)
+  if (diffH < 24) return `há ${diffH}h`
+  const diffD = Math.floor(diffH / 24)
+  if (diffD === 1) return 'ontem'
+  if (diffD < 30) return `há ${diffD} dias`
+  return brazilianDateFormatter(d)
+}
+
 function AxisSection({
   tone,
   title,
   summary,
+  sla,
+  lastUpdatedAt,
   defaultOpen,
   highlightNext,
   children,
@@ -295,10 +381,14 @@ function AxisSection({
   tone: Tone
   title: string
   summary: string
+  sla?: string
+  lastUpdatedAt?: string | null
   defaultOpen: boolean
   highlightNext: boolean
   children: React.ReactNode
 }) {
+  const relTime = formatRelativeTime(lastUpdatedAt ?? null)
+
   return (
     <Collapsible defaultOpen={defaultOpen}>
       <section
@@ -318,7 +408,15 @@ function AxisSection({
             <ToneIndicator tone={tone} />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-foreground truncate">{title}</p>
-              <p className="text-xs text-muted-foreground truncate">{summary}</p>
+              <p className="text-xs text-muted-foreground truncate">
+                {summary}
+                {tone === 'pending' && sla && <span className="ml-1.5 opacity-70">{sla}</span>}
+              </p>
+              {relTime && (
+                <p className="text-[11px] text-muted-foreground/60 mt-0.5">
+                  Atualizado {relTime}
+                </p>
+              )}
             </div>
             <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[open]:rotate-90" />
           </button>

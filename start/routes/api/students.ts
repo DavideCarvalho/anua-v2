@@ -6,6 +6,10 @@ export function registerStudentApiRoutes() {
   router
     .group(() => {
       router.get('/', [controllers.students.Index]).as('students.index')
+      router.post('/export-csv', [controllers.students.ExportStudentsCsv]).as('students.export_csv')
+      router
+        .get('/export-csv/download/:token', [controllers.students.ExportStudentsCsv, 'download'])
+        .as('students.export_csv_download')
       router.post('/', [controllers.students.Store]).as('students.store')
       router.post('/enroll', [controllers.students.EnrollStudent]).as('students.enroll')
       router

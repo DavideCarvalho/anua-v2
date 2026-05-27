@@ -1,12 +1,23 @@
+import { useEffect, useState } from 'react'
 import { Head, usePage } from '@inertiajs/react'
 import { Link } from '@adonisjs/inertia/react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { ResponsavelLayout } from '../../components/layouts'
 import { DashboardOverviewContainer } from '../../containers/responsavel/dashboard-overview-container'
 import { ResponsavelInsightsInbox } from '../../containers/responsavel/responsavel-insights-inbox'
+import { Button } from '../../components/ui/button'
 import { Card, CardContent } from '../../components/ui/card'
 import { Alert, AlertDescription } from '../../components/ui/alert'
-import { AlertCircle, BookOpen, DollarSign, Bell } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../components/ui/dialog'
+import { AlertCircle, BookOpen, DollarSign, Bell, FileText, CreditCard, Users, CheckCircle2 } from 'lucide-react'
+import { EmptyState } from '../../components/ui/empty-state'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 import type { SharedProps } from '../../lib/types'
@@ -46,13 +57,11 @@ function ResponsavelContent() {
   // Early return se não tiver filhos
   if (stats.students.length === 0) {
     return (
-      <div className="py-12 text-center">
-        <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground" />
-        <h3 className="mt-4 text-lg font-semibold">Nenhum aluno vinculado</h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Você não está vinculado a nenhum aluno no momento.
-        </p>
-      </div>
+      <EmptyState
+        icon={AlertCircle}
+        title="Nenhum aluno vinculado"
+        description="Você não está vinculado a nenhum aluno no momento."
+      />
     )
   }
 
@@ -197,15 +206,92 @@ function ResponsavelSkeleton() {
   )
 }
 
+const ONBOARDING_STEPS = [
+  {
+    icon: FileText,
+    title: 'Documentos',
+    description: 'Envie os documentos solicitados pela escola pra matrícula.',
+  },
+  {
+    icon: CreditCard,
+    title: 'Pagamentos',
+    description: 'Acompanhe mensalidades e faturas na aba Financeiro.',
+  },
+  {
+    icon: BookOpen,
+    title: 'Acompanhamento',
+    description: 'Veja notas, frequência e atividades do seu filho.',
+  },
+  {
+    icon: Bell,
+    title: 'Comunicados',
+    description: 'Fique por dentro dos avisos e eventos da escola.',
+  },
+]
+
+function OnboardingModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="z-[110] max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="text-xl">Bem-vindo ao Anuá!</DialogTitle>
+          <DialogDescription>
+            Aqui você acompanha tudo sobre a vida escolar do seu filho. Veja como começar:
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3 py-2">
+          {ONBOARDING_STEPS.map((step, i) => {
+            const Icon = step.icon
+            return (
+              <div key={i} className="flex items-start gap-3">
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
+                  <Icon className="h-4 w-4" />
+                </span>
+                <div>
+                  <p className="text-sm font-medium">{step.title}</p>
+                  <p className="text-xs text-muted-foreground">{step.description}</p>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        <DialogFooter>
+          <Button onClick={onClose} className="w-full">
+            <CheckCircle2 className="mr-2 h-4 w-4" />
+            Entendi, vamos lá!
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 export default function ResponsavelDashboard() {
   const user = useAuthUser()
+  const [showOnboarding, setShowOnboarding] = useState(false)
+
+  useEffect(() => {
+    if (!user) return
+    const key = `anua:onboarding-seen:${user.id}`
+    if (localStorage.getItem(key) !== '1') {
+      setShowOnboarding(true)
+    }
+  }, [user])
+
+  function handleDismissOnboarding() {
+    setShowOnboarding(false)
+    if (user) localStorage.setItem(`anua:onboarding-seen:${user.id}`, '1')
+  }
 
   return (
     <ResponsavelLayout>
       <Head title="Início" />
 
+      <OnboardingModal open={showOnboarding} onClose={handleDismissOnboarding} />
+
       <div className="space-y-6">
-        {/* Welcome section */}
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Olá, {user?.name?.split(' ')[0]}!</h1>
           <p className="text-muted-foreground">Acompanhe o desempenho dos seus filhos</p>
@@ -213,7 +299,6 @@ export default function ResponsavelDashboard() {
 
         <PendingAcknowledgementBanner />
 
-        {/* Dashboard Overview */}
         <ErrorBoundary
           fallbackRender={({ error, resetErrorBoundary }) => (
             <Alert variant="destructive">

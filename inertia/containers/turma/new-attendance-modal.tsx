@@ -857,10 +857,10 @@ function NewAttendanceModalContent({
                       <div
                         key={attendance.student.id}
                         className={cn(
-                          'flex cursor-pointer items-center justify-between rounded-lg border-l-4 p-3 transition-all hover:bg-muted/50',
+                          'flex cursor-pointer items-center justify-between rounded-lg p-3 ring-1 transition-colors hover:bg-muted/50',
                           isPresent
-                            ? 'border-l-green-500 bg-green-50/50 dark:bg-green-950/20'
-                            : 'border-l-red-500 bg-red-50/50 dark:bg-red-950/20'
+                            ? 'bg-green-50/50 ring-green-600/20 dark:bg-green-950/20 dark:ring-green-400/20'
+                            : 'bg-red-50/50 ring-red-600/20 dark:bg-red-950/20 dark:ring-red-400/20'
                         )}
                         onClick={() => toggleAttendance(originalIndex)}
                       >

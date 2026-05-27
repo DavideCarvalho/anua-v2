@@ -492,6 +492,12 @@ const routes = {
     tokens: [{"old":"/escola/comunicados/novo","type":0,"val":"escola","end":""},{"old":"/escola/comunicados/novo","type":0,"val":"comunicados","end":""},{"old":"/escola/comunicados/novo","type":0,"val":"novo","end":""}],
     types: placeholder as Registry['web.escola.comunicados.novo']['types'],
   },
+  'web.escola.comunicados.preview': {
+    methods: ["GET","HEAD"],
+    pattern: '/escola/comunicados/preview',
+    tokens: [{"old":"/escola/comunicados/preview","type":0,"val":"escola","end":""},{"old":"/escola/comunicados/preview","type":0,"val":"comunicados","end":""},{"old":"/escola/comunicados/preview","type":0,"val":"preview","end":""}],
+    types: placeholder as Registry['web.escola.comunicados.preview']['types'],
+  },
   'web.escola.comunicados.editar': {
     methods: ["GET","HEAD"],
     pattern: '/escola/comunicados/:id/editar',
@@ -1014,6 +1020,12 @@ const routes = {
     tokens: [{"old":"/admin/analytics/rh","type":0,"val":"admin","end":""},{"old":"/admin/analytics/rh","type":0,"val":"analytics","end":""},{"old":"/admin/analytics/rh","type":0,"val":"rh","end":""}],
     types: placeholder as Registry['web.admin.analytics.rh']['types'],
   },
+  'web.admin.analytics.school_health': {
+    methods: ["GET","HEAD"],
+    pattern: '/admin/analytics/school-health',
+    tokens: [{"old":"/admin/analytics/school-health","type":0,"val":"admin","end":""},{"old":"/admin/analytics/school-health","type":0,"val":"analytics","end":""},{"old":"/admin/analytics/school-health","type":0,"val":"school-health","end":""}],
+    types: placeholder as Registry['web.admin.analytics.school_health']['types'],
+  },
   'web.loja.dashboard': {
     methods: ["GET","HEAD"],
     pattern: '/loja',
@@ -1266,6 +1278,18 @@ const routes = {
     tokens: [{"old":"/api/v1/responsavel/students/:studentId/calendar","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/students/:studentId/calendar","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/students/:studentId/calendar","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/students/:studentId/calendar","type":0,"val":"students","end":""},{"old":"/api/v1/responsavel/students/:studentId/calendar","type":1,"val":"studentId","end":""},{"old":"/api/v1/responsavel/students/:studentId/calendar","type":0,"val":"calendar","end":""}],
     types: placeholder as Registry['api.v1.responsavel.api.student_calendar']['types'],
   },
+  'api.v1.responsavel.api.student_calendar_feed_url': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/responsavel/students/:studentId/calendar-feed-url',
+    tokens: [{"old":"/api/v1/responsavel/students/:studentId/calendar-feed-url","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/students/:studentId/calendar-feed-url","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/students/:studentId/calendar-feed-url","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/students/:studentId/calendar-feed-url","type":0,"val":"students","end":""},{"old":"/api/v1/responsavel/students/:studentId/calendar-feed-url","type":1,"val":"studentId","end":""},{"old":"/api/v1/responsavel/students/:studentId/calendar-feed-url","type":0,"val":"calendar-feed-url","end":""}],
+    types: placeholder as Registry['api.v1.responsavel.api.student_calendar_feed_url']['types'],
+  },
+  'api.v1.responsavel.api.enrollment_certificate': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/responsavel/matriculas/:matriculaId/certificate',
+    tokens: [{"old":"/api/v1/responsavel/matriculas/:matriculaId/certificate","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId/certificate","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId/certificate","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId/certificate","type":0,"val":"matriculas","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId/certificate","type":1,"val":"matriculaId","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId/certificate","type":0,"val":"certificate","end":""}],
+    types: placeholder as Registry['api.v1.responsavel.api.enrollment_certificate']['types'],
+  },
   'api.v1.responsavel.api.notifications': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/responsavel/notifications',
@@ -1362,6 +1386,18 @@ const routes = {
     tokens: [{"old":"/api/v1/responsavel/inquiries/:inquiryId/mark-read","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/mark-read","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/mark-read","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/mark-read","type":0,"val":"inquiries","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/mark-read","type":1,"val":"inquiryId","end":""},{"old":"/api/v1/responsavel/inquiries/:inquiryId/mark-read","type":0,"val":"mark-read","end":""}],
     types: placeholder as Registry['api.v1.responsavel.api.inquiries.mark-read']['types'],
   },
+  'api.v1.calendar_feed': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/calendars/:token',
+    tokens: [{"old":"/api/v1/calendars/:token","type":0,"val":"api","end":""},{"old":"/api/v1/calendars/:token","type":0,"val":"v1","end":""},{"old":"/api/v1/calendars/:token","type":0,"val":"calendars","end":""},{"old":"/api/v1/calendars/:token","type":1,"val":"token","end":""}],
+    types: placeholder as Registry['api.v1.calendar_feed']['types'],
+  },
+  'api.v1.verify_enrollment': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/verify-enrollment/:token',
+    tokens: [{"old":"/api/v1/verify-enrollment/:token","type":0,"val":"api","end":""},{"old":"/api/v1/verify-enrollment/:token","type":0,"val":"v1","end":""},{"old":"/api/v1/verify-enrollment/:token","type":0,"val":"verify-enrollment","end":""},{"old":"/api/v1/verify-enrollment/:token","type":1,"val":"token","end":""}],
+    types: placeholder as Registry['api.v1.verify_enrollment']['types'],
+  },
   'api.v1.dashboard.admin_stats': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/admin/stats',
@@ -1373,6 +1409,18 @@ const routes = {
     pattern: '/api/v1/admin/server-stats',
     tokens: [{"old":"/api/v1/admin/server-stats","type":0,"val":"api","end":""},{"old":"/api/v1/admin/server-stats","type":0,"val":"v1","end":""},{"old":"/api/v1/admin/server-stats","type":0,"val":"admin","end":""},{"old":"/api/v1/admin/server-stats","type":0,"val":"server-stats","end":""}],
     types: placeholder as Registry['api.v1.dashboard.server_stats']['types'],
+  },
+  'api.v1.admin.school_health': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/admin/school-health',
+    tokens: [{"old":"/api/v1/admin/school-health","type":0,"val":"api","end":""},{"old":"/api/v1/admin/school-health","type":0,"val":"v1","end":""},{"old":"/api/v1/admin/school-health","type":0,"val":"admin","end":""},{"old":"/api/v1/admin/school-health","type":0,"val":"school-health","end":""}],
+    types: placeholder as Registry['api.v1.admin.school_health']['types'],
+  },
+  'api.v1.admin.send_changelog_digest': {
+    methods: ["POST"],
+    pattern: '/api/v1/admin/send-changelog-digest',
+    tokens: [{"old":"/api/v1/admin/send-changelog-digest","type":0,"val":"api","end":""},{"old":"/api/v1/admin/send-changelog-digest","type":0,"val":"v1","end":""},{"old":"/api/v1/admin/send-changelog-digest","type":0,"val":"admin","end":""},{"old":"/api/v1/admin/send-changelog-digest","type":0,"val":"send-changelog-digest","end":""}],
+    types: placeholder as Registry['api.v1.admin.send_changelog_digest']['types'],
   },
   'api.v1.admin.ai.tool_calls': {
     methods: ["GET","HEAD"],
@@ -1559,6 +1607,18 @@ const routes = {
     pattern: '/api/v1/students',
     tokens: [{"old":"/api/v1/students","type":0,"val":"api","end":""},{"old":"/api/v1/students","type":0,"val":"v1","end":""},{"old":"/api/v1/students","type":0,"val":"students","end":""}],
     types: placeholder as Registry['api.v1.students.index']['types'],
+  },
+  'api.v1.students.export_csv': {
+    methods: ["POST"],
+    pattern: '/api/v1/students/export-csv',
+    tokens: [{"old":"/api/v1/students/export-csv","type":0,"val":"api","end":""},{"old":"/api/v1/students/export-csv","type":0,"val":"v1","end":""},{"old":"/api/v1/students/export-csv","type":0,"val":"students","end":""},{"old":"/api/v1/students/export-csv","type":0,"val":"export-csv","end":""}],
+    types: placeholder as Registry['api.v1.students.export_csv']['types'],
+  },
+  'api.v1.students.export_csv_download': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/students/export-csv/download/:token',
+    tokens: [{"old":"/api/v1/students/export-csv/download/:token","type":0,"val":"api","end":""},{"old":"/api/v1/students/export-csv/download/:token","type":0,"val":"v1","end":""},{"old":"/api/v1/students/export-csv/download/:token","type":0,"val":"students","end":""},{"old":"/api/v1/students/export-csv/download/:token","type":0,"val":"export-csv","end":""},{"old":"/api/v1/students/export-csv/download/:token","type":0,"val":"download","end":""},{"old":"/api/v1/students/export-csv/download/:token","type":1,"val":"token","end":""}],
+    types: placeholder as Registry['api.v1.students.export_csv_download']['types'],
   },
   'api.v1.students.store': {
     methods: ["POST"],
@@ -2538,6 +2598,24 @@ const routes = {
     tokens: [{"old":"/api/v1/notification-preferences","type":0,"val":"api","end":""},{"old":"/api/v1/notification-preferences","type":0,"val":"v1","end":""},{"old":"/api/v1/notification-preferences","type":0,"val":"notification-preferences","end":""}],
     types: placeholder as Registry['api.v1.notification_preferences.update']['types'],
   },
+  'api.v1.push.vapid_key': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/push/vapid-key',
+    tokens: [{"old":"/api/v1/push/vapid-key","type":0,"val":"api","end":""},{"old":"/api/v1/push/vapid-key","type":0,"val":"v1","end":""},{"old":"/api/v1/push/vapid-key","type":0,"val":"push","end":""},{"old":"/api/v1/push/vapid-key","type":0,"val":"vapid-key","end":""}],
+    types: placeholder as Registry['api.v1.push.vapid_key']['types'],
+  },
+  'api.v1.push.subscribe': {
+    methods: ["POST"],
+    pattern: '/api/v1/push/subscribe',
+    tokens: [{"old":"/api/v1/push/subscribe","type":0,"val":"api","end":""},{"old":"/api/v1/push/subscribe","type":0,"val":"v1","end":""},{"old":"/api/v1/push/subscribe","type":0,"val":"push","end":""},{"old":"/api/v1/push/subscribe","type":0,"val":"subscribe","end":""}],
+    types: placeholder as Registry['api.v1.push.subscribe']['types'],
+  },
+  'api.v1.push.unsubscribe': {
+    methods: ["POST"],
+    pattern: '/api/v1/push/unsubscribe',
+    tokens: [{"old":"/api/v1/push/unsubscribe","type":0,"val":"api","end":""},{"old":"/api/v1/push/unsubscribe","type":0,"val":"v1","end":""},{"old":"/api/v1/push/unsubscribe","type":0,"val":"push","end":""},{"old":"/api/v1/push/unsubscribe","type":0,"val":"unsubscribe","end":""}],
+    types: placeholder as Registry['api.v1.push.unsubscribe']['types'],
+  },
   'api.v1.school_announcements.list': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/school-announcements',
@@ -2579,6 +2657,24 @@ const routes = {
     pattern: '/api/v1/school-announcements/audience/students',
     tokens: [{"old":"/api/v1/school-announcements/audience/students","type":0,"val":"api","end":""},{"old":"/api/v1/school-announcements/audience/students","type":0,"val":"v1","end":""},{"old":"/api/v1/school-announcements/audience/students","type":0,"val":"school-announcements","end":""},{"old":"/api/v1/school-announcements/audience/students","type":0,"val":"audience","end":""},{"old":"/api/v1/school-announcements/audience/students","type":0,"val":"students","end":""}],
     types: placeholder as Registry['api.v1.school_announcements.audience_students']['types'],
+  },
+  'api.v1.announcement_templates.list': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/announcement-templates',
+    tokens: [{"old":"/api/v1/announcement-templates","type":0,"val":"api","end":""},{"old":"/api/v1/announcement-templates","type":0,"val":"v1","end":""},{"old":"/api/v1/announcement-templates","type":0,"val":"announcement-templates","end":""}],
+    types: placeholder as Registry['api.v1.announcement_templates.list']['types'],
+  },
+  'api.v1.announcement_templates.create': {
+    methods: ["POST"],
+    pattern: '/api/v1/announcement-templates',
+    tokens: [{"old":"/api/v1/announcement-templates","type":0,"val":"api","end":""},{"old":"/api/v1/announcement-templates","type":0,"val":"v1","end":""},{"old":"/api/v1/announcement-templates","type":0,"val":"announcement-templates","end":""}],
+    types: placeholder as Registry['api.v1.announcement_templates.create']['types'],
+  },
+  'api.v1.announcement_templates.delete': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/announcement-templates/:id',
+    tokens: [{"old":"/api/v1/announcement-templates/:id","type":0,"val":"api","end":""},{"old":"/api/v1/announcement-templates/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/announcement-templates/:id","type":0,"val":"announcement-templates","end":""},{"old":"/api/v1/announcement-templates/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['api.v1.announcement_templates.delete']['types'],
   },
   'api.v1.posts.index': {
     methods: ["GET","HEAD"],

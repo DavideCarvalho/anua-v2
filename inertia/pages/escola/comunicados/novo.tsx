@@ -1,7 +1,7 @@
 import { Head, router } from '@inertiajs/react'
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react'
 import { Link } from '@adonisjs/inertia/react'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 import { EscolaLayout } from '../../../components/layouts'
@@ -25,7 +25,8 @@ import {
   writeEscolaDashboardViewMode,
 } from '../../../lib/escola-dashboard-view-mode'
 import { useAuthUser } from '../../../stores/auth_store'
-import { Check, ChevronsUpDown, X, UploadCloud, Paperclip } from 'lucide-react'
+import { Check, ChevronsUpDown, X, UploadCloud, Paperclip, BookmarkPlus, FileText, Trash2, Eye } from 'lucide-react'
+import { api } from '~/lib/api'
 
 type Option = {
   id: string
@@ -95,6 +96,104 @@ function countSelectedGroups(groups: AudienceOptionGroup[], selectedValues: stri
   return groups.filter((group) => group.ids.some((id) => selectedValues.includes(id))).length
 }
 
+interface TemplateItem {
+  id: string
+  name: string
+  title: string
+  body: string
+}
+
+function TemplateBar({
+  templates,
+  onApply,
+  onDelete,
+  onSave,
+  onClear,
+  canSave,
+  isSaving,
+}: {
+  templates: TemplateItem[]
+  onApply: (tpl: TemplateItem) => void
+  onDelete: (tpl: TemplateItem) => void
+  onSave: (name: string) => void
+  onClear: () => void
+  canSave: boolean
+  isSaving: boolean
+}) {
+  function handleApply(tpl: TemplateItem) {
+    onApply(tpl)
+    toast.success(`Template "${tpl.name}" aplicado`)
+  }
+
+  async function handleDelete(tpl: TemplateItem) {
+    await onDelete(tpl)
+    toast.success(`Template "${tpl.name}" excluído`)
+  }
+
+  function handleSave() {
+    if (!canSave) {
+      toast.error('Preencha o título antes de salvar como template')
+      return
+    }
+    const name = prompt('Nome do template:')
+    if (!name?.trim()) return
+    onSave(name.trim())
+    toast.success(`Template "${name.trim()}" salvo`)
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
+      <FileText className="h-4 w-4 text-muted-foreground" />
+      <span className="text-xs text-muted-foreground">Templates</span>
+      {templates.map((tpl) => (
+        <span key={tpl.id} className="inline-flex items-center gap-0.5">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="text-xs rounded-r-none"
+            onClick={() => handleApply(tpl)}
+          >
+            {tpl.name}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="text-xs rounded-l-none border-l-0 px-1.5"
+            onClick={() => handleDelete(tpl)}
+          >
+            <Trash2 className="h-3 w-3" />
+          </Button>
+        </span>
+      ))}
+      {canSave && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="text-xs text-muted-foreground"
+          onClick={onClear}
+        >
+          <X className="mr-1 h-3 w-3" />
+          Limpar
+        </Button>
+      )}
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="ml-auto text-xs"
+        disabled={isSaving}
+        onClick={handleSave}
+      >
+        <BookmarkPlus className="mr-1.5 h-3.5 w-3.5" />
+        Salvar como template
+      </Button>
+    </div>
+  )
+}
+
 function formatAudienceGroupLabel(group: AudienceOptionGroup) {
   if (group.ids.length <= 1) {
     return group.label
@@ -105,6 +204,21 @@ function formatAudienceGroupLabel(group: AudienceOptionGroup) {
 
 export default function NovoComunicadoPage() {
   const user = useAuthUser()
+  const queryClient = useQueryClient()
+
+  const { data: templatesData } = useQuery(
+    api.api.v1.announcementTemplates.list.queryOptions()
+  )
+  const templates = templatesData?.data ?? []
+
+  const createTemplateMutation = useMutation(
+    api.api.v1.announcementTemplates.create.mutationOptions()
+  )
+
+  const deleteTemplateMutation = useMutation(
+    api.api.v1.announcementTemplates.delete.mutationOptions()
+  )
+
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -343,6 +457,32 @@ export default function NovoComunicadoPage() {
     return label.includes(normalizedSearch)
   })
 
+  function handleClearForm() {
+    setTitle('')
+    setBody('')
+  }
+
+  function handleApplyTemplate(tpl: TemplateItem) {
+    setTitle(tpl.title)
+    setBody(tpl.body)
+  }
+
+  async function handleDeleteTemplate(tpl: TemplateItem) {
+    await deleteTemplateMutation.mutateAsync({ params: { id: tpl.id } })
+    queryClient.invalidateQueries({
+      queryKey: api.api.v1.announcementTemplates.list.pathKey(),
+    })
+  }
+
+  async function handleSaveTemplate(name: string) {
+    await createTemplateMutation.mutateAsync({
+      body: { name, title, body },
+    })
+    queryClient.invalidateQueries({
+      queryKey: api.api.v1.announcementTemplates.list.pathKey(),
+    })
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError(null)
@@ -410,6 +550,16 @@ export default function NovoComunicadoPage() {
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
+            <TemplateBar
+              templates={templates}
+              onApply={handleApplyTemplate}
+              onDelete={handleDeleteTemplate}
+              onSave={handleSaveTemplate}
+              onClear={handleClearForm}
+              canSave={!!title.trim()}
+              isSaving={createTemplateMutation.isPending}
+            />
+
             <div className="space-y-2">
               <label htmlFor="title" className="text-sm font-medium">
                 Título
@@ -564,14 +714,28 @@ export default function NovoComunicadoPage() {
                 <div className="space-y-2" data-testid="announcement-audience-course-options">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-xs font-medium">Selecione os cursos</p>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setAudienceCourseIds([])}
-                    >
-                      Limpar seleção
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() =>
+                          setAudienceCourseIds(courseGroups.flatMap((group) => group.ids))
+                        }
+                        disabled={courseGroups.length === 0}
+                      >
+                        Selecionar todos
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setAudienceCourseIds([])}
+                        disabled={audienceCourseIds.length === 0}
+                      >
+                        Limpar
+                      </Button>
+                    </div>
                   </div>
                   <div className="grid gap-1">
                     {courseGroups.map((group) => (
@@ -596,14 +760,28 @@ export default function NovoComunicadoPage() {
                 <div className="space-y-2" data-testid="announcement-audience-level-options">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-xs font-medium">Selecione os anos</p>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setAudienceLevelIds([])}
-                    >
-                      Limpar seleção
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() =>
+                          setAudienceLevelIds(levelGroups.flatMap((group) => group.ids))
+                        }
+                        disabled={levelGroups.length === 0}
+                      >
+                        Selecionar todos
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setAudienceLevelIds([])}
+                        disabled={audienceLevelIds.length === 0}
+                      >
+                        Limpar
+                      </Button>
+                    </div>
                   </div>
                   <div className="grid gap-1">
                     {levelGroups.map((group) => (
@@ -628,14 +806,26 @@ export default function NovoComunicadoPage() {
                 <div className="space-y-2" data-testid="announcement-audience-class-options">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-xs font-medium">Selecione as turmas</p>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setAudienceClassIds([])}
-                    >
-                      Limpar seleção
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setAudienceClassIds(classes.map((item) => item.id))}
+                        disabled={classes.length === 0}
+                      >
+                        Selecionar todas
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setAudienceClassIds([])}
+                        disabled={audienceClassIds.length === 0}
+                      >
+                        Limpar
+                      </Button>
+                    </div>
                   </div>
                   <div className="grid gap-1">
                     {classes.map((item) => (
@@ -695,6 +885,44 @@ export default function NovoComunicadoPage() {
                             value={studentSearch}
                             onValueChange={setStudentSearch}
                           />
+                          {filteredStudents.length > 0 && (
+                            <div className="flex items-center justify-between gap-2 border-b px-2 py-1.5">
+                              <span className="text-xs text-muted-foreground">
+                                {filteredStudents.length} aluno(s)
+                                {studentSearch ? ' encontrado(s)' : ''}
+                              </span>
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-7 px-2 text-xs"
+                                  onClick={() =>
+                                    setAudienceStudentIds((previous) =>
+                                      Array.from(
+                                        new Set([
+                                          ...previous,
+                                          ...filteredStudents.map((item) => item.id),
+                                        ])
+                                      )
+                                    )
+                                  }
+                                >
+                                  {studentSearch ? 'Selecionar visíveis' : 'Selecionar todos'}
+                                </Button>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-7 px-2 text-xs"
+                                  onClick={() => setAudienceStudentIds([])}
+                                  disabled={audienceStudentIds.length === 0}
+                                >
+                                  Limpar
+                                </Button>
+                              </div>
+                            </div>
+                          )}
                           <CommandList>
                             <CommandEmpty>Nenhum aluno encontrado</CommandEmpty>
                             {filteredStudents.length > 0 && (
@@ -798,6 +1026,29 @@ export default function NovoComunicadoPage() {
               >
                 Salvar rascunho
               </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  if (!title.trim()) {
+                    toast.error('Preencha o título pra pré-visualizar')
+                    return
+                  }
+                  sessionStorage.setItem(
+                    'anua:comunicado-preview',
+                    JSON.stringify({
+                      title,
+                      body,
+                      attachments: attachments.map((f) => f.name),
+                      requiresAcknowledgement,
+                    })
+                  )
+                  window.open('/escola/comunicados/preview', '_blank')
+                }}
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                Pré-visualizar
+              </Button>
               <Link href="/escola/comunicados">
                 <Button type="button" variant="outline">
                   Cancelar
@@ -805,6 +1056,7 @@ export default function NovoComunicadoPage() {
               </Link>
             </div>
           </form>
+
         </CardContent>
       </Card>
     </>

@@ -115,6 +115,7 @@ export interface ApiDefinition {
       }
       comunicados: typeof routes['web.escola.comunicados'] & {
         novo: typeof routes['web.escola.comunicados.novo']
+        preview: typeof routes['web.escola.comunicados.preview']
         editar: typeof routes['web.escola.comunicados.editar']
       }
       chat: typeof routes['web.escola.chat'] & {
@@ -236,6 +237,7 @@ export interface ApiDefinition {
         ocorrencias: typeof routes['web.admin.analytics.ocorrencias']
         gamificacao: typeof routes['web.admin.analytics.gamificacao']
         rh: typeof routes['web.admin.analytics.rh']
+        schoolHealth: typeof routes['web.admin.analytics.school_health']
       }
     }
     loja: {
@@ -297,6 +299,8 @@ export interface ApiDefinition {
           studentOverview: typeof routes['api.v1.responsavel.api.student_overview']
           studentGamification: typeof routes['api.v1.responsavel.api.student_gamification']
           studentCalendar: typeof routes['api.v1.responsavel.api.student_calendar']
+          studentCalendarFeedUrl: typeof routes['api.v1.responsavel.api.student_calendar_feed_url']
+          enrollmentCertificate: typeof routes['api.v1.responsavel.api.enrollment_certificate']
           notifications: typeof routes['api.v1.responsavel.api.notifications']
           comunicados: {
             list: typeof routes['api.v1.responsavel.api.comunicados.list']
@@ -321,7 +325,11 @@ export interface ApiDefinition {
           }
         }
       }
+      calendarFeed: typeof routes['api.v1.calendar_feed']
+      verifyEnrollment: typeof routes['api.v1.verify_enrollment']
       admin: {
+        schoolHealth: typeof routes['api.v1.admin.school_health']
+        sendChangelogDigest: typeof routes['api.v1.admin.send_changelog_digest']
         ai: {
           toolCalls: typeof routes['api.v1.admin.ai.tool_calls']
           tokens: {
@@ -380,6 +388,8 @@ export interface ApiDefinition {
       }
       students: {
         index: typeof routes['api.v1.students.index']
+        exportCsv: typeof routes['api.v1.students.export_csv']
+        exportCsvDownload: typeof routes['api.v1.students.export_csv_download']
         store: typeof routes['api.v1.students.store']
         enroll: typeof routes['api.v1.students.enroll']
         checkDocument: typeof routes['api.v1.students.check_document']
@@ -622,6 +632,11 @@ export interface ApiDefinition {
         show: typeof routes['api.v1.notification_preferences.show']
         update: typeof routes['api.v1.notification_preferences.update']
       }
+      push: {
+        vapidKey: typeof routes['api.v1.push.vapid_key']
+        subscribe: typeof routes['api.v1.push.subscribe']
+        unsubscribe: typeof routes['api.v1.push.unsubscribe']
+      }
       schoolAnnouncements: {
         list: typeof routes['api.v1.school_announcements.list']
         create: typeof routes['api.v1.school_announcements.create']
@@ -630,6 +645,11 @@ export interface ApiDefinition {
         deleteDraft: typeof routes['api.v1.school_announcements.delete_draft']
         publishDraft: typeof routes['api.v1.school_announcements.publish_draft']
         audienceStudents: typeof routes['api.v1.school_announcements.audience_students']
+      }
+      announcementTemplates: {
+        list: typeof routes['api.v1.announcement_templates.list']
+        create: typeof routes['api.v1.announcement_templates.create']
+        delete: typeof routes['api.v1.announcement_templates.delete']
       }
       posts: {
         index: typeof routes['api.v1.posts.index']

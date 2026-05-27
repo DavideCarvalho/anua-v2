@@ -21,6 +21,23 @@ export function registerNotificationApiRoutes() {
     .use([middleware.auth(), middleware.impersonation()])
 }
 
+export function registerPushSubscriptionApiRoutes() {
+  router
+    .group(() => {
+      router
+        .get('/vapid-key', [controllers.notifications.PushSubscription, 'getVapidKey'])
+        .as('push.vapid_key')
+      router
+        .post('/subscribe', [controllers.notifications.PushSubscription, 'subscribe'])
+        .as('push.subscribe')
+      router
+        .post('/unsubscribe', [controllers.notifications.PushSubscription, 'unsubscribe'])
+        .as('push.unsubscribe')
+    })
+    .prefix('/push')
+    .use([middleware.auth()])
+}
+
 export function registerNotificationPreferenceApiRoutes() {
   router
     .group(() => {

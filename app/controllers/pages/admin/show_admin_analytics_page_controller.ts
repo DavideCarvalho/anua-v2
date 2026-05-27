@@ -33,6 +33,10 @@ export default class ShowAdminAnalyticsPageController {
     return inertia.render('admin/analytics/rh', {})
   }
 
+  async schoolHealth({ inertia }: HttpContext) {
+    return inertia.render('admin/analytics/school-health', {})
+  }
+
   async index({ inertia }: HttpContext) {
     return inertia.render('admin/analytics/index', {})
   }

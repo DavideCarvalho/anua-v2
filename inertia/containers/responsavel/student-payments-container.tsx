@@ -1,12 +1,26 @@
-import { CheckCircle, Clock, AlertTriangle, XCircle, ExternalLink, Loader2 } from 'lucide-react'
+import { useState } from 'react'
+import { CheckCircle, Clock, AlertTriangle, XCircle, ExternalLink, Loader2, Info, Copy, QrCode } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useQuery } from '@tanstack/react-query'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 
+import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '../../components/ui/dialog'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '../../components/ui/popover'
 import {
   Table,
   TableBody,
@@ -47,12 +61,140 @@ function getPaymentDescription(payment: any): string {
   }
 }
 
+const PIX_KEY_TYPE_LABELS: Record<string, string> = {
+  CPF: 'CPF',
+  CNPJ: 'CNPJ',
+  EMAIL: 'E-mail',
+  PHONE: 'Telefone',
+  RANDOM: 'Chave aleatória',
+}
+
+function OfflinePaymentFallback({
+  schoolPaymentInfo,
+}: {
+  schoolPaymentInfo: { name: string; pixKey: string | null; pixKeyType: string | null } | null
+}) {
+  const hasPixKey = schoolPaymentInfo?.pixKey
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button className="inline-flex items-center gap-1 rounded-md bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground hover:bg-secondary/80 transition-colors">
+          <Info className="h-3 w-3" />
+          Como pagar
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-72 space-y-3 text-sm" align="end">
+        {hasPixKey ? (
+          <>
+            <p className="font-medium">Pague via PIX</p>
+            <div className="space-y-1.5">
+              <p className="text-muted-foreground">
+                {PIX_KEY_TYPE_LABELS[schoolPaymentInfo.pixKeyType ?? ''] ?? 'Chave PIX'}
+              </p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 truncate rounded bg-muted px-2 py-1 text-xs">
+                  {schoolPaymentInfo.pixKey}
+                </code>
+                <button
+                  onClick={() => navigator.clipboard.writeText(schoolPaymentInfo.pixKey ?? '')}
+                  className="rounded p-1 hover:bg-muted transition-colors"
+                >
+                  <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                </button>
+              </div>
+              {schoolPaymentInfo.name && (
+                <p className="text-xs text-muted-foreground">
+                  Favorecido: {schoolPaymentInfo.name}
+                </p>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="font-medium">Pagamento não disponível online</p>
+            <p className="text-muted-foreground">
+              Entre em contato com a secretaria da escola para obter os dados de pagamento.
+            </p>
+          </>
+        )}
+      </PopoverContent>
+    </Popover>
+  )
+}
+
 interface StudentPaymentsContainerProps {
   studentId: string
 }
 
+interface PixModalData {
+  qrCodeImage: string
+  copyPaste: string
+  expirationDate: string
+  invoiceUrl: string | null
+}
+
+function PixQrModal({ data, onClose }: { data: PixModalData | null; onClose: () => void }) {
+  const handleCopy = () => {
+    if (!data) return
+    navigator.clipboard.writeText(data.copyPaste)
+  }
+
+  return (
+    <Dialog open={!!data} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="z-[110] max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <QrCode className="h-5 w-5" />
+            Pagar via PIX
+          </DialogTitle>
+          <DialogDescription>
+            Escaneie o QR code com o app do seu banco ou copie o código.
+          </DialogDescription>
+        </DialogHeader>
+        {data && (
+          <div className="space-y-4">
+            <div className="flex justify-center">
+              <img
+                src={`data:image/png;base64,${data.qrCodeImage}`}
+                alt="QR Code PIX"
+                className="h-56 w-56 rounded-lg"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-muted-foreground">Código PIX copia e cola</p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 truncate rounded bg-muted px-2 py-1.5 text-xs">
+                  {data.copyPaste.substring(0, 40)}...
+                </code>
+                <Button size="sm" variant="outline" onClick={handleCopy}>
+                  <Copy className="mr-1.5 h-3 w-3" />
+                  Copiar
+                </Button>
+              </div>
+            </div>
+
+            {data.invoiceUrl && (
+              <a
+                href={data.invoiceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-center text-xs text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
+              >
+                Prefere boleto? Abrir página de pagamento
+              </a>
+            )}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 export function StudentPaymentsContainer({ studentId }: StudentPaymentsContainerProps) {
   const queryClient = useQueryClient()
+  const [pixModal, setPixModal] = useState<PixModalData | null>(null)
   const { data, isLoading, isError, error } = useQuery(
     api.api.v1.responsavel.api.studentInvoices.queryOptions({ params: { studentId } })
   )
@@ -107,10 +249,27 @@ export function StudentPaymentsContainer({ studentId }: StudentPaymentsContainer
     checkoutMutation.mutate(
       { params: { id: invoiceId } },
       {
-        onSuccess: (result) => {
+        onSuccess: (raw) => {
           queryClient.invalidateQueries({ queryKey: ['responsavel', 'student-invoices'] })
-          if (result?.invoiceUrl) {
-            window.open(result.invoiceUrl, '_blank')
+
+          // PIX fields are returned by the controller but Tuyau schema
+          // only updates after server restart — use runtime check
+          const r: Record<string, unknown> = raw
+          const pixImage = typeof r.pixQrCodeImage === 'string' ? r.pixQrCodeImage : null
+          const pixPaste = typeof r.pixCopyPaste === 'string' ? r.pixCopyPaste : null
+
+          if (pixImage && pixPaste) {
+            setPixModal({
+              qrCodeImage: pixImage,
+              copyPaste: pixPaste,
+              expirationDate: typeof r.pixExpirationDate === 'string' ? r.pixExpirationDate : '',
+              invoiceUrl: raw.invoiceUrl ?? null,
+            })
+            return
+          }
+
+          if (raw.invoiceUrl) {
+            window.open(raw.invoiceUrl, '_blank')
           }
         },
       }
@@ -152,7 +311,11 @@ export function StudentPaymentsContainer({ studentId }: StudentPaymentsContainer
       )
     }
 
-    return null
+    const isPendingPayment =
+      invoice.status === 'OPEN' || invoice.status === 'PENDING' || invoice.status === 'OVERDUE' || isOverdue
+    if (!isPendingPayment) return null
+
+    return <OfflinePaymentFallback schoolPaymentInfo={data.schoolPaymentInfo} />
   }
 
   const getInvoiceStatusBadge = (status: string, dueDate: string) => {
@@ -213,7 +376,8 @@ export function StudentPaymentsContainer({ studentId }: StudentPaymentsContainer
 
   return (
     <div className="space-y-6">
-      {/* Invoices */}
+      <PixQrModal data={pixModal} onClose={() => setPixModal(null)} />
+
       <Card>
         <CardHeader>
           <CardTitle>Faturas</CardTitle>
@@ -247,36 +411,64 @@ export function StudentPaymentsContainer({ studentId }: StudentPaymentsContainer
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Tipo</TableHead>
-                            <TableHead>Referência</TableHead>
-                            <TableHead className="text-right">Valor</TableHead>
-                            <TableHead className="text-center">Status</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {(invoice.payments ?? []).map((payment: any) => (
-                            <TableRow key={payment.id}>
-                              <TableCell className="font-medium">
-                                {getPaymentDescription(payment)}
-                              </TableCell>
-                              <TableCell>
-                                {format(new Date(payment.dueDate), "MMMM 'de' yyyy", {
-                                  locale: ptBR,
-                                })}
-                              </TableCell>
-                              <TableCell className="text-right font-medium">
-                                {formatCurrency(payment.amount)}
-                              </TableCell>
-                              <TableCell className="text-center">
-                                {getPaymentStatusBadge(payment.status)}
-                              </TableCell>
+                      {/* Desktop: tabela */}
+                      <div className="hidden md:block">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Tipo</TableHead>
+                              <TableHead>Referência</TableHead>
+                              <TableHead className="text-right">Valor</TableHead>
+                              <TableHead className="text-center">Status</TableHead>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                          </TableHeader>
+                          <TableBody>
+                            {(invoice.payments ?? []).map((payment: any) => (
+                              <TableRow key={payment.id}>
+                                <TableCell className="font-medium">
+                                  {getPaymentDescription(payment)}
+                                </TableCell>
+                                <TableCell>
+                                  {format(new Date(payment.dueDate), "MMMM 'de' yyyy", {
+                                    locale: ptBR,
+                                  })}
+                                </TableCell>
+                                <TableCell className="text-right font-medium">
+                                  {formatCurrency(payment.amount)}
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  {getPaymentStatusBadge(payment.status)}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+
+                      {/* Mobile: cards empilhados */}
+                      <div className="space-y-2 md:hidden">
+                        {(invoice.payments ?? []).map((payment: any) => (
+                          <div
+                            key={payment.id}
+                            className="flex items-center justify-between gap-3 rounded-lg border border-border p-3"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium truncate">
+                                {getPaymentDescription(payment)}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {format(new Date(payment.dueDate), "MMM yyyy", { locale: ptBR })}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="text-sm font-medium tabular-nums">
+                                {formatCurrency(payment.amount)}
+                              </span>
+                              {getPaymentStatusBadge(payment.status)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </CardContent>
                   </Card>
                 )

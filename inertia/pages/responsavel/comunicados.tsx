@@ -119,7 +119,7 @@ function ComunicadosContent() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="max-w-3xl space-y-4">
       {announcements.map((announcement) => (
         <Card key={announcement.id} className="border-primary/20">
           <CardHeader className="pb-2">
@@ -146,7 +146,9 @@ function ComunicadosContent() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">{announcement.body}</p>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+              {announcement.body}
+            </p>
 
             {announcement.attachments && announcement.attachments.length > 0 && (
               <div className="mt-3 space-y-2">

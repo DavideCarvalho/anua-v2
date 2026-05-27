@@ -611,6 +611,25 @@ function PDVFullPage({ topbarActions }: { topbarActions: ReactNode }) {
             </div>
 
             <div className="space-y-4">
+              {selectedStudentData && (
+                <div className="rounded-xl bg-card ring-1 ring-foreground/10 px-4 py-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Saldo disponível</p>
+                    <p className={`text-lg font-semibold tabular-nums ${studentBalance > 0 && studentBalance >= totalAmount ? 'text-green-600' : studentBalance > 0 ? 'text-amber-600' : 'text-destructive'}`}>
+                      {formatCurrency(studentBalance)}
+                    </p>
+                  </div>
+                  {totalAmount > 0 && paymentMethod === 'BALANCE' && (
+                    <div className="text-right">
+                      <p className="text-xs text-muted-foreground">Após compra</p>
+                      <p className={`text-sm font-medium tabular-nums ${studentBalance - totalAmount >= 0 ? 'text-muted-foreground' : 'text-destructive'}`}>
+                        {formatCurrency(studentBalance - totalAmount)}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <Card>
                 <CardHeader>
                   <div className="flex items-center gap-2">
@@ -768,7 +787,13 @@ function PDVFullPage({ topbarActions }: { topbarActions: ReactNode }) {
                   <Button
                     className="w-full mt-4"
                     disabled={!canFinish || createPurchaseMutation.isPending}
-                    onClick={onSubmit}
+                    onClick={() => {
+                      if (paymentMethod === 'BALANCE' && totalAmount > 0 && studentBalance < totalAmount) {
+                        toast.error(`Saldo insuficiente: faltam ${formatCurrency(totalAmount - studentBalance)} para cobrir o total`)
+                        return
+                      }
+                      onSubmit()
+                    }}
                   >
                     Finalizar Venda
                   </Button>

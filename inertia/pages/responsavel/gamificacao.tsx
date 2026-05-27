@@ -5,6 +5,7 @@ import { Trophy, Star, Medal, Target, XCircle } from 'lucide-react'
 
 import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
+import { EmptyState } from '../../components/ui/empty-state'
 
 import { api } from '~/lib/api'
 
@@ -36,12 +37,12 @@ function GamificacaoContent() {
   if (students.length === 0) {
     return (
       <Card>
-        <CardContent className="py-12 text-center">
-          <Trophy className="mx-auto h-12 w-12 text-muted-foreground" />
-          <h3 className="mt-4 text-lg font-semibold">Nenhum aluno vinculado</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Você não possui alunos vinculados à sua conta.
-          </p>
+        <CardContent>
+          <EmptyState
+            icon={Trophy}
+            title="Nenhum aluno vinculado"
+            description="Você não possui alunos vinculados à sua conta."
+          />
         </CardContent>
       </Card>
     )

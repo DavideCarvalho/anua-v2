@@ -85,6 +85,7 @@ export type ScannedRoutes = {
     'web.escola.notificacoes.preferencias': { paramsTuple?: []; params?: {} }
     'web.escola.comunicados': { paramsTuple?: []; params?: {} }
     'web.escola.comunicados.novo': { paramsTuple?: []; params?: {} }
+    'web.escola.comunicados.preview': { paramsTuple?: []; params?: {} }
     'web.escola.comunicados.editar': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'web.escola.chat': { paramsTuple?: []; params?: {} }
     'web.escola.chat.show': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
@@ -172,6 +173,7 @@ export type ScannedRoutes = {
     'web.admin.analytics.ocorrencias': { paramsTuple?: []; params?: {} }
     'web.admin.analytics.gamificacao': { paramsTuple?: []; params?: {} }
     'web.admin.analytics.rh': { paramsTuple?: []; params?: {} }
+    'web.admin.analytics.school_health': { paramsTuple?: []; params?: {} }
     'web.loja.dashboard': { paramsTuple?: []; params?: {} }
     'web.loja.produtos': { paramsTuple?: []; params?: {} }
     'web.loja.pedidos': { paramsTuple?: []; params?: {} }
@@ -214,6 +216,8 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.student_overview': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_gamification': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_calendar': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
+    'api.v1.responsavel.api.student_calendar_feed_url': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
+    'api.v1.responsavel.api.enrollment_certificate': { paramsTuple: [ParamValue]; params: {'matriculaId': ParamValue} }
     'api.v1.responsavel.api.notifications': { paramsTuple?: []; params?: {} }
     'api.v1.responsavel.api.comunicados.list': { paramsTuple?: []; params?: {} }
     'api.v1.responsavel.api.comunicados.pending_ack': { paramsTuple?: []; params?: {} }
@@ -230,8 +234,12 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.inquiries.messages.create': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
     'api.v1.responsavel.api.inquiries.resolve': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
     'api.v1.responsavel.api.inquiries.mark-read': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
+    'api.v1.calendar_feed': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
+    'api.v1.verify_enrollment': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'api.v1.dashboard.admin_stats': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.server_stats': { paramsTuple?: []; params?: {} }
+    'api.v1.admin.school_health': { paramsTuple?: []; params?: {} }
+    'api.v1.admin.send_changelog_digest': { paramsTuple?: []; params?: {} }
     'api.v1.admin.ai.tool_calls': { paramsTuple?: []; params?: {} }
     'api.v1.admin.ai.tokens.summary': { paramsTuple?: []; params?: {} }
     'api.v1.asaas.webhook': { paramsTuple?: []; params?: {} }
@@ -263,6 +271,8 @@ export type ScannedRoutes = {
     'api.v1.school_switcher.toggle_school': { paramsTuple?: []; params?: {} }
     'api.v1.school_switcher.toggle_group': { paramsTuple?: []; params?: {} }
     'api.v1.students.index': { paramsTuple?: []; params?: {} }
+    'api.v1.students.export_csv': { paramsTuple?: []; params?: {} }
+    'api.v1.students.export_csv_download': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'api.v1.students.store': { paramsTuple?: []; params?: {} }
     'api.v1.students.enroll': { paramsTuple?: []; params?: {} }
     'api.v1.students.check_document': { paramsTuple?: []; params?: {} }
@@ -426,6 +436,9 @@ export type ScannedRoutes = {
     'api.v1.notifications.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.notification_preferences.show': { paramsTuple?: []; params?: {} }
     'api.v1.notification_preferences.update': { paramsTuple?: []; params?: {} }
+    'api.v1.push.vapid_key': { paramsTuple?: []; params?: {} }
+    'api.v1.push.subscribe': { paramsTuple?: []; params?: {} }
+    'api.v1.push.unsubscribe': { paramsTuple?: []; params?: {} }
     'api.v1.school_announcements.list': { paramsTuple?: []; params?: {} }
     'api.v1.school_announcements.create': { paramsTuple?: []; params?: {} }
     'api.v1.school_announcements.details': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -433,6 +446,9 @@ export type ScannedRoutes = {
     'api.v1.school_announcements.delete_draft': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.school_announcements.publish_draft': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.school_announcements.audience_students': { paramsTuple?: []; params?: {} }
+    'api.v1.announcement_templates.list': { paramsTuple?: []; params?: {} }
+    'api.v1.announcement_templates.create': { paramsTuple?: []; params?: {} }
+    'api.v1.announcement_templates.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.posts.index': { paramsTuple?: []; params?: {} }
     'api.v1.posts.store': { paramsTuple?: []; params?: {} }
     'api.v1.posts.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -819,6 +835,7 @@ export type ScannedRoutes = {
     'web.escola.notificacoes.preferencias': { paramsTuple?: []; params?: {} }
     'web.escola.comunicados': { paramsTuple?: []; params?: {} }
     'web.escola.comunicados.novo': { paramsTuple?: []; params?: {} }
+    'web.escola.comunicados.preview': { paramsTuple?: []; params?: {} }
     'web.escola.comunicados.editar': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'web.escola.chat': { paramsTuple?: []; params?: {} }
     'web.escola.chat.show': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
@@ -906,6 +923,7 @@ export type ScannedRoutes = {
     'web.admin.analytics.ocorrencias': { paramsTuple?: []; params?: {} }
     'web.admin.analytics.gamificacao': { paramsTuple?: []; params?: {} }
     'web.admin.analytics.rh': { paramsTuple?: []; params?: {} }
+    'web.admin.analytics.school_health': { paramsTuple?: []; params?: {} }
     'web.loja.dashboard': { paramsTuple?: []; params?: {} }
     'web.loja.produtos': { paramsTuple?: []; params?: {} }
     'web.loja.pedidos': { paramsTuple?: []; params?: {} }
@@ -941,6 +959,8 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.student_overview': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_gamification': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_calendar': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
+    'api.v1.responsavel.api.student_calendar_feed_url': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
+    'api.v1.responsavel.api.enrollment_certificate': { paramsTuple: [ParamValue]; params: {'matriculaId': ParamValue} }
     'api.v1.responsavel.api.notifications': { paramsTuple?: []; params?: {} }
     'api.v1.responsavel.api.comunicados.list': { paramsTuple?: []; params?: {} }
     'api.v1.responsavel.api.comunicados.pending_ack': { paramsTuple?: []; params?: {} }
@@ -949,8 +969,11 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.show_wallet_top_up': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.responsavel.api.inquiries.list': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.inquiries.show': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
+    'api.v1.calendar_feed': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
+    'api.v1.verify_enrollment': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'api.v1.dashboard.admin_stats': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.server_stats': { paramsTuple?: []; params?: {} }
+    'api.v1.admin.school_health': { paramsTuple?: []; params?: {} }
     'api.v1.admin.ai.tool_calls': { paramsTuple?: []; params?: {} }
     'api.v1.admin.ai.tokens.summary': { paramsTuple?: []; params?: {} }
     'api.v1.asaas.subaccounts.status': { paramsTuple?: []; params?: {} }
@@ -965,6 +988,7 @@ export type ScannedRoutes = {
     'api.v1.user_school_groups.list_user_school_groups': { paramsTuple?: []; params?: {} }
     'api.v1.school_switcher.get_data': { paramsTuple?: []; params?: {} }
     'api.v1.students.index': { paramsTuple?: []; params?: {} }
+    'api.v1.students.export_csv_download': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'api.v1.students.check_document': { paramsTuple?: []; params?: {} }
     'api.v1.students.check_email': { paramsTuple?: []; params?: {} }
     'api.v1.students.lookup_responsible': { paramsTuple?: []; params?: {} }
@@ -1049,9 +1073,11 @@ export type ScannedRoutes = {
     'api.v1.notifications.index': { paramsTuple?: []; params?: {} }
     'api.v1.notifications.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.notification_preferences.show': { paramsTuple?: []; params?: {} }
+    'api.v1.push.vapid_key': { paramsTuple?: []; params?: {} }
     'api.v1.school_announcements.list': { paramsTuple?: []; params?: {} }
     'api.v1.school_announcements.details': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.school_announcements.audience_students': { paramsTuple?: []; params?: {} }
+    'api.v1.announcement_templates.list': { paramsTuple?: []; params?: {} }
     'api.v1.posts.index': { paramsTuple?: []; params?: {} }
     'api.v1.posts.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.posts.comments.index': { paramsTuple: [ParamValue]; params: {'postId': ParamValue} }
@@ -1266,6 +1292,7 @@ export type ScannedRoutes = {
     'web.escola.notificacoes.preferencias': { paramsTuple?: []; params?: {} }
     'web.escola.comunicados': { paramsTuple?: []; params?: {} }
     'web.escola.comunicados.novo': { paramsTuple?: []; params?: {} }
+    'web.escola.comunicados.preview': { paramsTuple?: []; params?: {} }
     'web.escola.comunicados.editar': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'web.escola.chat': { paramsTuple?: []; params?: {} }
     'web.escola.chat.show': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
@@ -1353,6 +1380,7 @@ export type ScannedRoutes = {
     'web.admin.analytics.ocorrencias': { paramsTuple?: []; params?: {} }
     'web.admin.analytics.gamificacao': { paramsTuple?: []; params?: {} }
     'web.admin.analytics.rh': { paramsTuple?: []; params?: {} }
+    'web.admin.analytics.school_health': { paramsTuple?: []; params?: {} }
     'web.loja.dashboard': { paramsTuple?: []; params?: {} }
     'web.loja.produtos': { paramsTuple?: []; params?: {} }
     'web.loja.pedidos': { paramsTuple?: []; params?: {} }
@@ -1388,6 +1416,8 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.student_overview': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_gamification': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_calendar': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
+    'api.v1.responsavel.api.student_calendar_feed_url': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
+    'api.v1.responsavel.api.enrollment_certificate': { paramsTuple: [ParamValue]; params: {'matriculaId': ParamValue} }
     'api.v1.responsavel.api.notifications': { paramsTuple?: []; params?: {} }
     'api.v1.responsavel.api.comunicados.list': { paramsTuple?: []; params?: {} }
     'api.v1.responsavel.api.comunicados.pending_ack': { paramsTuple?: []; params?: {} }
@@ -1396,8 +1426,11 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.show_wallet_top_up': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.responsavel.api.inquiries.list': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.inquiries.show': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
+    'api.v1.calendar_feed': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
+    'api.v1.verify_enrollment': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'api.v1.dashboard.admin_stats': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.server_stats': { paramsTuple?: []; params?: {} }
+    'api.v1.admin.school_health': { paramsTuple?: []; params?: {} }
     'api.v1.admin.ai.tool_calls': { paramsTuple?: []; params?: {} }
     'api.v1.admin.ai.tokens.summary': { paramsTuple?: []; params?: {} }
     'api.v1.asaas.subaccounts.status': { paramsTuple?: []; params?: {} }
@@ -1412,6 +1445,7 @@ export type ScannedRoutes = {
     'api.v1.user_school_groups.list_user_school_groups': { paramsTuple?: []; params?: {} }
     'api.v1.school_switcher.get_data': { paramsTuple?: []; params?: {} }
     'api.v1.students.index': { paramsTuple?: []; params?: {} }
+    'api.v1.students.export_csv_download': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'api.v1.students.check_document': { paramsTuple?: []; params?: {} }
     'api.v1.students.check_email': { paramsTuple?: []; params?: {} }
     'api.v1.students.lookup_responsible': { paramsTuple?: []; params?: {} }
@@ -1496,9 +1530,11 @@ export type ScannedRoutes = {
     'api.v1.notifications.index': { paramsTuple?: []; params?: {} }
     'api.v1.notifications.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.notification_preferences.show': { paramsTuple?: []; params?: {} }
+    'api.v1.push.vapid_key': { paramsTuple?: []; params?: {} }
     'api.v1.school_announcements.list': { paramsTuple?: []; params?: {} }
     'api.v1.school_announcements.details': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.school_announcements.audience_students': { paramsTuple?: []; params?: {} }
+    'api.v1.announcement_templates.list': { paramsTuple?: []; params?: {} }
     'api.v1.posts.index': { paramsTuple?: []; params?: {} }
     'api.v1.posts.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.posts.comments.index': { paramsTuple: [ParamValue]; params: {'postId': ParamValue} }
@@ -1662,6 +1698,7 @@ export type ScannedRoutes = {
     'api.v1.events.participants.cancel': { paramsTuple: [ParamValue,ParamValue]; params: {'eventId': ParamValue,'participantId': ParamValue} }
     'api.v1.notifications.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.school_announcements.delete_draft': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.announcement_templates.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.posts.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.comments.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.extra_classes.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -1705,6 +1742,7 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.inquiries.messages.create': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
     'api.v1.responsavel.api.inquiries.resolve': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
     'api.v1.responsavel.api.inquiries.mark-read': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
+    'api.v1.admin.send_changelog_digest': { paramsTuple?: []; params?: {} }
     'api.v1.asaas.webhook': { paramsTuple?: []; params?: {} }
     'api.v1.asaas.subaccounts.create': { paramsTuple?: []; params?: {} }
     'api.v1.schools.store': { paramsTuple?: []; params?: {} }
@@ -1714,6 +1752,7 @@ export type ScannedRoutes = {
     'api.v1.user_school_groups.create_user_school_group': { paramsTuple?: []; params?: {} }
     'api.v1.school_switcher.toggle_school': { paramsTuple?: []; params?: {} }
     'api.v1.school_switcher.toggle_group': { paramsTuple?: []; params?: {} }
+    'api.v1.students.export_csv': { paramsTuple?: []; params?: {} }
     'api.v1.students.store': { paramsTuple?: []; params?: {} }
     'api.v1.students.enroll': { paramsTuple?: []; params?: {} }
     'api.v1.students.me.avatar.purchase': { paramsTuple?: []; params?: {} }
@@ -1753,8 +1792,11 @@ export type ScannedRoutes = {
     'api.v1.enrollment.finish': { paramsTuple?: []; params?: {} }
     'api.v1.notifications.mark_read': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.notifications.mark_all_read': { paramsTuple?: []; params?: {} }
+    'api.v1.push.subscribe': { paramsTuple?: []; params?: {} }
+    'api.v1.push.unsubscribe': { paramsTuple?: []; params?: {} }
     'api.v1.school_announcements.create': { paramsTuple?: []; params?: {} }
     'api.v1.school_announcements.publish_draft': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.announcement_templates.create': { paramsTuple?: []; params?: {} }
     'api.v1.posts.store': { paramsTuple?: []; params?: {} }
     'api.v1.posts.like': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.posts.unlike': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

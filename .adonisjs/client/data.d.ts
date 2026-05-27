@@ -40,6 +40,7 @@ import type CourseClassExpandedTransformer from '#transformers/course_class_expa
 import type CourseHasAcademicPeriodTransformer from '#transformers/course_has_academic_period_transformer'
 import type CourseTransformer from '#transformers/course_transformer'
 import type EmployeeListItemTransformer from '#transformers/employee_list_item_transformer'
+import type EnrollmentAxesTransformer from '#transformers/enrollment_axes_transformer'
 import type EnrollmentWithAxesTransformer from '#transformers/enrollment_with_axes_transformer'
 import type EventParentalConsentTransformer from '#transformers/event_parental_consent_transformer'
 import type EventParticipantTransformer from '#transformers/event_participant_transformer'
@@ -265,6 +266,10 @@ export namespace Data {
   export type EmployeeListItem = InferData<EmployeeListItemTransformer>
   export namespace EmployeeListItem {
     export type Variants = InferVariants<EmployeeListItemTransformer>
+  }
+  export type EnrollmentAxes = InferData<EnrollmentAxesTransformer>
+  export namespace EnrollmentAxes {
+    export type Variants = InferVariants<EnrollmentAxesTransformer>
   }
   export type EnrollmentWithAxes = InferData<EnrollmentWithAxesTransformer>
   export namespace EnrollmentWithAxes {

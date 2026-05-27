@@ -5,6 +5,13 @@
  * code referencing Inertia pages for inferring props types.
  *
  * The main part here is "composite: true"
+ *
+ * NOTE: tsc --noEmit against this config produces TS6059/TS2345 noise because
+ * .adonisjs/server/controllers.ts (included transitively via inertia/tsconfig.json
+ * for Tuyau response type inference) imports files outside rootDir. This is
+ * structural to the AdonisJS+Inertia+Tuyau setup and doesn't affect the Vite
+ * build or runtime. Use `tsc --noEmit --project tsconfig.json` (backend) for
+ * real type checking. Frontend types are validated by Vite at build time.
  */
 {
   "extends": "./inertia/tsconfig.json",

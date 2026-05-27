@@ -27,42 +27,42 @@ const alertConfigs: AlertCardConfig[] = [
     title: 'Risco de Reprovação por Frequência',
     icon: Users,
     color: 'text-destructive',
-    bgClass: 'bg-destructive/10 hover:bg-destructive/20 border-l-destructive',
+    bgClass: 'bg-destructive/10 ring-destructive/30 hover:bg-destructive/15',
   },
   {
     key: 'studentsAtRiskByGrade',
     title: 'Risco de Reprovação por Nota',
     icon: TrendingDown,
     color: 'text-destructive',
-    bgClass: 'bg-destructive/10 hover:bg-destructive/20 border-l-destructive',
+    bgClass: 'bg-destructive/10 ring-destructive/30 hover:bg-destructive/15',
   },
   {
     key: 'examsWithoutGrades',
     title: 'Provas Sem Notas',
     icon: FileText,
     color: 'text-amber-500',
-    bgClass: 'bg-amber-500/10 hover:bg-amber-500/20 border-l-amber-500',
+    bgClass: 'bg-amber-500/10 ring-amber-500/30 hover:bg-amber-500/15',
   },
   {
     key: 'overdueActivities',
     title: 'Atividades Vencidas Sem Notas',
     icon: Calendar,
     color: 'text-amber-500',
-    bgClass: 'bg-amber-500/10 hover:bg-amber-500/20 border-l-amber-500',
+    bgClass: 'bg-amber-500/10 ring-amber-500/30 hover:bg-amber-500/15',
   },
   {
     key: 'ungradedSubmissions',
     title: 'Notas Pendentes',
     icon: CheckCircle,
     color: 'text-blue-500',
-    bgClass: 'bg-blue-500/10 hover:bg-blue-500/20 border-l-blue-500',
+    bgClass: 'bg-blue-500/10 ring-blue-500/30 hover:bg-blue-500/15',
   },
   {
     key: 'teachersMissingAttendance',
     title: 'Professores Sem Presença',
     icon: Clock,
     color: 'text-amber-500',
-    bgClass: 'bg-amber-500/10 hover:bg-amber-500/20 border-l-amber-500',
+    bgClass: 'bg-amber-500/10 ring-amber-500/30 hover:bg-amber-500/15',
   },
 ]
 
@@ -153,10 +153,7 @@ function PedagogicalAlertsCardsContent({
           return (
             <Card
               key={config.key}
-              className={cn(
-                'cursor-pointer transition-colors border-l-4 border-l-transparent',
-                config.bgClass
-              )}
+              className={cn('cursor-pointer ring-1 transition-colors', config.bgClass)}
               onClick={() => setSelectedAlert(config.key)}
             >
               <CardHeader className="pb-2">

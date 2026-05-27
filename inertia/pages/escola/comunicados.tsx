@@ -2,6 +2,7 @@ import { Head } from '@inertiajs/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Bell, Megaphone, Plus, Send, Trash2 } from 'lucide-react'
+import { EmptyState } from '../../components/ui/empty-state'
 import { Link } from '@adonisjs/inertia/react'
 import { toast } from 'sonner'
 
@@ -154,6 +155,27 @@ export default function EscolaComunicadosPage() {
 
   const announcements = data?.data ?? []
 
+  const loadingSkeleton = (
+    <div className="space-y-3">
+      {[0, 1, 2].map((index) => (
+        <Card key={index}>
+          <CardHeader>
+            <div className="flex items-center justify-between gap-3">
+              <div className="space-y-2">
+                <div className="h-5 w-48 animate-pulse rounded bg-muted" />
+                <div className="h-3 w-32 animate-pulse rounded bg-muted" />
+              </div>
+              <div className="h-5 w-16 animate-pulse rounded bg-muted" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="h-12 w-full animate-pulse rounded bg-muted" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )
+
   if (viewMode === 'simple') {
     return (
       <EscolaLayoutSimplificado
@@ -184,13 +206,7 @@ export default function EscolaComunicadosPage() {
         >
           <SimplifiedBasicList>
             <div className="space-y-3">
-              {isLoading && (
-                <Card>
-                  <CardContent className="py-8 text-center text-sm text-muted-foreground">
-                    Carregando comunicados...
-                  </CardContent>
-                </Card>
-              )}
+              {isLoading && loadingSkeleton}
 
               {isError && (
                 <Card>
@@ -202,11 +218,12 @@ export default function EscolaComunicadosPage() {
 
               {!isLoading && !isError && announcements.length === 0 && (
                 <Card>
-                  <CardContent className="py-10 text-center">
-                    <Bell className="mx-auto h-8 w-8 text-muted-foreground" />
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      Nenhum comunicado criado ainda.
-                    </p>
+                  <CardContent>
+                    <EmptyState
+                      icon={Bell}
+                      title="Nenhum comunicado"
+                      description="Nenhum comunicado criado ainda."
+                    />
                   </CardContent>
                 </Card>
               )}
@@ -289,13 +306,7 @@ export default function EscolaComunicadosPage() {
           </Link>
         </div>
 
-        {isLoading && (
-          <Card>
-            <CardContent className="py-8 text-center text-sm text-muted-foreground">
-              Carregando comunicados...
-            </CardContent>
-          </Card>
-        )}
+        {isLoading && loadingSkeleton}
 
         {isError && (
           <Card>
@@ -307,9 +318,12 @@ export default function EscolaComunicadosPage() {
 
         {!isLoading && !isError && announcements.length === 0 && (
           <Card>
-            <CardContent className="py-10 text-center">
-              <Bell className="mx-auto h-8 w-8 text-muted-foreground" />
-              <p className="mt-2 text-sm text-muted-foreground">Nenhum comunicado criado ainda.</p>
+            <CardContent>
+              <EmptyState
+                icon={Bell}
+                title="Nenhum comunicado"
+                description="Nenhum comunicado criado ainda."
+              />
             </CardContent>
           </Card>
         )}

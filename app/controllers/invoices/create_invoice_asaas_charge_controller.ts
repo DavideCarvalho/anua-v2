@@ -11,6 +11,8 @@ import type SchoolChain from '#models/school_chain'
 import AppException from '#exceptions/app_exception'
 import type StudentPayment from '#models/student_payment'
 import AsaasService from '#services/asaas_service'
+import AsaasPaymentGateway from '#services/payment/asaas_payment_gateway'
+import type { PaymentGateway } from '#services/payment/payment_gateway'
 
 @inject()
 export default class CreateInvoiceAsaasChargeController {
@@ -35,7 +37,6 @@ export default class CreateInvoiceAsaasChargeController {
       throw AppException.notFound('Fatura não encontrada')
     }
 
-    // Validate that the responsible has access to this student
     const relation = await StudentHasResponsible.query()
       .where('responsibleId', effectiveUser.id)
       .where('studentId', invoice.studentId)
@@ -49,7 +50,6 @@ export default class CreateInvoiceAsaasChargeController {
       throw AppException.badRequest('Fatura sem pagamentos ativos')
     }
 
-    // Resolve school via contract
     const contractId = invoice.payments[0].contractId
     const contract = await Contract.query()
       .where('id', contractId)
@@ -61,9 +61,9 @@ export default class CreateInvoiceAsaasChargeController {
       throw AppException.notFound('Escola não encontrada')
     }
 
-    const config = this.asaasService.resolveAsaasConfig(contract.school)
-    if (!config) {
-      throw AppException.badRequest('Configuração do Asaas não encontrada para esta escola')
+    const gateway = this.resolveGateway(contract.school)
+    if (!gateway) {
+      throw AppException.badRequest('Configuração de pagamento não encontrada para esta escola')
     }
 
     const checkoutPricing = this.resolveCheckoutPricing(invoice, contract)
@@ -86,14 +86,9 @@ export default class CreateInvoiceAsaasChargeController {
     const schoolName = contract.school.name
     const chargeDescription = `${schoolName} - Fatura ${String(invoice.month).padStart(2, '0')}/${invoice.year}\n${paymentDescriptions}${discountDescription}`
 
-    // Idempotency: if charge already exists, check if value matches
     if (invoice.paymentGatewayId) {
-      const existing = await this.asaasService.fetchAsaasPayment(
-        config.apiKey,
-        invoice.paymentGatewayId
-      )
+      const existing = await gateway.fetchCharge(invoice.paymentGatewayId)
 
-      // If value and description match, refresh URL and return
       if (
         this.areValuesEquivalent(existing.value, expectedValue) &&
         this.areDescriptionsEquivalent(existing.description, chargeDescription)
@@ -105,11 +100,26 @@ export default class CreateInvoiceAsaasChargeController {
         invoice.chargedAmount = chargedAmount
         invoice.invoiceUrl = existing.bankSlipUrl ?? existing.invoiceUrl ?? invoice.invoiceUrl
         await invoice.save()
+
+        const billingType = invoice.paymentMethod ?? (await this.resolveBillingType(invoice))
+        if (billingType === 'PIX') {
+          try {
+            const pix = await gateway.fetchPixQr(invoice.paymentGatewayId)
+            return response.ok({
+              invoiceUrl: invoice.invoiceUrl,
+              pixQrCodeImage: pix.encodedImage,
+              pixCopyPaste: pix.payload,
+              pixExpirationDate: pix.expirationDate,
+            })
+          } catch {
+            return response.ok({ invoiceUrl: invoice.invoiceUrl })
+          }
+        }
+
         return response.ok({ invoiceUrl: invoice.invoiceUrl })
       }
 
-      // Value mismatch — cancel stale charge and fall through to create new one
-      await this.asaasService.deleteAsaasPayment(config.apiKey, invoice.paymentGatewayId)
+      await gateway.deleteCharge(invoice.paymentGatewayId)
       invoice.paymentGatewayId = null
       invoice.invoiceUrl = null
       invoice.paymentGateway = null
@@ -122,25 +132,17 @@ export default class CreateInvoiceAsaasChargeController {
       await invoice.save()
     }
 
-    // Validate CPF — the responsible (effectiveUser) is the payer, not the student
     if (!effectiveUser.documentNumber) {
       throw AppException.badRequest(
         'Responsável financeiro sem CPF cadastrado. Atualize o cadastro antes de pagar.'
       )
     }
 
-    // Resolve billing type from StudentHasLevel payment method
     const billingType = await this.resolveBillingType(invoice)
+    const customerId = await gateway.getOrCreateCustomer(effectiveUser)
 
-    // Get or create Asaas customer using the responsible's data
-    const customerId = await this.asaasService.getOrCreateAsaasCustomer(
-      config.apiKey,
-      effectiveUser
-    )
-
-    // Create charge — totalAmount already includes fine/interest from daily reconciliation
-    const charge = await this.asaasService.createAsaasPayment(config.apiKey, {
-      customer: customerId,
+    const charge = await gateway.createCharge({
+      customerId,
       billingType,
       value: expectedValue,
       dueDate: DateTime.now().toISODate()!,
@@ -154,13 +156,33 @@ export default class CreateInvoiceAsaasChargeController {
     invoice.platformFeeAmount = platformFeeAmount
     invoice.chargedAmount = chargedAmount
     invoice.paymentGateway = 'ASAAS'
-    invoice.paymentGatewayId = charge.id
+    invoice.paymentGatewayId = charge.chargeId
     invoice.invoiceUrl = charge.bankSlipUrl ?? charge.invoiceUrl ?? null
     invoice.paymentMethod = billingType
     invoice.status = 'PENDING'
     await invoice.save()
 
+    if (billingType === 'PIX') {
+      try {
+        const pix = await gateway.fetchPixQr(charge.chargeId)
+        return response.created({
+          invoiceUrl: invoice.invoiceUrl,
+          pixQrCodeImage: pix.encodedImage,
+          pixCopyPaste: pix.payload,
+          pixExpirationDate: pix.expirationDate,
+        })
+      } catch {
+        return response.created({ invoiceUrl: invoice.invoiceUrl })
+      }
+    }
+
     return response.created({ invoiceUrl: invoice.invoiceUrl })
+  }
+
+  private resolveGateway(school: School & { schoolChain?: SchoolChain | null }): PaymentGateway | null {
+    const config = this.asaasService.resolveAsaasConfig(school)
+    if (!config) return null
+    return new AsaasPaymentGateway(this.asaasService, config)
   }
 
   private async resolvePaymentSettings(
@@ -415,7 +437,7 @@ export default class CreateInvoiceAsaasChargeController {
     })
   }
 
-  private areDescriptionsEquivalent(current?: string, next?: string): boolean {
+  private areDescriptionsEquivalent(current?: string | null, next?: string): boolean {
     const normalizedCurrent = (current ?? '').replace(/\s+/g, ' ').trim()
     const normalizedNext = (next ?? '').replace(/\s+/g, ' ').trim()
     return normalizedCurrent.length > 0 && normalizedCurrent === normalizedNext

@@ -363,7 +363,7 @@ export default function HorariosPage() {
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Link route="web.escola.pedagogico.grade">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" aria-label="Voltar">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>

@@ -1,5 +1,6 @@
 import { Suspense, useMemo, useState } from 'react'
-import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import { useQuery, useMutation, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
 import { api } from '../lib/api'
@@ -34,6 +35,7 @@ import {
   UserX,
   Filter,
   X,
+  Download,
 } from 'lucide-react'
 import { Link } from '@adonisjs/inertia/react'
 import { router } from '@inertiajs/react'
@@ -375,6 +377,25 @@ export function StudentsListContainer() {
     setFilters({ search: null, academicPeriodId: null, courseId: null, classId: null, page: 1 })
   }
 
+  const exportMutation = useMutation(api.api.v1.students.exportCsv.mutationOptions())
+
+  function handleExportCsv() {
+    exportMutation.mutate(
+      {
+        query: {
+          academicPeriodId: selectedAcademicPeriodId ?? undefined,
+          courseId: selectedCourseId ?? undefined,
+          classId: selectedClassId ?? undefined,
+          search: debouncedSearch || undefined,
+        },
+      },
+      {
+        onSuccess: () => toast.success('Exportação iniciada! Você receberá uma notificação quando estiver pronta.'),
+        onError: () => toast.error('Erro ao iniciar exportação'),
+      }
+    )
+  }
+
   return (
     <div className="space-y-4">
       {/* Toolbar */}
@@ -388,12 +409,18 @@ export function StudentsListContainer() {
             onChange={(e) => setFilters({ search: e.target.value || null, page: 1 })}
           />
         </div>
-        <Button className="ml-auto" asChild>
-          <Link href="/escola/administrativo/matriculas/nova">
-            <Plus className="h-4 w-4 mr-2" />
-            Novo Aluno
-          </Link>
-        </Button>
+        <div className="ml-auto flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handleExportCsv} disabled={exportMutation.isPending}>
+            <Download className="h-4 w-4 mr-2" />
+            {exportMutation.isPending ? 'Exportando...' : 'Exportar CSV'}
+          </Button>
+          <Button asChild>
+            <Link href="/escola/administrativo/matriculas/nova">
+              <Plus className="h-4 w-4 mr-2" />
+              Novo Aluno
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}

@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   Trophy,
   Briefcase,
+  Activity,
 } from 'lucide-react'
 
 const analyticsPages = [
@@ -77,6 +78,14 @@ const analyticsPages = [
     icon: Briefcase,
     color: 'text-slate-600',
     bgColor: 'bg-slate-100',
+  },
+  {
+    title: 'Health das Escolas',
+    description: 'Ativação, uso e escolas em risco',
+    route: 'web.admin.analytics.school_health' as const,
+    icon: Activity,
+    color: 'text-rose-600',
+    bgColor: 'bg-rose-100',
   },
 ]
 

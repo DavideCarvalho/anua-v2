@@ -50,15 +50,15 @@ function StudentPaymentsSkeleton() {
   return (
     <div className="border rounded-lg">
       <div className="p-4 border-b">
-        <div className="grid grid-cols-6 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
+        <div className="grid grid-cols-7 gap-4">
+          {Array.from({ length: 7 }).map((_, i) => (
             <div key={i} className="h-4 bg-muted animate-pulse rounded" />
           ))}
         </div>
       </div>
       {Array.from({ length: 10 }).map((_, i) => (
         <div key={i} className="p-4 border-b last:border-0">
-          <div className="grid grid-cols-6 gap-4">
+          <div className="grid grid-cols-7 gap-4">
             {Array.from({ length: 6 }).map((_, j) => (
               <div key={j} className="h-4 bg-muted animate-pulse rounded" />
             ))}
@@ -147,6 +147,49 @@ function formatDate(date: string | Date | null | undefined): string {
   if (!date) return '-'
   const d = new Date(date)
   return d.toLocaleDateString('pt-BR')
+}
+
+const OVERDUE_AWARE_STATUSES: readonly PaymentStatus[] = ['NOT_PAID', 'PENDING', 'OVERDUE']
+
+function isOverdueAwareStatus(status: PaymentStatus | string | null | undefined): boolean {
+  if (!status) return false
+  return OVERDUE_AWARE_STATUSES.some((value) => value === status)
+}
+
+function getDaysOverdue(
+  status: PaymentStatus | string | null | undefined,
+  dueDate: string | Date | null | undefined
+): number {
+  if (!dueDate) return 0
+  if (!isOverdueAwareStatus(status)) return 0
+
+  const due = new Date(dueDate)
+  if (Number.isNaN(due.getTime())) return 0
+
+  const now = new Date()
+  const start = new Date(due.getFullYear(), due.getMonth(), due.getDate())
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const diffMs = today.getTime() - start.getTime()
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  return diffDays > 0 ? diffDays : 0
+}
+
+function formatDaysOverdue(days: number): string {
+  if (days <= 0) return '-'
+  if (days < 30) return `${days} ${days === 1 ? 'dia' : 'dias'}`
+  if (days < 365) {
+    const months = Math.floor(days / 30)
+    return `${months} ${months === 1 ? 'mês' : 'meses'}`
+  }
+  const years = Math.floor(days / 365)
+  return `${years} ${years === 1 ? 'ano' : 'anos'}`
+}
+
+function getDaysOverdueClass(days: number): string {
+  if (days <= 0) return 'text-muted-foreground'
+  if (days > 60) return 'font-semibold text-destructive'
+  if (days > 30) return 'font-medium text-amber-600 dark:text-amber-400'
+  return 'text-amber-600 dark:text-amber-400'
 }
 
 // Container Export
@@ -396,6 +439,7 @@ function StudentPaymentsContent({
                   <th className="text-left p-4 font-medium">Aluno</th>
                   <th className="text-left p-4 font-medium">Referência</th>
                   <th className="text-left p-4 font-medium">Vencimento</th>
+                  <th className="text-left p-4 font-medium">Atraso</th>
                   <th className="text-left p-4 font-medium">Valor</th>
                   <th className="text-left p-4 font-medium">Status</th>
                   <th className="text-right p-4 font-medium">Ações</th>
@@ -405,6 +449,7 @@ function StudentPaymentsContent({
                 {payments.map((payment) => {
                   const config = statusConfig[(payment.status as PaymentStatus) || 'PENDING']
                   const StatusIcon = config.icon
+                  const daysOverdue = getDaysOverdue(payment.status, payment.dueDate)
 
                   return (
                     <tr key={payment.id} className="border-t hover:bg-muted/30 transition-colors">
@@ -420,6 +465,9 @@ function StudentPaymentsContent({
                         {payment.month}/{payment.year}
                       </td>
                       <td className="p-4 text-muted-foreground">{formatDate(payment.dueDate)}</td>
+                      <td className={`p-4 ${getDaysOverdueClass(daysOverdue)}`}>
+                        {formatDaysOverdue(daysOverdue)}
+                      </td>
                       <td className="p-4 font-semibold">
                         {formatCurrency(Number(payment.amount || 0))}
                       </td>

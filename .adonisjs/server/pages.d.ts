@@ -23,6 +23,7 @@ declare module '@adonisjs/inertia/types' {
     'admin/analytics/pagamentos': ExtractProps<(typeof import('../../inertia/pages/admin/analytics/pagamentos.tsx'))['default']>
     'admin/analytics/presenca': ExtractProps<(typeof import('../../inertia/pages/admin/analytics/presenca.tsx'))['default']>
     'admin/analytics/rh': ExtractProps<(typeof import('../../inertia/pages/admin/analytics/rh.tsx'))['default']>
+    'admin/analytics/school-health': ExtractProps<(typeof import('../../inertia/pages/admin/analytics/school-health.tsx'))['default']>
     'admin/billing/dashboard': ExtractProps<(typeof import('../../inertia/pages/admin/billing/dashboard.tsx'))['default']>
     'admin/billing/faturas': ExtractProps<(typeof import('../../inertia/pages/admin/billing/faturas.tsx'))['default']>
     'admin/billing/subscriptions': ExtractProps<(typeof import('../../inertia/pages/admin/billing/subscriptions.tsx'))['default']>
@@ -89,6 +90,7 @@ declare module '@adonisjs/inertia/types' {
     'escola/comunicados': ExtractProps<(typeof import('../../inertia/pages/escola/comunicados.tsx'))['default']>
     'escola/comunicados/editar': ExtractProps<(typeof import('../../inertia/pages/escola/comunicados/editar.tsx'))['default']>
     'escola/comunicados/novo': ExtractProps<(typeof import('../../inertia/pages/escola/comunicados/novo.tsx'))['default']>
+    'escola/comunicados/preview': ExtractProps<(typeof import('../../inertia/pages/escola/comunicados/preview.tsx'))['default']>
     'escola/configuracoes/index': ExtractProps<(typeof import('../../inertia/pages/escola/configuracoes/index.tsx'))['default']>
     'escola/desempenho': ExtractProps<(typeof import('../../inertia/pages/escola/desempenho.tsx'))['default']>
     'escola/eventos/autorizacoes': ExtractProps<(typeof import('../../inertia/pages/escola/eventos/autorizacoes.tsx'))['default']>

@@ -37,6 +37,7 @@ import { formatRoleName } from '../../lib/formatters'
 import { ImpersonationBanner } from '../admin/impersonation-banner'
 import { StudentSelectorWithData } from '../responsavel/student-selector'
 import { NotificationBell } from '../notifications/notification-bell'
+import { ChangelogButton } from '../changelog/changelog-button'
 import { useQuery } from '@tanstack/react-query'
 import { registry } from '@generated/registry/index'
 import { useAuthUser } from '../../stores/auth_store'
@@ -371,6 +372,7 @@ export function ResponsavelLayout({ children }: PropsWithChildren) {
                   <span className="sr-only sm:hidden">Perguntar ao Anuá</span>
                 </Button>
               )}
+              <ChangelogButton audience="responsavel" />
               <NotificationBell allNotificationsRoute="web.responsavel.comunicados" />
               <StudentSelectorWithData />
             </div>

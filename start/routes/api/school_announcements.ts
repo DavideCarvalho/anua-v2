@@ -29,4 +29,19 @@ export function registerSchoolAnnouncementApiRoutes() {
     })
     .prefix('/school-announcements')
     .use([middleware.auth(), middleware.impersonation()])
+
+  router
+    .group(() => {
+      router
+        .get('/', [controllers.announcementTemplates.ListAnnouncementTemplates])
+        .as('announcement_templates.list')
+      router
+        .post('/', [controllers.announcementTemplates.CreateAnnouncementTemplate])
+        .as('announcement_templates.create')
+      router
+        .delete('/:id', [controllers.announcementTemplates.DeleteAnnouncementTemplate])
+        .as('announcement_templates.delete')
+    })
+    .prefix('/announcement-templates')
+    .use([middleware.auth(), middleware.impersonation()])
 }

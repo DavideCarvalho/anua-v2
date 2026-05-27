@@ -65,6 +65,9 @@ export function registerAdminPageRoutes() {
         .get('/analytics/gamificacao', [admin.ShowAdminAnalyticsPage, 'gamificacao'])
         .as('analytics.gamificacao')
       router.get('/analytics/rh', [admin.ShowAdminAnalyticsPage, 'rh']).as('analytics.rh')
+      router
+        .get('/analytics/school-health', [admin.ShowAdminAnalyticsPage, 'schoolHealth'])
+        .as('analytics.school_health')
     })
     .prefix('/admin')
     .use([

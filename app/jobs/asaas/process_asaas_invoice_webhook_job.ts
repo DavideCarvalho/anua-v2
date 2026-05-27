@@ -1,10 +1,9 @@
 import { Job } from '@adonisjs/queue'
 import { DateTime } from 'luxon'
-import db from '@adonisjs/lucid/services/db'
-import Invoice from '#models/invoice'
-import StudentPayment from '#models/student_payment'
 import WebhookEvent from '#models/webhook_event'
 import EmitNfseJob from '#jobs/invoices/emit_nfse_job'
+import AsaasWebhookMapper from '#services/payment/asaas_webhook_mapper'
+import PaymentWebhookProcessor from '#services/payment/payment_webhook_processor'
 
 interface ProcessAsaasInvoiceWebhookPayload {
   webhookEventId: string
@@ -40,9 +39,9 @@ export default class ProcessAsaasInvoiceWebhookJob extends Job<ProcessAsaasInvoi
       return
     }
 
-    const payload = webhookEvent.payload as {
+    const rawPayload = webhookEvent.payload as {
       event: string
-      payment: {
+      payment?: {
         id: string
         status: string
         billingType: string
@@ -55,72 +54,28 @@ export default class ProcessAsaasInvoiceWebhookJob extends Job<ProcessAsaasInvoi
       }
     }
 
+    const event = AsaasWebhookMapper.toPaymentEvent(rawPayload)
+    if (!event || !event.externalReference) {
+      webhookEvent.status = 'FAILED'
+      webhookEvent.error = 'Could not map Asaas payload to payment event'
+      await webhookEvent.save()
+      return
+    }
+
     try {
       webhookEvent.status = 'PROCESSING'
       webhookEvent.attempts += 1
       await webhookEvent.save()
 
-      await db.transaction(async (trx) => {
-        const invoice = await Invoice.query({ client: trx })
-          .where('id', payload.payment.externalReference!)
-          .forUpdate()
-          .firstOrFail()
+      await PaymentWebhookProcessor.processInvoiceEvent(event.externalReference, event, 'ASAAS')
 
-        invoice.paymentGateway = 'ASAAS'
-        invoice.paymentGatewayId = payload.payment.id
-        invoice.invoiceUrl =
-          payload.payment.bankSlipUrl ?? payload.payment.invoiceUrl ?? invoice.invoiceUrl
+      webhookEvent.status = 'COMPLETED'
+      webhookEvent.processedAt = DateTime.now()
+      webhookEvent.error = null
+      await webhookEvent.save()
 
-        switch (payload.event) {
-          case 'PAYMENT_CONFIRMED':
-          case 'PAYMENT_RECEIVED': {
-            invoice.status = 'PAID'
-            const paidAt = payload.payment.confirmedDate ?? payload.payment.paymentDate
-            invoice.paidAt = paidAt ? DateTime.fromISO(paidAt) : DateTime.now()
-
-            // Marcar todos os StudentPayments vinculados como PAID
-            await StudentPayment.query({ client: trx })
-              .where('invoiceId', invoice.id)
-              .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
-              .update({ status: 'PAID', paidAt: invoice.paidAt.toISO() })
-            break
-          }
-          case 'PAYMENT_OVERDUE':
-            invoice.status = 'OVERDUE'
-            break
-          case 'PAYMENT_DELETED':
-            invoice.paymentGatewayId = null
-            invoice.status = 'OPEN'
-            break
-          case 'PAYMENT_CREATED':
-            invoice.status = 'PENDING'
-            break
-          case 'PAYMENT_UPDATED':
-            invoice.status = invoice.status ?? 'PENDING'
-            break
-          case 'PAYMENT_REFUNDED':
-          case 'PAYMENT_CHARGEBACK_REQUESTED':
-            invoice.status = 'CANCELLED'
-            break
-          default:
-            break
-        }
-
-        await invoice.save()
-
-        webhookEvent.useTransaction(trx)
-        webhookEvent.status = 'COMPLETED'
-        webhookEvent.processedAt = DateTime.now()
-        webhookEvent.error = null
-        await webhookEvent.save()
-      })
-
-      // Dispatch NFS-e emission after payment confirmed
-      if (
-        (payload.event === 'PAYMENT_CONFIRMED' || payload.event === 'PAYMENT_RECEIVED') &&
-        payload.payment.externalReference
-      ) {
-        await EmitNfseJob.dispatch({ invoiceId: payload.payment.externalReference })
+      if (event.eventType === 'PAYMENT_CONFIRMED') {
+        await EmitNfseJob.dispatch({ invoiceId: event.externalReference })
       }
 
       console.log(`[ASAAS_INVOICE_WEBHOOK] Invoice webhook processed: ${webhookEventId}`)

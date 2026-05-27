@@ -41,6 +41,10 @@ export function registerAdminStatsApiRoutes() {
     .group(() => {
       router.get('/stats', [controllers.dashboard.GetAdminStats]).as('dashboard.admin_stats')
       router.get('/server-stats', [controllers.admin.GetServerStats]).as('dashboard.server_stats')
+      router.get('/school-health', [controllers.admin.GetSchoolHealth]).as('admin.school_health')
+      router
+        .post('/send-changelog-digest', [controllers.admin.SendChangelogDigest])
+        .as('admin.send_changelog_digest')
     })
     .prefix('/admin')
     .use([

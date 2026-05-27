@@ -29,6 +29,7 @@ import { ImpersonationBanner } from '../admin/impersonation-banner'
 import { SidebarAcademicPeriods } from '../sidebar/sidebar-academic-periods'
 import { SchoolGroupSwitcher } from '../sidebar/school-group-switcher'
 import { NotificationBell } from '../notifications/notification-bell'
+import { ChangelogButton } from '../changelog/changelog-button'
 import { useAuthUser } from '../../stores/auth_store'
 import { registry } from '@generated/registry/index'
 import {
@@ -450,6 +451,7 @@ export function EscolaLayout({ children, topbarActions, rightPane }: EscolaLayou
               className="ml-auto flex items-center gap-2"
             >
               {topbarActions}
+              <ChangelogButton audience="escola" />
               <NotificationBell allNotificationsRoute="web.escola.notificacoes" />
             </div>
           </header>

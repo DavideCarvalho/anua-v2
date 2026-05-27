@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import Invoice from '#models/invoice'
 import Contract from '#models/contract'
+import School from '#models/school'
 import StudentHasResponsible from '#models/student_has_responsible'
 import AppException from '#exceptions/app_exception'
 import AsaasService from '#services/asaas_service'
@@ -79,6 +80,7 @@ export default class GetStudentInvoicesController {
 
     // Check if school has Asaas enabled via the first invoice's contract
     let asaasEnabled = false
+    let school: School | null = null
     const firstInvoice = invoices.all().find((i) => i.payments?.length > 0)
     if (firstInvoice) {
       const contract = await Contract.query()
@@ -89,12 +91,23 @@ export default class GetStudentInvoicesController {
       if (contract?.school && contract.school.paymentConfigStatus === 'ACTIVE') {
         asaasEnabled = !!this.asaasService.resolveAsaasConfig(contract.school)
       }
+
+      if (contract?.school) {
+        school = contract.school
+      }
     }
 
     return {
       ...(await serialize(InvoiceTransformer.paginate(invoices.all(), invoices.getMeta()))),
       summary,
       asaasEnabled,
+      schoolPaymentInfo: school
+        ? {
+            name: school.name,
+            pixKey: school.pixKey,
+            pixKeyType: school.pixKeyType,
+          }
+        : null,
     }
   }
 }
