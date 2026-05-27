@@ -4,6 +4,7 @@ import { batchSaveExamGradesValidator } from '#validators/exam'
 import Exam from '#models/exam'
 import ExamGrade from '#models/exam_grade'
 import AppException from '#exceptions/app_exception'
+import { gamificationEventService } from '#services/gamification/gamification_event_service'
 
 export default class BatchSaveExamGradesController {
   async handle({ params, request, response }: HttpContext) {
@@ -47,6 +48,19 @@ export default class BatchSaveExamGradesController {
       }
 
       results.push(grade)
+    }
+
+    for (const grade of results) {
+      if (grade.attended && grade.score !== null) {
+        gamificationEventService
+          .emitGradeReceived({
+            gradeId: grade.id,
+            studentId: grade.studentId,
+            value: Number(grade.score),
+            maxValue: Number(exam.maxScore ?? 10),
+          })
+          .catch(() => {})
+      }
     }
 
     return response.ok({

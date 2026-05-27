@@ -4,6 +4,7 @@ import Exam from '#models/exam'
 import ExamGrade from '#models/exam_grade'
 import AppException from '#exceptions/app_exception'
 import ExamGradeTransformer from '#transformers/exam_grade_transformer'
+import { gamificationEventService } from '#services/gamification/gamification_event_service'
 
 export default class SaveExamGradeController {
   async handle({ params, request, response, serialize }: HttpContext) {
@@ -28,6 +29,17 @@ export default class SaveExamGradeController {
 
     await grade.load('student')
     await grade.load('exam')
+
+    if (grade.attended && grade.score !== null) {
+      gamificationEventService
+        .emitGradeReceived({
+          gradeId: grade.id,
+          studentId: grade.studentId,
+          value: Number(grade.score),
+          maxValue: Number(exam.maxScore ?? 10),
+        })
+        .catch(() => {})
+    }
 
     return response.created(await serialize(ExamGradeTransformer.transform(grade)))
   }
