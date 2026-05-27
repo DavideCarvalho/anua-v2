@@ -41,6 +41,15 @@ Lista de oportunidades pra trackear melhoria de fluxo (feature), negócio e UI/U
 - Bug fix: `computeAxesStatus` tratava `required = 0` como PENDING em vez de COMPLETE.
 - Data fix: Silva Gomes — `enrollmentValue` zerado + `docusealSignatureStatus = 'SIGNED'` pra 34 matrículas (todas concluídas).
 
+**2026-05-27/28, sessão 4**
+- Concluídos: #7 (P1 — automação de inadimplência), gamification backfill.
+- Arquivos criados (19): `agreement_proposal.ts`, `agreement_proposal_invoice.ts` (models), `agreement_proposal_transformer.ts`, `agreement_proposal_invoice_transformer.ts` (transformers), `accept/approve_school/create/list_school/list_student/reject_school/reject_responsible_agreement_proposal_controller.ts` (7 controllers), `generate_agreement_proposals_job.ts`, `agreement_proposal_notification_service.ts`, `gamification_backfill.ts`, `run_generate_agreement_proposals.ts`, `dispatch_generate_agreement_proposals.ts` (commands), `agreement-proposals-container.tsx`, `agreement-proposal-banner.tsx` (frontend), migration `1788000000060`.
+- Arquivos editados: `inadimplencia.tsx` (tabs), `mensalidades.tsx` (banner), `student-payments-container.tsx` (multi-select + toolbar), `responsavel-layout.tsx` (badge), `changelog-button.tsx` (SSR fix), `payment_webhook_processor.ts` (auto-cancel), `mark_invoice_paid_controller.ts` (auto-cancel), `notification.ts` (+3 types), `scheduler.ts` (+job 7h), rotas.
+- Validação: Chrome MCP fluxo completo — escola aprova proposta → responsável vê banner → aceita → parcelas geradas em mensalidades. Multi-select de faturas com toolbar floating testado.
+- Gamification backfill: 4326 presenças + 2 notas processadas desde fev/2026.
+- 18 propostas criadas em prod (12 escola teste + 1 Silva Gomes + 5 novas após fix StudentHasLevel fallback).
+- Aprendizado: transformer Collection tem maxDepth=1 por default — `.depth(6)` deve ir no Collection do pai, não no Item nested.
+
 ---
 
 ## Sumário
@@ -103,10 +112,11 @@ Nada disso é estrutural. É puxada de qualidade em pontos específicos.
 - **Feito 2026-05-27:** (a) Abstração gateway-agnóstica: `PaymentGateway` interface + `AsaasPaymentGateway` adapter em `app/services/payment/`. Controller refatorado pra usar adapter. (b) PIX inline: controller agora chama `fetchPixQr()` após criar charge PIX e retorna `{ invoiceUrl, pixQrCodeImage, pixCopyPaste, pixExpirationDate }`. Frontend: `PixQrModal` com QR code base64, copia-e-cola com botão copiar, fallback pra boleto. Dialog z-[110]. (c) Webhook agnóstico: `PaymentWebhookEvent` tipo interno, `AsaasWebhookMapper` traduz payload Asaas → formato interno, `PaymentWebhookProcessor` aplica evento no banco (Invoice + StudentPayment). Job refatorado pra usar mapper+processor. NFSe/AccountStatus ficaram Asaas-only. Não testado end-to-end (precisa escola com Asaas PIX habilitado).
 
 ### 7. [negocio] [feature] Automação de inadimplência com acordo + multi-canal
-- [ ] **Onde:** `inertia/pages/escola/financeiro/inadimplencia.tsx`, novo controller + job.
+- [x] **Onde:** `inertia/pages/escola/financeiro/inadimplencia.tsx`, novo controller + job.
 - **Problema:** Hoje a coordenadora liga/email pra 20+ alunos atrasados por mês. Sem proposta de parcelamento automática, sem disparo coordenado WhatsApp + SMS + email. É a maior dor operacional e o ponto onde a Anuá pode entregar ROI mensurável pra escola.
 - **Fix:** (a) Job detecta mensalidade OVERDUE > N dias e gera proposta de acordo (2x ou 3x). (b) Comunicado multi-canal disparado pro responsável com link aceitar. (c) Lista de "acordos pendentes" pra coordenadora aprovar em 1 clique em `inadimplencia.tsx`. Recalcula cobrança. (d) Coluna "dias em atraso" sortable + highlight >60 dias.
 - **Esforço:** 2 sprints. **Posição comercial:** bundlar como add-on premium (Smart Receivables).
+- **Feito 2026-05-27/28:** Sistema completo de propostas de acordo. (a) Job `GenerateAgreementProposalsJob` roda diário às 7h, detecta faturas OVERDUE >15 dias, agrupa por aluno (mínimo 2 faturas), cria `AgreementProposal` com status `PENDING_SCHOOL_APPROVAL`. (b) Aba "Propostas de acordo" na página de inadimplência com cards por proposta mostrando aluno/valor/parcelas/faturas, botões Aprovar e Rejeitar com dialog de motivo. (c) Criação manual via multi-select de faturas com checkboxes + toolbar floating. (d) Ao aprovar, notifica responsável financeiro via multi-canal (email/whatsapp/push/in-app). Banner na página `/responsavel/mensalidades` com valor, parcelamento, faturas incluídas, botões Aceitar/Recusar. Badge pulsante no menu Mensalidades. (e) Aceite cria Agreement + parcelas (`StudentPayment` tipo `AGREEMENT`) e marca faturas originais como `RENEGOTIATED`. (f) Rejeição notifica escola in-app. (g) Auto-cancel de propostas quando fatura é paga (webhook ou mark-paid manual). (h) Todos models com `Auditable`, transformers com `BaseTransformer` + `AgreementProposalInvoiceTransformer`. Testado end-to-end via Chrome MCP: escola aprova → responsável vê banner → aceita → parcelas geradas → aparecem em mensalidades.
 
 ### 8. [feature] Matrícula online com salvar progresso, OCR mobile e multi-aluno
 - [ ] **Onde:** `inertia/containers/online-enrollment/*`.
@@ -328,4 +338,4 @@ Nada disso é estrutural. É puxada de qualidade em pontos específicos.
 3. Onde tem `[design]` confirmado por arquivo:linha, dá pra rodar `/impeccable polish <path>` direto.
 4. Onde tem `[feature]` ou `[negocio]`, vale `brainstorming` antes pra fechar escopo.
 
-Última atualização: 2026-05-22 (sessão 1: 8 quick wins do P2 aplicados e validados via Chrome MCP).
+Última atualização: 2026-05-28 (sessão 4: automação de inadimplência #7 completa + gamification backfill).
