@@ -92,6 +92,14 @@ export default await Env.create(new URL('../', import.meta.url), {
   | Variables for configuring Arara WhatsApp gateway
   |----------------------------------------------------------
   */
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring signature provider (Autentique)
+  |----------------------------------------------------------
+  */
+  SIGNATURE_PROVIDER: Env.schema.string.optional(),
+  AUTENTIQUE_API_KEY: Env.schema.string.optional(),
+
   ARARA_API_KEY: Env.schema.string.optional(),
   ARARA_WEBHOOK_TOKEN: Env.schema.string.optional(),
 
