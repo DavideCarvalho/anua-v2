@@ -2,6 +2,13 @@ export type SignerAction = 'SIGN' | 'SIGN_AS_A_WITNESS' | 'APPROVE' | 'RECOGNIZE
 
 export type DeliveryMethod = 'EMAIL' | 'WHATSAPP' | 'SMS'
 
+export interface SignerFieldPosition {
+  x: string
+  y: string
+  z: number
+  element: 'SIGNATURE' | 'NAME' | 'DATE' | 'CPF' | 'INITIALS'
+}
+
 export interface SignerInput {
   name: string
   email?: string
@@ -9,6 +16,7 @@ export interface SignerInput {
   cpf?: string
   action: SignerAction
   deliveryMethod?: DeliveryMethod
+  positions?: SignerFieldPosition[]
 }
 
 export interface CreateDocumentInput {

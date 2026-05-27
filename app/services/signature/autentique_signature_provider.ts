@@ -161,6 +161,14 @@ export default class AutentiqueSignatureProvider implements SignatureProvider {
       }
     }
     if (signer.cpf) mapped.configs = { cpf: signer.cpf }
+    if (signer.positions?.length) {
+      mapped.positions = signer.positions.map((p) => ({
+        x: p.x,
+        y: p.y,
+        z: p.z,
+        element: p.element,
+      }))
+    }
 
     return mapped
   }
