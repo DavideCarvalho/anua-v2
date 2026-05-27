@@ -55,3 +55,8 @@ node_modules/.vite
 # Local git worktrees
 .worktrees/
 .adonisjs/server-stats/
+.tmp/
+.commandcode/
+.cursor/
+server-stats-dashboard-error.log
+usage-report-week.md
