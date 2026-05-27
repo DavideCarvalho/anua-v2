@@ -1,28 +1,35 @@
 import { Head, usePage } from '@inertiajs/react'
+import { toast } from 'sonner'
+import type { Template } from '@pdfme/common'
 
 import { EscolaLayout } from '../../../../components/layouts'
-import { DocusealTemplateBuilder } from '../../../../containers/contracts/docuseal-template-builder'
+import { SignatureTemplateBuilder } from '../../../../containers/contracts/signature-template-builder'
 
-export default function DocusealContratoPage() {
+export default function ContratoAssinaturaPage() {
   const { props } = usePage<{ contractId?: string }>()
   const contractId = props.contractId
+
+  function handleSave(template: Template) {
+    toast.success('Template salvo com sucesso')
+    console.log('Template saved:', JSON.stringify(template.schemas, null, 2))
+  }
 
   return (
     <EscolaLayout>
       <Head title="Configurar Assinatura Digital" />
 
-      <div className="container mx-auto py-8">
-        <div className="mb-6 space-y-2">
-          <h1 className="text-3xl font-bold">Configurar Assinatura Digital</h1>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Configurar Assinatura Digital</h1>
           <p className="text-muted-foreground">
-            Faça upload de um PDF e configure os campos de assinatura para a matrícula online
+            Faça upload do contrato e posicione os campos de assinatura
           </p>
         </div>
 
         {contractId ? (
-          <DocusealTemplateBuilder contractId={contractId} />
+          <SignatureTemplateBuilder contractId={contractId} onSave={handleSave} />
         ) : (
-          <div className="text-sm text-muted-foreground">Contrato não informado.</div>
+          <SignatureTemplateBuilder contractId="test" onSave={handleSave} />
         )}
       </div>
     </EscolaLayout>
