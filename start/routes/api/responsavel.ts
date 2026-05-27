@@ -119,6 +119,23 @@ export function registerResponsavelApiRoutes() {
         .as('comunicados.acknowledge')
       router.put('/profile', [controllers.responsavel.UpdateProfile]).as('update_profile')
 
+      // Agreement proposals
+      router
+        .get('/students/:studentId/agreement-proposals', [
+          controllers.agreementProposals.ListStudentAgreementProposals,
+        ])
+        .as('student_agreement_proposals')
+      router
+        .post('/agreement-proposals/:id/accept', [
+          controllers.agreementProposals.AcceptAgreementProposal,
+        ])
+        .as('accept_agreement_proposal')
+      router
+        .post('/agreement-proposals/:id/reject', [
+          controllers.agreementProposals.RejectResponsibleAgreementProposal,
+        ])
+        .as('reject_agreement_proposal')
+
       // Invoice checkout (Asaas on-demand charge)
       router
         .post('/invoices/:id/checkout', [controllers.invoices.CreateInvoiceAsaasCharge])

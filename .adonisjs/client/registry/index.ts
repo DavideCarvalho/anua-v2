@@ -1326,6 +1326,24 @@ const routes = {
     tokens: [{"old":"/api/v1/responsavel/profile","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/profile","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/profile","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/profile","type":0,"val":"profile","end":""}],
     types: placeholder as Registry['api.v1.responsavel.api.update_profile']['types'],
   },
+  'api.v1.responsavel.api.student_agreement_proposals': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/responsavel/students/:studentId/agreement-proposals',
+    tokens: [{"old":"/api/v1/responsavel/students/:studentId/agreement-proposals","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/students/:studentId/agreement-proposals","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/students/:studentId/agreement-proposals","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/students/:studentId/agreement-proposals","type":0,"val":"students","end":""},{"old":"/api/v1/responsavel/students/:studentId/agreement-proposals","type":1,"val":"studentId","end":""},{"old":"/api/v1/responsavel/students/:studentId/agreement-proposals","type":0,"val":"agreement-proposals","end":""}],
+    types: placeholder as Registry['api.v1.responsavel.api.student_agreement_proposals']['types'],
+  },
+  'api.v1.responsavel.api.accept_agreement_proposal': {
+    methods: ["POST"],
+    pattern: '/api/v1/responsavel/agreement-proposals/:id/accept',
+    tokens: [{"old":"/api/v1/responsavel/agreement-proposals/:id/accept","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/agreement-proposals/:id/accept","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/agreement-proposals/:id/accept","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/agreement-proposals/:id/accept","type":0,"val":"agreement-proposals","end":""},{"old":"/api/v1/responsavel/agreement-proposals/:id/accept","type":1,"val":"id","end":""},{"old":"/api/v1/responsavel/agreement-proposals/:id/accept","type":0,"val":"accept","end":""}],
+    types: placeholder as Registry['api.v1.responsavel.api.accept_agreement_proposal']['types'],
+  },
+  'api.v1.responsavel.api.reject_agreement_proposal': {
+    methods: ["POST"],
+    pattern: '/api/v1/responsavel/agreement-proposals/:id/reject',
+    tokens: [{"old":"/api/v1/responsavel/agreement-proposals/:id/reject","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/agreement-proposals/:id/reject","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/agreement-proposals/:id/reject","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/agreement-proposals/:id/reject","type":0,"val":"agreement-proposals","end":""},{"old":"/api/v1/responsavel/agreement-proposals/:id/reject","type":1,"val":"id","end":""},{"old":"/api/v1/responsavel/agreement-proposals/:id/reject","type":0,"val":"reject","end":""}],
+    types: placeholder as Registry['api.v1.responsavel.api.reject_agreement_proposal']['types'],
+  },
   'api.v1.responsavel.api.invoice_checkout': {
     methods: ["POST"],
     pattern: '/api/v1/responsavel/invoices/:id/checkout',
@@ -3035,6 +3053,30 @@ const routes = {
     pattern: '/api/v1/agreements',
     tokens: [{"old":"/api/v1/agreements","type":0,"val":"api","end":""},{"old":"/api/v1/agreements","type":0,"val":"v1","end":""},{"old":"/api/v1/agreements","type":0,"val":"agreements","end":""}],
     types: placeholder as Registry['api.v1.agreements.store']['types'],
+  },
+  'api.v1.agreement_proposals.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/agreement-proposals',
+    tokens: [{"old":"/api/v1/agreement-proposals","type":0,"val":"api","end":""},{"old":"/api/v1/agreement-proposals","type":0,"val":"v1","end":""},{"old":"/api/v1/agreement-proposals","type":0,"val":"agreement-proposals","end":""}],
+    types: placeholder as Registry['api.v1.agreement_proposals.index']['types'],
+  },
+  'api.v1.agreement_proposals.store': {
+    methods: ["POST"],
+    pattern: '/api/v1/agreement-proposals',
+    tokens: [{"old":"/api/v1/agreement-proposals","type":0,"val":"api","end":""},{"old":"/api/v1/agreement-proposals","type":0,"val":"v1","end":""},{"old":"/api/v1/agreement-proposals","type":0,"val":"agreement-proposals","end":""}],
+    types: placeholder as Registry['api.v1.agreement_proposals.store']['types'],
+  },
+  'api.v1.agreement_proposals.approve': {
+    methods: ["POST"],
+    pattern: '/api/v1/agreement-proposals/:id/approve',
+    tokens: [{"old":"/api/v1/agreement-proposals/:id/approve","type":0,"val":"api","end":""},{"old":"/api/v1/agreement-proposals/:id/approve","type":0,"val":"v1","end":""},{"old":"/api/v1/agreement-proposals/:id/approve","type":0,"val":"agreement-proposals","end":""},{"old":"/api/v1/agreement-proposals/:id/approve","type":1,"val":"id","end":""},{"old":"/api/v1/agreement-proposals/:id/approve","type":0,"val":"approve","end":""}],
+    types: placeholder as Registry['api.v1.agreement_proposals.approve']['types'],
+  },
+  'api.v1.agreement_proposals.reject': {
+    methods: ["POST"],
+    pattern: '/api/v1/agreement-proposals/:id/reject',
+    tokens: [{"old":"/api/v1/agreement-proposals/:id/reject","type":0,"val":"api","end":""},{"old":"/api/v1/agreement-proposals/:id/reject","type":0,"val":"v1","end":""},{"old":"/api/v1/agreement-proposals/:id/reject","type":0,"val":"agreement-proposals","end":""},{"old":"/api/v1/agreement-proposals/:id/reject","type":1,"val":"id","end":""},{"old":"/api/v1/agreement-proposals/:id/reject","type":0,"val":"reject","end":""}],
+    types: placeholder as Registry['api.v1.agreement_proposals.reject']['types'],
   },
   'api.v1.invoices.index': {
     methods: ["GET","HEAD"],

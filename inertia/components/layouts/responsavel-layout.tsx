@@ -53,6 +53,7 @@ interface NavItem {
   icon: React.ElementType
   requiresPedagogical?: boolean
   requiresFinancial?: boolean
+  badge?: boolean
 }
 
 // Navigation items organized by category
@@ -179,17 +180,7 @@ function NavigationContent() {
   const { data, isLoading } = useQuery(api.api.v1.dashboard.responsavelStats.queryOptions({}))
   const pathname = url.split('?')[0]
 
-  if (isLoading || !data) {
-    return (
-      <div className="space-y-1">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-10 animate-pulse rounded bg-muted" />
-        ))}
-      </div>
-    )
-  }
-
-  // ?aluno= carrega slug, não UUID; compare via slug pra não cair sempre no fallback
+  const stats = data as ResponsavelStatsResponse | undefined
   let selectedStudentSlug: string | null = null
   try {
     const urlObj =
@@ -202,20 +193,43 @@ function NavigationContent() {
     selectedStudentSlug = match ? match[1] : null
   }
 
-  const stats = data as ResponsavelStatsResponse
   const selectedStudent =
-    (selectedStudentSlug && stats.students.find((s) => s.slug === selectedStudentSlug)) ||
-    stats.students[0]
+    (selectedStudentSlug && stats?.students.find((s) => s.slug === selectedStudentSlug)) ||
+    stats?.students[0]
 
-  const hasPedagogical = selectedStudent?.permissions?.pedagogical || false
   const hasFinancial = selectedStudent?.permissions?.financial || false
 
-  // Build navigation based on permissions
+  const proposalsQuery = useQuery({
+    ...api.api.v1.responsavel.api.studentAgreementProposals.queryOptions({
+      params: { studentId: selectedStudent?.id ?? '' },
+    }),
+    enabled: hasFinancial && !!selectedStudent?.id,
+  })
+  const hasPendingProposals = Array.isArray(proposalsQuery.data) && proposalsQuery.data.some((p) => p.status === 'SENT_TO_RESPONSIBLE')
+
+  if (isLoading || !data) {
+    return (
+      <div className="space-y-1">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-10 animate-pulse rounded bg-muted" />
+        ))}
+      </div>
+    )
+  }
+
+  const hasPedagogical = selectedStudent?.permissions?.pedagogical || false
+
   const navigation = [
     ...baseNavigation,
     ...(hasPedagogical ? pedagogicalNavigation : []),
     ...commonNavigation,
-    ...(hasFinancial ? financialNavigation : []),
+    ...(hasFinancial
+      ? financialNavigation.map((item) =>
+          item.route === 'web.responsavel.mensalidades' && hasPendingProposals
+            ? { ...item, badge: true }
+            : item
+        )
+      : []),
   ]
 
   return (
@@ -236,6 +250,9 @@ function NavigationContent() {
           >
             <Icon className="h-4 w-4" />
             {item.title}
+            {item.badge && (
+              <span className="ml-auto h-2 w-2 rounded-full bg-primary animate-pulse" />
+            )}
           </Link>
         )
       })}

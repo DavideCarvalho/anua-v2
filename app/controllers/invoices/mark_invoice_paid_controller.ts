@@ -5,6 +5,7 @@ import Invoice from '#models/invoice'
 import { markInvoicePaidValidator } from '#validators/invoice'
 import AppException from '#exceptions/app_exception'
 import InvoiceTransformer from '#transformers/invoice_transformer'
+import PaymentWebhookProcessor from '#services/payment/payment_webhook_processor'
 
 export default class MarkInvoicePaidController {
   async handle({ request, response, params, serialize }: HttpContext) {
@@ -62,6 +63,8 @@ export default class MarkInvoicePaidController {
             updatedAt: DateTime.now().toSQL(),
           })
       }
+
+      await PaymentWebhookProcessor.cancelProposalsForPaidInvoice(invoice.id, trx)
 
       await trx.commit()
 

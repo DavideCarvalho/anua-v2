@@ -224,6 +224,9 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.comunicados.details': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.responsavel.api.comunicados.acknowledge': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.responsavel.api.update_profile': { paramsTuple?: []; params?: {} }
+    'api.v1.responsavel.api.student_agreement_proposals': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
+    'api.v1.responsavel.api.accept_agreement_proposal': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.responsavel.api.reject_agreement_proposal': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.responsavel.api.invoice_checkout': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.responsavel.api.create_wallet_top_up': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.list_wallet_top_ups': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
@@ -509,6 +512,10 @@ export type ScannedRoutes = {
     'api.v1.student_payments.send_boleto': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.student_payments.get_boleto': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.agreements.store': { paramsTuple?: []; params?: {} }
+    'api.v1.agreement_proposals.index': { paramsTuple?: []; params?: {} }
+    'api.v1.agreement_proposals.store': { paramsTuple?: []; params?: {} }
+    'api.v1.agreement_proposals.approve': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.agreement_proposals.reject': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.invoices.index': { paramsTuple?: []; params?: {} }
     'api.v1.invoices.mark_paid': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.audits.index': { paramsTuple: [ParamValue,ParamValue]; params: {'entityType': ParamValue,'entityId': ParamValue} }
@@ -965,6 +972,7 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.comunicados.list': { paramsTuple?: []; params?: {} }
     'api.v1.responsavel.api.comunicados.pending_ack': { paramsTuple?: []; params?: {} }
     'api.v1.responsavel.api.comunicados.details': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.responsavel.api.student_agreement_proposals': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.list_wallet_top_ups': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.show_wallet_top_up': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.responsavel.api.inquiries.list': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
@@ -1104,6 +1112,7 @@ export type ScannedRoutes = {
     'api.v1.student_payments.index': { paramsTuple?: []; params?: {} }
     'api.v1.student_payments.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.student_payments.get_boleto': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.agreement_proposals.index': { paramsTuple?: []; params?: {} }
     'api.v1.invoices.index': { paramsTuple?: []; params?: {} }
     'api.v1.audits.index': { paramsTuple: [ParamValue,ParamValue]; params: {'entityType': ParamValue,'entityId': ParamValue} }
     'api.v1.audits.student_history': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
@@ -1422,6 +1431,7 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.comunicados.list': { paramsTuple?: []; params?: {} }
     'api.v1.responsavel.api.comunicados.pending_ack': { paramsTuple?: []; params?: {} }
     'api.v1.responsavel.api.comunicados.details': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.responsavel.api.student_agreement_proposals': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.list_wallet_top_ups': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.show_wallet_top_up': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.responsavel.api.inquiries.list': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
@@ -1561,6 +1571,7 @@ export type ScannedRoutes = {
     'api.v1.student_payments.index': { paramsTuple?: []; params?: {} }
     'api.v1.student_payments.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.student_payments.get_boleto': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.agreement_proposals.index': { paramsTuple?: []; params?: {} }
     'api.v1.invoices.index': { paramsTuple?: []; params?: {} }
     'api.v1.audits.index': { paramsTuple: [ParamValue,ParamValue]; params: {'entityType': ParamValue,'entityId': ParamValue} }
     'api.v1.audits.student_history': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
@@ -1736,6 +1747,8 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.upload_student_document': { paramsTuple: [ParamValue,ParamValue]; params: {'studentId': ParamValue,'submissionId': ParamValue} }
     'api.v1.responsavel.api.acknowledge_occurrence': { paramsTuple: [ParamValue,ParamValue]; params: {'studentId': ParamValue,'occurrenceId': ParamValue} }
     'api.v1.responsavel.api.comunicados.acknowledge': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.responsavel.api.accept_agreement_proposal': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.responsavel.api.reject_agreement_proposal': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.responsavel.api.invoice_checkout': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.responsavel.api.create_wallet_top_up': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.inquiries.create': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
@@ -1819,6 +1832,9 @@ export type ScannedRoutes = {
     'api.v1.student_payments.asaas_charge': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.student_payments.send_boleto': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.agreements.store': { paramsTuple?: []; params?: {} }
+    'api.v1.agreement_proposals.store': { paramsTuple?: []; params?: {} }
+    'api.v1.agreement_proposals.approve': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'api.v1.agreement_proposals.reject': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.invoices.mark_paid': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.student_balance_transactions.store': { paramsTuple?: []; params?: {} }
     'api.v1.canteens.store': { paramsTuple?: []; params?: {} }

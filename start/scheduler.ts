@@ -1,3 +1,4 @@
+import GenerateAgreementProposalsJob from '#jobs/payments/generate_agreement_proposals_job'
 import GenerateMissingPaymentsJob from '#jobs/payments/generate_missing_payments_job'
 import GenerateInvoicesJob from '#jobs/payments/generate_invoices_job'
 import RefreshOverdueInvoicesJob from '#jobs/payments/refresh_overdue_invoices_job'
@@ -39,6 +40,9 @@ await CreateInvoiceAsaasChargesJob.schedule({}).cron('0 6 * * *').timezone(tz)
 
 // 06:30 - Enviar notificações consolidadas de invoices para responsáveis financeiros
 await SendInvoiceNotificationsJob.schedule({}).cron('30 6 * * *').timezone(tz)
+
+// 07:00 - Gerar propostas de acordo para faturas > 15 dias em atraso
+await GenerateAgreementProposalsJob.schedule({}).cron('0 7 * * *').timezone(tz)
 
 // 08:00 - Varredura diária de document URLs pendentes no Asaas
 await SweepPendingAsaasDocumentsJob.schedule({}).cron('0 8 * * *').timezone(tz)

@@ -18,11 +18,13 @@ import {
 const CHANGELOG_SEEN_KEY = 'anua:changelog-seen'
 
 function getLastSeenId(): string | null {
-  return localStorage.getItem(CHANGELOG_SEEN_KEY)
+  if (typeof window === 'undefined') return null
+  return window.localStorage.getItem(CHANGELOG_SEEN_KEY)
 }
 
 function markSeen(id: string) {
-  localStorage.setItem(CHANGELOG_SEEN_KEY, id)
+  if (typeof window === 'undefined') return
+  window.localStorage.setItem(CHANGELOG_SEEN_KEY, id)
 }
 
 function EntryList({ entries }: { entries: ChangelogEntry[] }) {

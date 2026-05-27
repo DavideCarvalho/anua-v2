@@ -2647,6 +2647,42 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/update_profile_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'api.v1.responsavel.api.student_agreement_proposals': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/responsavel/students/:studentId/agreement-proposals'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { studentId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/agreement_proposals/list_student_agreement_proposals_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/agreement_proposals/list_student_agreement_proposals_controller').default['handle']>>>
+    }
+  }
+  'api.v1.responsavel.api.accept_agreement_proposal': {
+    methods: ["POST"]
+    pattern: '/api/v1/responsavel/agreement-proposals/:id/accept'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/agreement_proposals/accept_agreement_proposal_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/agreement_proposals/accept_agreement_proposal_controller').default['handle']>>>
+    }
+  }
+  'api.v1.responsavel.api.reject_agreement_proposal': {
+    methods: ["POST"]
+    pattern: '/api/v1/responsavel/agreement-proposals/:id/reject'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/agreement_proposals/reject_responsible_agreement_proposal_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/agreement_proposals/reject_responsible_agreement_proposal_controller').default['handle']>>>
+    }
+  }
   'api.v1.responsavel.api.invoice_checkout': {
     methods: ["POST"]
     pattern: '/api/v1/responsavel/invoices/:id/checkout'
@@ -6065,6 +6101,54 @@ export interface Registry {
       query: ExtractQuery<InferInput<(typeof import('#validators/agreement').createAgreementValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/agreements/create_agreement_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/agreements/create_agreement_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.agreement_proposals.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/agreement-proposals'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/agreement_proposals/list_school_agreement_proposals_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/agreement_proposals/list_school_agreement_proposals_controller').default['handle']>>>
+    }
+  }
+  'api.v1.agreement_proposals.store': {
+    methods: ["POST"]
+    pattern: '/api/v1/agreement-proposals'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/agreement_proposals/create_agreement_proposal_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/agreement_proposals/create_agreement_proposal_controller').default['handle']>>>
+    }
+  }
+  'api.v1.agreement_proposals.approve': {
+    methods: ["POST"]
+    pattern: '/api/v1/agreement-proposals/:id/approve'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/agreement_proposals/approve_school_agreement_proposal_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/agreement_proposals/approve_school_agreement_proposal_controller').default['handle']>>>
+    }
+  }
+  'api.v1.agreement_proposals.reject': {
+    methods: ["POST"]
+    pattern: '/api/v1/agreement-proposals/:id/reject'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/agreement_proposals/reject_school_agreement_proposal_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/agreement_proposals/reject_school_agreement_proposal_controller').default['handle']>>>
     }
   }
   'api.v1.invoices.index': {

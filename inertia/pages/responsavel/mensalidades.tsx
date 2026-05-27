@@ -12,6 +12,7 @@ import {
   StudentPaymentsContainer,
   StudentPaymentsContainerSkeleton,
 } from '../../containers/responsavel/student-payments-container'
+import { AgreementProposalBanner } from '../../containers/responsavel/agreement-proposal-banner'
 
 function MensalidadesContent() {
   const { student, studentId, students, isLoaded, setDefaultStudent } = useSelectedStudent()
@@ -69,7 +70,12 @@ function MensalidadesContent() {
         </Card>
       )}
 
-      {studentId && student && <StudentPaymentsContainer studentId={studentId} />}
+      {studentId && student && (
+        <>
+          <AgreementProposalBanner studentId={studentId} />
+          <StudentPaymentsContainer studentId={studentId} />
+        </>
+      )}
     </div>
   )
 }

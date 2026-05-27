@@ -309,6 +309,9 @@ export interface ApiDefinition {
             acknowledge: typeof routes['api.v1.responsavel.api.comunicados.acknowledge']
           }
           updateProfile: typeof routes['api.v1.responsavel.api.update_profile']
+          studentAgreementProposals: typeof routes['api.v1.responsavel.api.student_agreement_proposals']
+          acceptAgreementProposal: typeof routes['api.v1.responsavel.api.accept_agreement_proposal']
+          rejectAgreementProposal: typeof routes['api.v1.responsavel.api.reject_agreement_proposal']
           invoiceCheckout: typeof routes['api.v1.responsavel.api.invoice_checkout']
           createWalletTopUp: typeof routes['api.v1.responsavel.api.create_wallet_top_up']
           listWalletTopUps: typeof routes['api.v1.responsavel.api.list_wallet_top_ups']
@@ -738,6 +741,12 @@ export interface ApiDefinition {
       }
       agreements: {
         store: typeof routes['api.v1.agreements.store']
+      }
+      agreementProposals: {
+        index: typeof routes['api.v1.agreement_proposals.index']
+        store: typeof routes['api.v1.agreement_proposals.store']
+        approve: typeof routes['api.v1.agreement_proposals.approve']
+        reject: typeof routes['api.v1.agreement_proposals.reject']
       }
       invoices: {
         index: typeof routes['api.v1.invoices.index']

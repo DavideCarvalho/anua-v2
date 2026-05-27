@@ -14,6 +14,17 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    id: '2026-05-28',
+    date: '28 de maio de 2026',
+    title: 'Acordos de Inadimplência',
+    items: [
+      { text: 'Acordos de inadimplência automáticos — o sistema identifica famílias com faturas em atraso e gera propostas de parcelamento pra você aprovar', audience: 'escola' },
+      { text: 'Novo fluxo de cobrança: aprove a proposta, o responsável recebe pelo app e aceita ou recusa, e as parcelas são geradas sozinhas', audience: 'escola' },
+      { text: 'Crie propostas manualmente selecionando faturas na tela de inadimplência', audience: 'escola' },
+      { text: 'Acompanhe tudo na aba "Propostas de acordo" dentro de Inadimplência, com auditoria de quem aprovou e quando', audience: 'escola' },
+    ],
+  },
+  {
     id: '2026-05-27',
     date: '27 de maio de 2026',
     title: 'Maio 2026',

@@ -46,6 +46,26 @@ export function registerAgreementApiRoutes() {
     .use([middleware.auth(), middleware.impersonation()])
 }
 
+export function registerAgreementProposalApiRoutes() {
+  router
+    .group(() => {
+      router
+        .get('/', [controllers.agreementProposals.ListSchoolAgreementProposals])
+        .as('agreement_proposals.index')
+      router
+        .post('/', [controllers.agreementProposals.CreateAgreementProposal])
+        .as('agreement_proposals.store')
+      router
+        .post('/:id/approve', [controllers.agreementProposals.ApproveSchoolAgreementProposal])
+        .as('agreement_proposals.approve')
+      router
+        .post('/:id/reject', [controllers.agreementProposals.RejectSchoolAgreementProposal])
+        .as('agreement_proposals.reject')
+    })
+    .prefix('/agreement-proposals')
+    .use([middleware.auth(), middleware.impersonation()])
+}
+
 export function registerInvoiceApiRoutes() {
   router
     .group(() => {

@@ -46,6 +46,7 @@ import { registerOccurrenceApiRoutes } from './occurrences.js'
 import {
   registerStudentPaymentApiRoutes,
   registerAgreementApiRoutes,
+  registerAgreementProposalApiRoutes,
   registerInvoiceApiRoutes,
   registerAuditApiRoutes,
   registerStudentBalanceTransactionApiRoutes,
@@ -162,6 +163,7 @@ export function registerApiRoutes() {
   registerOccurrenceApiRoutes()
   registerStudentPaymentApiRoutes()
   registerAgreementApiRoutes()
+  registerAgreementProposalApiRoutes()
   registerInvoiceApiRoutes()
   registerAuditApiRoutes()
   registerStudentBalanceTransactionApiRoutes()

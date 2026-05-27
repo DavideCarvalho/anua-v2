@@ -11,6 +11,8 @@ import type AcademicPeriodDashboardTransformer from '#transformers/academic_peri
 import type AcademicPeriodTransformer from '#transformers/academic_period_transformer'
 import type AcademicSubPeriodTransformer from '#transformers/academic_sub_period_transformer'
 import type AchievementTransformer from '#transformers/achievement_transformer'
+import type AgreementProposalInvoiceTransformer from '#transformers/agreement_proposal_invoice_transformer'
+import type AgreementProposalTransformer from '#transformers/agreement_proposal_transformer'
 import type AiThreadDetailTransformer from '#transformers/ai_thread_detail_transformer'
 import type AiThreadMessageTransformer from '#transformers/ai_thread_message_transformer'
 import type AiThreadTransformer from '#transformers/ai_thread_transformer'
@@ -150,6 +152,14 @@ export namespace Data {
   export type Achievement = InferData<AchievementTransformer>
   export namespace Achievement {
     export type Variants = InferVariants<AchievementTransformer>
+  }
+  export type AgreementProposalInvoice = InferData<AgreementProposalInvoiceTransformer>
+  export namespace AgreementProposalInvoice {
+    export type Variants = InferVariants<AgreementProposalInvoiceTransformer>
+  }
+  export type AgreementProposal = InferData<AgreementProposalTransformer>
+  export namespace AgreementProposal {
+    export type Variants = InferVariants<AgreementProposalTransformer>
   }
   export type AiThreadDetail = InferData<AiThreadDetailTransformer>
   export namespace AiThreadDetail {

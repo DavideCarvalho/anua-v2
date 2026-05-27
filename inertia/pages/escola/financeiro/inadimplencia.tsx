@@ -7,7 +7,9 @@ import { SimplifiedPageShell } from '../../../components/escola/simplified-page-
 import { SimplifiedBasicList } from '../../../components/escola/simplified-basic-list'
 import { EscolaLayout } from '../../../components/layouts'
 import { Button } from '../../../components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
 import { StudentPaymentsContainer } from '../../../containers/student-payments-container'
+import { AgreementProposalsContainer } from '../../../containers/agreement-proposals-container'
 import {
   readEscolaDashboardViewMode,
   type EscolaDashboardViewMode,
@@ -89,7 +91,18 @@ export default function InadimplenciaPage() {
           <p className="text-muted-foreground">Acompanhe alunos e pagamentos em atraso</p>
         </div>
 
-        {paymentsContainer}
+        <Tabs defaultValue="payments">
+          <TabsList>
+            <TabsTrigger value="payments">Pagamentos em atraso</TabsTrigger>
+            <TabsTrigger value="proposals">Propostas de acordo</TabsTrigger>
+          </TabsList>
+          <TabsContent value="payments" className="mt-4">
+            {paymentsContainer}
+          </TabsContent>
+          <TabsContent value="proposals" className="mt-4">
+            <AgreementProposalsContainer />
+          </TabsContent>
+        </Tabs>
       </div>
     </EscolaLayout>
   )

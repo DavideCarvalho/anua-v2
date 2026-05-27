@@ -245,6 +245,87 @@ export class AgreementEarlyDiscountSchema extends BaseModel {
   declare updatedAt: DateTime
 }
 
+export class AgreementProposalSchema extends BaseModel {
+  static $columns = ['acceptedAt', 'approvedAt', 'approvedById', 'cancellationReason', 'cancelledAt', 'createdAt', 'expiresAt', 'id', 'installments', 'overdueDays', 'rejectedAt', 'rejectedById', 'rejectionReason', 'schoolId', 'sentAt', 'status', 'studentId', 'totalAmount', 'updatedAt'] as const
+  $columns = AgreementProposalSchema.$columns
+  @column.dateTime()
+  declare acceptedAt: DateTime | null
+  @column.dateTime()
+  declare approvedAt: DateTime | null
+  @column()
+  declare approvedById: string | null
+  @column()
+  declare cancellationReason: string | null
+  @column.dateTime()
+  declare cancelledAt: DateTime | null
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column.dateTime()
+  declare expiresAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare installments: number
+  @column()
+  declare overdueDays: number
+  @column.dateTime()
+  declare rejectedAt: DateTime | null
+  @column()
+  declare rejectedById: string | null
+  @column()
+  declare rejectionReason: string | null
+  @column()
+  declare schoolId: string
+  @column.dateTime()
+  declare sentAt: DateTime | null
+  @column()
+  declare status: string
+  @column()
+  declare studentId: string
+  @column()
+  declare totalAmount: number
+  @column.dateTime()
+  declare updatedAt: DateTime
+}
+
+export class AgreementProposalInvoiceSchema extends BaseModel {
+  static $columns = ['amount', 'createdAt', 'id', 'invoiceId', 'overdueDays', 'proposalId'] as const
+  $columns = AgreementProposalInvoiceSchema.$columns
+  @column()
+  declare amount: number
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare invoiceId: string
+  @column()
+  declare overdueDays: number
+  @column()
+  declare proposalId: string
+}
+
+export class AnnouncementTemplateSchema extends BaseModel {
+  static $columns = ['body', 'createdAt', 'createdById', 'id', 'name', 'schoolId', 'title', 'updatedAt'] as const
+  $columns = AnnouncementTemplateSchema.$columns
+  @column()
+  declare body: string
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare createdById: string | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare name: string
+  @column()
+  declare schoolId: string
+  @column()
+  declare title: string
+  @column.dateTime()
+  declare updatedAt: DateTime
+}
+
 export class AssignmentSchema extends BaseModel {
   static $columns = ['academicPeriodId', 'createdAt', 'description', 'dueDate', 'grade', 'id', 'name', 'subPeriodId', 'teacherHasClassId', 'updatedAt'] as const
   $columns = AssignmentSchema.$columns
@@ -769,7 +850,7 @@ export class CommentLikeSchema extends BaseModel {
 }
 
 export class ContractSchema extends BaseModel {
-  static $columns = ['academicPeriodId', 'ammount', 'createdAt', 'description', 'docusealTemplateId', 'endDate', 'enrollmentPaymentUntilDays', 'enrollmentValue', 'enrollmentValueInstallments', 'flexibleInstallments', 'hasInsurance', 'id', 'installments', 'isActive', 'name', 'paymentType', 'schoolId', 'updatedAt'] as const
+  static $columns = ['academicPeriodId', 'ammount', 'createdAt', 'description', 'docusealTemplateId', 'endDate', 'enrollmentFeeDueDays', 'enrollmentPaymentUntilDays', 'enrollmentValue', 'enrollmentValueInstallments', 'flexibleInstallments', 'hasInsurance', 'id', 'installments', 'isActive', 'name', 'paymentType', 'schoolId', 'updatedAt'] as const
   $columns = ContractSchema.$columns
   @column()
   declare academicPeriodId: string | null
@@ -783,6 +864,8 @@ export class ContractSchema extends BaseModel {
   declare docusealTemplateId: string | null
   @column.date()
   declare endDate: DateTime | null
+  @column()
+  declare enrollmentFeeDueDays: number
   @column()
   declare enrollmentPaymentUntilDays: number | null
   @column()
@@ -2992,6 +3075,52 @@ export class StudentDocumentSchema extends BaseModel {
   declare updatedAt: DateTime
 }
 
+export class StudentDocumentFileSchema extends BaseModel {
+  static $columns = ['createdAt', 'fileName', 'fileUrl', 'id', 'mimeType', 'ord', 'size', 'submissionId'] as const
+  $columns = StudentDocumentFileSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column()
+  declare fileName: string
+  @column()
+  declare fileUrl: string
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare mimeType: string
+  @column()
+  declare ord: number
+  @column()
+  declare size: number
+  @column()
+  declare submissionId: string
+}
+
+export class StudentDocumentSubmissionSchema extends BaseModel {
+  static $columns = ['contractDocumentId', 'createdAt', 'id', 'rejectionReason', 'reviewedAt', 'reviewedBy', 'status', 'studentId', 'submittedAt', 'updatedAt'] as const
+  $columns = StudentDocumentSubmissionSchema.$columns
+  @column()
+  declare contractDocumentId: string
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare rejectionReason: string | null
+  @column.dateTime()
+  declare reviewedAt: DateTime | null
+  @column()
+  declare reviewedBy: string | null
+  @column()
+  declare status: any
+  @column()
+  declare studentId: string
+  @column.dateTime()
+  declare submittedAt: DateTime | null
+  @column.dateTime()
+  declare updatedAt: DateTime
+}
+
 export class StudentEmergencyContactSchema extends BaseModel {
   static $columns = ['createdAt', 'id', 'name', 'order', 'phone', 'relationship', 'studentId', 'updatedAt', 'userId'] as const
   $columns = StudentEmergencyContactSchema.$columns
@@ -3013,6 +3142,29 @@ export class StudentEmergencyContactSchema extends BaseModel {
   declare updatedAt: DateTime
   @column()
   declare userId: string | null
+}
+
+export class StudentFarmSchema extends BaseModel {
+  static $columns = ['createdAt', 'id', 'lastDailyAt', 'plots', 'pointsEarnedToday', 'pointsResetAt', 'seeds', 'studentId', 'updatedAt'] as const
+  $columns = StudentFarmSchema.$columns
+  @column.dateTime()
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column.dateTime()
+  declare lastDailyAt: DateTime | null
+  @column()
+  declare plots: any
+  @column()
+  declare pointsEarnedToday: number
+  @column.date()
+  declare pointsResetAt: DateTime | null
+  @column()
+  declare seeds: number
+  @column()
+  declare studentId: string
+  @column.dateTime()
+  declare updatedAt: DateTime
 }
 
 export class StudentGamificationSchema extends BaseModel {
@@ -3738,7 +3890,7 @@ export class TuitionTransferSchema extends BaseModel {
 }
 
 export class UserSchema extends BaseModel {
-  static $columns = ['active', 'asaasCustomerId', 'birthDate', 'createdAt', 'deletedAt', 'deletedBy', 'documentNumber', 'documentType', 'email', 'emailVerifiedAt', 'grossSalary', 'id', 'imageUrl', 'lastLoggedInAt', 'name', 'phone', 'roleId', 'schoolChainId', 'schoolId', 'slug', 'updatedAt', 'whatsappContact'] as const
+  static $columns = ['active', 'asaasCustomerId', 'birthDate', 'createdAt', 'deletedAt', 'deletedBy', 'documentNumber', 'documentType', 'email', 'emailVerifiedAt', 'grossSalary', 'id', 'imageUrl', 'lastLoggedInAt', 'name', 'phone', 'pushSubscription', 'roleId', 'schoolChainId', 'schoolId', 'slug', 'updatedAt', 'whatsappContact'] as const
   $columns = UserSchema.$columns
   @column()
   declare active: boolean
@@ -3772,6 +3924,8 @@ export class UserSchema extends BaseModel {
   declare name: string
   @column()
   declare phone: string | null
+  @column()
+  declare pushSubscription: string | null
   @column()
   declare roleId: string
   @column()
@@ -3960,7 +4114,7 @@ export class AiThreadMessageSchema extends BaseModel {
 }
 
 export class AiThreadSchema extends BaseModel {
-  static $columns = ['channel', 'contextSummary', 'createdAt', 'id', 'persona', 'schoolId', 'summaryUpToMessageId', 'title', 'updatedAt', 'userId'] as const
+  static $columns = ['channel', 'contextSummary', 'createdAt', 'id', 'persona', 'schoolId', 'summaryUpToMessageId', 'surface', 'title', 'updatedAt', 'userId'] as const
   $columns = AiThreadSchema.$columns
   @column()
   declare channel: string
@@ -3976,6 +4130,8 @@ export class AiThreadSchema extends BaseModel {
   declare schoolId: string | null
   @column()
   declare summaryUpToMessageId: string | null
+  @column()
+  declare surface: string
   @column()
   declare title: string | null
   @column.dateTime()

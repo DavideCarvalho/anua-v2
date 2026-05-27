@@ -897,4 +897,13 @@ export const controllers = {
   whatsapp: {
     WhatsappWebhook: () => import('#controllers/whatsapp/whatsapp_webhook_controller'),
   },
+  agreementProposals: {
+    ListSchoolAgreementProposals: () => import('#controllers/agreement_proposals/list_school_agreement_proposals_controller'),
+    ListStudentAgreementProposals: () => import('#controllers/agreement_proposals/list_student_agreement_proposals_controller'),
+    AcceptAgreementProposal: () => import('#controllers/agreement_proposals/accept_agreement_proposal_controller'),
+    CreateAgreementProposal: () => import('#controllers/agreement_proposals/create_agreement_proposal_controller'),
+    ApproveSchoolAgreementProposal: () => import('#controllers/agreement_proposals/approve_school_agreement_proposal_controller'),
+    RejectSchoolAgreementProposal: () => import('#controllers/agreement_proposals/reject_school_agreement_proposal_controller'),
+    RejectResponsibleAgreementProposal: () => import('#controllers/agreement_proposals/reject_responsible_agreement_proposal_controller'),
+  },
 }

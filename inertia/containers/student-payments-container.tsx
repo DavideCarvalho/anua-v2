@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
+import { useState, useMemo } from 'react'
+import { useQuery, useMutation, useQueryClient, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
 import type { LucideIcon } from 'lucide-react'
@@ -38,7 +38,19 @@ import {
   Pencil,
   Handshake,
   FilterX,
+  FileText,
 } from 'lucide-react'
+import { toast } from 'sonner'
+import { Checkbox } from '../components/ui/checkbox'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../components/ui/dialog'
+import { Label } from '../components/ui/label'
 import { formatCurrency } from '../lib/utils'
 import { EditPaymentModal } from './student-payments/edit-payment-modal'
 import { MarkPaidModal } from './student-payments/mark-paid-modal'
@@ -232,6 +244,10 @@ function StudentPaymentsContent({
 }) {
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null)
   const [activeModal, setActiveModal] = useState<ModalType>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [proposalDialogOpen, setProposalDialogOpen] = useState(false)
+  const [proposalInstallments, setProposalInstallments] = useState(2)
+  const queryClient = useQueryClient()
 
   function openModal(payment: Payment, modal: ModalType) {
     setSelectedPayment(payment)
@@ -242,6 +258,19 @@ function StudentPaymentsContent({
     setActiveModal(null)
     setSelectedPayment(null)
   }
+
+  function toggleSelection(paymentId: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(paymentId)) next.delete(paymentId)
+      else next.add(paymentId)
+      return next
+    })
+  }
+
+  const createProposalMutation = useMutation(
+    api.api.v1.agreementProposals.store.mutationOptions()
+  )
 
   // URL state with nuqs
   const [filters, setFilters] = useQueryStates({
@@ -296,6 +325,43 @@ function StudentPaymentsContent({
 
   const payments: Payment[] = data?.data ?? []
   const meta: PaginationMeta | undefined = data?.metadata
+
+  const selectedPayments = useMemo(
+    () => payments.filter((p) => selectedIds.has(p.id)),
+    [payments, selectedIds]
+  )
+
+  const selectedStudentIds = useMemo(
+    () => new Set(selectedPayments.map((p) => p.student?.id).filter(Boolean)),
+    [selectedPayments]
+  )
+
+  const canCreateProposal =
+    selectedPayments.length >= 2 && selectedStudentIds.size === 1
+
+  const proposalError = selectedPayments.length >= 2 && selectedStudentIds.size > 1
+    ? 'Selecione faturas do mesmo aluno'
+    : null
+
+  async function handleCreateProposal() {
+    try {
+      const invoiceIds = selectedPayments
+        .map((p) => p.invoiceId)
+        .filter((id): id is string => !!id)
+
+      await createProposalMutation.mutateAsync({
+        body: { invoiceIds, installments: proposalInstallments },
+      })
+      toast.success('Proposta de acordo criada')
+      setSelectedIds(new Set())
+      setProposalDialogOpen(false)
+      await queryClient.invalidateQueries({
+        queryKey: api.api.v1.agreementProposals.index.pathKey(),
+      })
+    } catch {
+      toast.error('Erro ao criar proposta')
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -436,6 +502,7 @@ function StudentPaymentsContent({
             <table className="w-full">
               <thead className="bg-muted/50">
                 <tr>
+                  {activeStatus === 'OVERDUE' && <th className="w-10 p-4" />}
                   <th className="text-left p-4 font-medium">Aluno</th>
                   <th className="text-left p-4 font-medium">Referência</th>
                   <th className="text-left p-4 font-medium">Vencimento</th>
@@ -452,7 +519,15 @@ function StudentPaymentsContent({
                   const daysOverdue = getDaysOverdue(payment.status, payment.dueDate)
 
                   return (
-                    <tr key={payment.id} className="border-t hover:bg-muted/30 transition-colors">
+                    <tr key={payment.id} className={`border-t hover:bg-muted/30 transition-colors ${selectedIds.has(payment.id) ? 'bg-primary/5' : ''}`}>
+                      {activeStatus === 'OVERDUE' && (
+                        <td className="p-4">
+                          <Checkbox
+                            checked={selectedIds.has(payment.id)}
+                            onCheckedChange={() => toggleSelection(payment.id)}
+                          />
+                        </td>
+                      )}
                       <td className="p-4">
                         <div className="flex items-center gap-3">
                           <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
@@ -552,6 +627,92 @@ function StudentPaymentsContent({
           )}
         </div>
       )}
+
+      {selectedIds.size > 0 && activeStatus === 'OVERDUE' && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-lg bg-foreground px-4 py-3 text-background shadow-lg">
+          <span className="text-sm font-medium">
+            {selectedIds.size} fatura{selectedIds.size > 1 ? 's' : ''} selecionada{selectedIds.size > 1 ? 's' : ''}
+          </span>
+          {proposalError && (
+            <span className="text-xs text-destructive">{proposalError}</span>
+          )}
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => setSelectedIds(new Set())}
+          >
+            Limpar
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => {
+              if (!canCreateProposal) {
+                if (selectedIds.size < 2) toast.error('Selecione pelo menos 2 faturas')
+                else if (selectedStudentIds.size > 1) toast.error('Selecione faturas do mesmo aluno')
+                return
+              }
+              const total = selectedPayments.reduce((s, p) => s + Number(p.amount ?? 0), 0)
+              setProposalInstallments(total > 50000 ? 3 : 2)
+              setProposalDialogOpen(true)
+            }}
+          >
+            <FileText className="mr-1 h-3.5 w-3.5" />
+            Criar proposta de acordo
+          </Button>
+        </div>
+      )}
+
+      <Dialog open={proposalDialogOpen} onOpenChange={setProposalDialogOpen}>
+        <DialogContent className="z-[110]">
+          <DialogHeader>
+            <DialogTitle>Criar proposta de acordo</DialogTitle>
+            <DialogDescription>
+              Proposta para {selectedPayments[0]?.student?.user?.name ?? 'aluno'} com {selectedPayments.length} faturas em atraso.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="rounded-lg bg-muted/50 p-3 space-y-2">
+              <p className="text-sm font-medium">
+                Total: {formatCurrency(selectedPayments.reduce((s, p) => s + Number(p.amount ?? 0), 0))}
+              </p>
+              <div className="flex flex-wrap gap-1">
+                {selectedPayments.map((p) => (
+                  <span key={p.id} className="text-xs bg-background px-2 py-1 rounded ring-1 ring-foreground/10">
+                    {p.month}/{p.year} — {formatCurrency(Number(p.amount ?? 0))}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Parcelas</Label>
+              <Select
+                value={String(proposalInstallments)}
+                onValueChange={(v) => setProposalInstallments(Number(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2">2x de {formatCurrency(Math.ceil(selectedPayments.reduce((s, p) => s + Number(p.amount ?? 0), 0) / 2))}</SelectItem>
+                  <SelectItem value="3">3x de {formatCurrency(Math.ceil(selectedPayments.reduce((s, p) => s + Number(p.amount ?? 0), 0) / 3))}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setProposalDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleCreateProposal}
+              disabled={createProposalMutation.isPending}
+            >
+              <Handshake className="mr-1 h-3.5 w-3.5" />
+              Criar proposta
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {selectedPayment && activeModal === 'edit' && (
         <EditPaymentModal

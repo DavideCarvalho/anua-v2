@@ -42,6 +42,9 @@ export type NotificationType =
   | 'ACADEMIC_DIGEST_DAILY'
   | 'ACADEMIC_DIGEST_WEEKLY'
   | 'EXPORT_READY'
+  | 'AGREEMENT_PROPOSAL'
+  | 'AGREEMENT_PROPOSAL_ACCEPTED'
+  | 'AGREEMENT_PROPOSAL_REJECTED'
 
 export default class Notification extends BaseModel {
   static table = 'Notification'
