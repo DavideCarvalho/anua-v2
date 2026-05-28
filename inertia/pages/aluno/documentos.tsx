@@ -15,7 +15,9 @@ export default function AlunoDocumentosPage() {
         </div>
         {user?.studentId ? (
           <StudentDocumentsContainer studentId={user.studentId} studentName={user.name} />
-        ) : null}
+        ) : (
+          <p className="text-muted-foreground">Nenhuma informação disponível.</p>
+        )}
       </div>
     </AlunoLayout>
   )

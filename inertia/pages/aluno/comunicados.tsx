@@ -6,7 +6,13 @@ export default function AlunoComunicadosPage() {
   return (
     <AlunoLayout>
       <Head title="Comunicados" />
-      <ComunicadosContent />
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Comunicados</h1>
+          <p className="text-muted-foreground">Suas notificações e avisos da escola</p>
+        </div>
+        <ComunicadosContent />
+      </div>
     </AlunoLayout>
   )
 }

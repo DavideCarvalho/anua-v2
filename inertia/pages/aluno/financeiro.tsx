@@ -13,7 +13,11 @@ export default function AlunoFinanceiroPage() {
           <h1 className="text-2xl font-bold tracking-tight">Financeiro</h1>
           <p className="text-muted-foreground">Suas mensalidades e faturas</p>
         </div>
-        {user?.studentId ? <StudentPaymentsContainer studentId={user.studentId} /> : null}
+        {user?.studentId ? (
+          <StudentPaymentsContainer studentId={user.studentId} />
+        ) : (
+          <p className="text-muted-foreground">Nenhuma informação disponível.</p>
+        )}
       </div>
     </AlunoLayout>
   )
