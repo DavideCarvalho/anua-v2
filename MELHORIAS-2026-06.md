@@ -283,10 +283,14 @@ Documento de melhorias organizado por módulo funcional. Cada módulo tem três 
 
 ### Polish
 
-#### 4.1 Comunicados sem rich text editor `P2` `[S]`
-- **Onde:** `inertia/pages/escola/comunicados/novo.tsx`
-- **Problema:** Editor de comunicado é textarea simples. Sem negrito, itálico, lista, link.
-- **Fix:** Substituir por Tiptap (já usado no chat de IA) com toolbar mínima: bold, italic, lista, link.
+#### 4.1 ~~Comunicados sem rich text editor~~ `P2` `[S]` FEITO
+- [x] **Onde:** `inertia/components/ui/rich-text-editor.tsx` (novo), `inertia/components/ui/announcement-body.tsx` (novo), `app/lib/sanitize_announcement_html.ts` (novo), forms de novo/editar/preview de comunicado, lista da escola e portal do responsável.
+- **Fix completo:**
+  - **Editor:** componente `RichTextEditor` reutilizável usando Tiptap (`StarterKit` + `Link` + `Placeholder`). Toolbar: negrito, itálico, tachado, lista com marcadores, lista numerada, link com prompt de URL (valida protocolo http/https/mailto).
+  - **Sanitização backend:** novo `sanitizeAnnouncementHtml` via `sanitize-html@2.13.1` (pinned). Whitelist mínima: `p, br, strong, b, em, i, s, u, ul, ol, li, a`. Links forçam `rel="noopener noreferrer nofollow"` e `target="_blank"`. Aplicado em `create_school_announcement_controller` e `update_school_announcement_controller`.
+  - **Render:** componente `AnnouncementBody` usa `dangerouslySetInnerHTML` confiando na sanitização backend, com classes `prose prose-sm`. Aplicado em `responsavel/comunicados`, `escola/comunicados/preview` e usado direto. Lista de comunicados usa novo util `htmlToPlainText` pra `line-clamp` preservar 3 linhas de texto puro.
+  - **Sync:** `setContent` no `useEffect` quando valor externo muda (suporta reset de form e carregamento na edição).
+- **Validado 2026-05-28:** Typecheck verde. Sanitização defensiva em camadas (backend salva sanitizado; render confia no banco).
 
 #### 4.2 ~~Comunicados sem anexos~~ `P2` `[S]` FALSO POSITIVO
 - [~] **Onde:** `inertia/pages/escola/comunicados/novo.tsx`

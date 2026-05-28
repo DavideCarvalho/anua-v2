@@ -20,6 +20,7 @@ import {
 import { Input } from '../../../components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover'
 import { Textarea } from '../../../components/ui/textarea'
+import { RichTextEditor } from '../../../components/ui/rich-text-editor'
 import {
   readEscolaDashboardViewMode,
   type EscolaDashboardViewMode,
@@ -569,12 +570,11 @@ export default function EditarComunicadoPage({ comunicadoId }: Props) {
                 <label htmlFor="body" className="text-sm font-medium">
                   Mensagem
                 </label>
-                <Textarea
+                <RichTextEditor
                   id="body"
                   value={body}
-                  onChange={(event) => setBody(event.target.value)}
-                  rows={8}
-                  required
+                  onChange={setBody}
+                  placeholder="Escreva o comunicado para os responsáveis"
                 />
               </div>
 

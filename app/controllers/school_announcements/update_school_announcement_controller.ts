@@ -13,6 +13,7 @@ import {
   syncSchoolAnnouncementAudience,
 } from '#services/school_announcements/school_announcement_audience_service'
 import AppException from '#exceptions/app_exception'
+import { sanitizeAnnouncementHtml } from '#lib/sanitize_announcement_html'
 
 export default class UpdateSchoolAnnouncementController {
   async handle({
@@ -89,7 +90,8 @@ export default class UpdateSchoolAnnouncementController {
         announcement.useTransaction(trx)
         announcement.merge({
           title: payload.title ?? announcement.title,
-          body: payload.body ?? announcement.body,
+          body:
+            payload.body !== undefined ? sanitizeAnnouncementHtml(payload.body) : announcement.body,
           requiresAcknowledgement,
           acknowledgementDueAt,
         })

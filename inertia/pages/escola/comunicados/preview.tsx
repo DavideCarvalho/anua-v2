@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from '../../../components/ui/card'
+import { AnnouncementBody } from '../../../components/ui/announcement-body'
 
 interface PreviewData {
   title: string
@@ -48,9 +49,7 @@ function PreviewContent({ data }: { data: PreviewData }) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
-            {data.body}
-          </p>
+          <AnnouncementBody html={data.body} className="text-sm leading-relaxed" />
 
           {data.attachments.length > 0 && (
             <div className="mt-3 space-y-2">

@@ -12,6 +12,7 @@ import {
   syncSchoolAnnouncementAudience,
 } from '#services/school_announcements/school_announcement_audience_service'
 import AppException from '#exceptions/app_exception'
+import { sanitizeAnnouncementHtml } from '#lib/sanitize_announcement_html'
 
 export default class CreateSchoolAnnouncementController {
   async handle({
@@ -48,7 +49,7 @@ export default class CreateSchoolAnnouncementController {
           {
             schoolId: selectedSchoolIds[0],
             title: payload.title,
-            body: payload.body,
+            body: sanitizeAnnouncementHtml(payload.body),
             status: 'DRAFT',
             publishedAt: null,
             requiresAcknowledgement,

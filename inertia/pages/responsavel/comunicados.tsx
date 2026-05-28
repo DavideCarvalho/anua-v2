@@ -10,6 +10,7 @@ import { ResponsavelLayout } from '../../components/layouts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
 import { FilePreviewLightbox, type PreviewFile } from '../../components/ui/file-preview-lightbox'
+import { AnnouncementBody } from '../../components/ui/announcement-body'
 
 type AnnouncementItem = {
   id: string
@@ -146,9 +147,7 @@ function ComunicadosContent() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
-              {announcement.body}
-            </p>
+            <AnnouncementBody html={announcement.body} className="text-sm leading-relaxed" />
 
             {announcement.attachments && announcement.attachments.length > 0 && (
               <div className="mt-3 space-y-2">

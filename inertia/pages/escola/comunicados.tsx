@@ -13,6 +13,7 @@ import { EscolaLayoutSimplificado } from '../../components/layouts/escola-layout
 import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
+import { htmlToPlainText } from '../../lib/html-text'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -245,7 +246,7 @@ export default function EscolaComunicadosPage() {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <p className="line-clamp-3 text-sm text-muted-foreground">
-                      {announcement.body}
+                      {htmlToPlainText(announcement.body)}
                     </p>
 
                     {announcement.status === 'DRAFT' && (
@@ -345,7 +346,9 @@ export default function EscolaComunicadosPage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p className="line-clamp-3 text-sm text-muted-foreground">{announcement.body}</p>
+                <p className="line-clamp-3 text-sm text-muted-foreground">
+                  {htmlToPlainText(announcement.body)}
+                </p>
 
                 <div className="flex items-center gap-2">
                   {announcement.status === 'DRAFT' && (
