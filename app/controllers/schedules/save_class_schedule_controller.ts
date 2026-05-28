@@ -40,7 +40,19 @@ export default class SaveClassScheduleController {
           .where('academicPeriodId', academicPeriodId)
           .where('isActive', true)
           .where('isCanceled', false)
+          .orderBy('createdAt', 'desc')
           .first()
+
+        // Garante no máximo um calendário ativo por turma: desativa quaisquer
+        // outros calendários ativos da turma (de outro período ou stale) antes
+        // de reaproveitar/criar o desta grade.
+        const deactivateOthers = Calendar.query({ client: trx })
+          .where('classId', classId)
+          .where('isActive', true)
+        if (calendar) {
+          deactivateOthers.whereNot('id', calendar.id)
+        }
+        await deactivateOthers.update({ isActive: false })
 
         if (!calendar) {
           calendar = await Calendar.create(

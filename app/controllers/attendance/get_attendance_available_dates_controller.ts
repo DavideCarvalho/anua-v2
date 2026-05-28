@@ -69,6 +69,7 @@ export default class GetAttendanceAvailableDatesController {
       .where('academicPeriodId', academicPeriodId)
       .where('isActive', true)
       .where('isCanceled', false)
+      .orderBy('createdAt', 'desc')
       .first()
 
     if (!calendar) {

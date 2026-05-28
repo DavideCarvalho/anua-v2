@@ -30,6 +30,7 @@ export default class BatchCreateAttendanceController {
       .where('academicPeriodId', data.academicPeriodId)
       .where('isActive', true)
       .where('isCanceled', false)
+      .orderBy('createdAt', 'desc')
       .first()
 
     if (!calendar) {

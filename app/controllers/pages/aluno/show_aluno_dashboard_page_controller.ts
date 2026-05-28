@@ -25,6 +25,7 @@ async function getTodayClasses(student: Student): Promise<TodayClass[]> {
     .where('classId', student.classId)
     .where('isActive', true)
     .where('isCanceled', false)
+    .orderBy('createdAt', 'desc')
     .first()
   if (!calendar) return []
 

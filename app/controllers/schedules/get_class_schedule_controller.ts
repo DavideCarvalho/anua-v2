@@ -21,6 +21,7 @@ export default class GetClassScheduleController {
       .where('academicPeriodId', academicPeriodId)
       .where('isActive', true)
       .where('isCanceled', false)
+      .orderBy('createdAt', 'desc')
       .first()
 
     // Get slots if calendar exists

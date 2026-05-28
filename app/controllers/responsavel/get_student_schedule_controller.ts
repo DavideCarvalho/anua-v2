@@ -98,6 +98,7 @@ export default class GetStudentScheduleController {
       .where('academicPeriodId', activeAcademicPeriod.id)
       .where('isActive', true)
       .where('isCanceled', false)
+      .orderBy('createdAt', 'desc')
       .first()
 
     if (!calendar) {

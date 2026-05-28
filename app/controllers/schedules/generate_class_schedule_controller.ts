@@ -182,6 +182,7 @@ export default class GenerateClassScheduleController {
         .where('classId', classId)
         .where('academicPeriodId', academicPeriodId)
         .where('isActive', true)
+        .orderBy('createdAt', 'desc')
         .first()
 
       if (currentCalendar) {
