@@ -20,11 +20,21 @@ export interface SendNotificationParams {
   message: string
   data?: Record<string, unknown>
   actionUrl?: string
+  /**
+   * Sobrescreve canais quando o caller já cuida de um deles (ex: comunicado
+   * dispara email rico via `SchoolAnnouncementMail` e passa `email: false`
+   * aqui pra evitar duplicidade). Quando omitido, segue `NotificationPreference`.
+   */
+  channels?: {
+    email?: boolean
+    whatsApp?: boolean
+    push?: boolean
+  }
 }
 
 export class NotificationService {
   async send(params: SendNotificationParams): Promise<Notification> {
-    const { userId, type, title, message, data, actionUrl } = params
+    const { userId, type, title, message, data, actionUrl, channels } = params
 
     const user = await User.find(userId)
     if (!user) {
@@ -53,8 +63,10 @@ export class NotificationService {
       .where('notificationType', type)
       .first()
 
-    const enableEmail = pref ? pref.enableEmail : true
-    const enableWhatsApp = pref ? pref.enableWhatsApp : false
+    const enableEmail =
+      channels?.email !== undefined ? channels.email : pref ? pref.enableEmail : true
+    const enableWhatsApp =
+      channels?.whatsApp !== undefined ? channels.whatsApp : pref ? pref.enableWhatsApp : false
 
     const dispatches: Promise<unknown>[] = []
 
@@ -80,7 +92,8 @@ export class NotificationService {
       )
     }
 
-    const enablePush = pref ? pref.enablePush : true
+    const enablePush =
+      channels?.push !== undefined ? channels.push : pref ? pref.enablePush : true
     if (enablePush && user.pushSubscription) {
       const { sendPushNotification } = await import('#services/push_notification_service')
       dispatches.push(

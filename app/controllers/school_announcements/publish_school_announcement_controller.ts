@@ -2,10 +2,10 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import mail from '@adonisjs/mail/services/main'
+import logger from '@adonisjs/core/services/logger'
 import SchoolAnnouncement from '#models/school_announcement'
 import SchoolAnnouncementRecipient from '#models/school_announcement_recipient'
 import StudentHasResponsible from '#models/student_has_responsible'
-import Notification from '#models/notification'
 import User from '#models/user'
 import School from '#models/school'
 import Student from '#models/student'
@@ -18,6 +18,8 @@ import {
   resolveAnnouncementAudienceConfig,
   resolveAudienceStudentIds,
 } from '#services/school_announcements/school_announcement_audience_service'
+import { notificationService } from '#services/notification_service'
+import { htmlToPlainText } from '#lib/html_to_plain_text'
 
 export default class PublishSchoolAnnouncementController {
   async handle({
@@ -98,13 +100,16 @@ export default class PublishSchoolAnnouncementController {
 
       const responsibleUserMap = new Map(responsibleUsers.map((u) => [u.id, u]))
 
-      await db.transaction(async (trx) => {
+      // Commit do publish + recipients dentro da transação. O dispatch das
+      // notificações (4 canais via notificationService) acontece pós-commit
+      // pra não bloquear/duplicar se algum canal externo falhar.
+      const recipientRows = await db.transaction(async (trx) => {
         announcement.useTransaction(trx)
         announcement.status = 'PUBLISHED'
         announcement.publishedAt = DateTime.now()
         await announcement.save()
 
-        const rows = await Promise.all(
+        return Promise.all(
           responsibleIdList.map((responsibleId) =>
             SchoolAnnouncementRecipient.create(
               {
@@ -118,29 +123,31 @@ export default class PublishSchoolAnnouncementController {
             )
           )
         )
+      })
 
-        for (const recipient of rows) {
-          const actionUrl = `/responsavel/comunicados?anuncio=${announcement.id}`
-          const notification = await Notification.create({
+      const plainBody = htmlToPlainText(announcement.body)
+      const actionUrl = `/responsavel/comunicados?anuncio=${announcement.id}`
+
+      for (const recipient of recipientRows) {
+        try {
+          // notificationService cobre in-app, push e WhatsApp respeitando
+          // NotificationPreference do destinatário. Email é desabilitado aqui
+          // (`channels.email: false`) porque mandamos email rico via
+          // SchoolAnnouncementMail logo abaixo.
+          const notification = await notificationService.send({
             userId: recipient.responsibleId,
             type: 'SYSTEM_ANNOUNCEMENT',
             title: announcement.title,
-            message: announcement.body,
+            message: plainBody || announcement.title,
             data: {
               kind: 'school_announcement',
               announcementId: announcement.id,
             },
-            isRead: false,
-            sentViaInApp: true,
-            sentViaEmail: true,
-            sentViaPush: false,
-            sentViaSms: false,
-            sentViaWhatsApp: false,
             actionUrl,
+            channels: { email: false },
           })
 
           recipient.notificationId = notification.id
-          await recipient.save()
 
           const recipientUser = responsibleUserMap.get(recipient.responsibleId)
           if (recipientUser?.email) {
@@ -154,14 +161,23 @@ export default class PublishSchoolAnnouncementController {
                   actionUrl
                 )
               )
+              notification.sentViaEmail = true
+              await notification.save()
             } catch (error) {
               notification.emailError =
                 error instanceof Error ? error.message : 'Erro ao enviar email'
               await notification.save()
             }
           }
+
+          await recipient.save()
+        } catch (err) {
+          logger.error(
+            { err, recipientId: recipient.id, announcementId: announcement.id },
+            '[publish-announcement] falha ao despachar notificação'
+          )
         }
-      })
+      }
     } else {
       announcement.status = 'PUBLISHED'
       announcement.publishedAt = DateTime.now()
