@@ -38,13 +38,18 @@ test.group('backfill:self-responsible-links', (group) => {
   })
 
   test('cria links pros autorresponsáveis sem vínculo e ignora os demais', async ({ assert }) => {
+    // Backfill é uma operação global (varre todos os autorresponsáveis do DB).
+    // Capturamos um baseline pra asserir de forma relativa — robusto contra
+    // autorresponsáveis pré-existentes no DB (ex: seed de dev).
+    const baseline = await backfillSelfResponsibleLinks()
+
     const selfA = await makeStudent('bf-a', true)
     const selfB = await makeStudent('bf-b', true)
     await makeStudent('bf-c', false)
 
     const stats = await backfillSelfResponsibleLinks()
 
-    assert.equal(stats.processed, 2)
+    assert.equal(stats.processed, baseline.processed + 2)
     assert.equal(stats.created, 2)
     for (const s of [selfA, selfB]) {
       const link = await StudentHasResponsible.query()
@@ -59,7 +64,7 @@ test.group('backfill:self-responsible-links', (group) => {
     await makeStudent('bf-idem', true)
     await backfillSelfResponsibleLinks()
     const stats = await backfillSelfResponsibleLinks()
-    assert.equal(stats.processed, 1)
+    // created === 0 captura a idempotência independente do que já exista no DB.
     assert.equal(stats.created, 0)
   })
 })
