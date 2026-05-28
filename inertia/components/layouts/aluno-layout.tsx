@@ -18,6 +18,13 @@ import {
   ShieldCheck,
   GraduationCap,
   Megaphone,
+  Award,
+  CalendarCheck,
+  Clock,
+  BookOpen,
+  Calendar,
+  AlertCircle,
+  UtensilsCrossed,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 
@@ -95,8 +102,18 @@ const gamifiedNavigation: NavItem[] = [
   },
 ]
 
-const selfResponsibleNavigation: NavItem[] = [
+const academicNavigation: NavItem[] = [
+  { title: 'Notas', route: 'web.aluno.notas', href: '/aluno/notas', icon: Award },
+  { title: 'Frequência', route: 'web.aluno.frequencia', href: '/aluno/frequencia', icon: CalendarCheck },
+  { title: 'Horário', route: 'web.aluno.horario', href: '/aluno/horario', icon: Clock },
+  { title: 'Atividades', route: 'web.aluno.atividades', href: '/aluno/atividades', icon: BookOpen },
+  { title: 'Calendário', route: 'web.aluno.calendario', href: '/aluno/calendario', icon: Calendar },
+  { title: 'Ocorrências', route: 'web.aluno.ocorrencias', href: '/aluno/ocorrencias', icon: AlertCircle },
+]
+
+const minhaContaNavigation: NavItem[] = [
   { title: 'Financeiro', route: 'web.aluno.financeiro', href: '/aluno/financeiro', icon: Wallet },
+  { title: 'Cantina', route: 'web.aluno.cantina', href: '/aluno/cantina', icon: UtensilsCrossed },
   { title: 'Documentos', route: 'web.aluno.documentos', href: '/aluno/documentos', icon: FileText },
   {
     title: 'Autorizações',
@@ -185,26 +202,48 @@ function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
         {user?.isSelfResponsible && !gamified ? (
-          <SidebarGroup>
-            <SidebarGroupLabel>Minha Conta</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {selfResponsibleNavigation.map((item) => {
-                  const isActive = pathname === item.href
-                  return (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
-                        <Link href={item.href}>
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+          <>
+            <SidebarGroup>
+              <SidebarGroupLabel>Acadêmico</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {academicNavigation.map((item) => {
+                    const isActive = pathname === item.href
+                    return (
+                      <SidebarMenuItem key={item.href}>
+                        <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
+                          <Link href={item.href}>
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    )
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+            <SidebarGroup>
+              <SidebarGroupLabel>Minha Conta</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {minhaContaNavigation.map((item) => {
+                    const isActive = pathname === item.href
+                    return (
+                      <SidebarMenuItem key={item.href}>
+                        <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
+                          <Link href={item.href}>
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    )
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
         ) : null}
       </SidebarContent>
 
