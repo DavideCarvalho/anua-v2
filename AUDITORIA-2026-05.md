@@ -57,6 +57,14 @@ Lista de oportunidades pra trackear melhoria de fluxo (feature), negócio e UI/U
 - ⚠️ **Working tree tinha ~12 arquivos com trabalho não commitado de sessão anterior** (feriados no calendário do responsável, disciplina/justificativa na frequência, validação de motivo na rejeição de acordo #7, null-safety em faturas). Handoff dizia "tree limpo" — estava errado. Não commitado nesta sessão, aguarda decisão.
 - Backend typecheck verde, migration aplicada (batch 1028).
 
+**2026-05-28, sessão 6**
+- Concluídos: #2 (P0 — segmentação do aluno autorresponsável).
+- Fluxo: brainstorming → spec → plano (`docs/superpowers/`) → execução subagent-driven (13 tasks, TDD, implementer + spec review + quality review por task) → revisão holística final.
+- Arquivos criados: `self_responsible_link.ts`, `self_responsible_context.ts` (services), `backfill_self_responsible_links.ts` (command), `require_self_responsible_middleware.ts`, 5 page controllers em `pages/aluno/`, `comunicados-content.tsx` (container extraído), 5 páginas `inertia/pages/aluno/*`, 8 specs funcionais.
+- Arquivos editados: `finish_enrollment_controller.ts` (hook), `user.dto.ts`, `me.ts`, `inertia_middleware.ts` (contexto + gate gamified), `kernel.ts`, `routes/pages/aluno.ts`, `aluno-layout.tsx`, `inertia/lib/types.ts`.
+- 17 testes funcionais verdes, typecheck verde. Backfill rodado em dev (0 autorresponsáveis existentes).
+- Aprendizado: stub em arquivo de codegen (`.adonisjs/server/pages.d.ts`) é apagado ao bootar o ace; a forma robusta é criar as `.tsx` reais antes (ou junto) dos controllers que as referenciam.
+
 ---
 
 ## Sumário
@@ -83,10 +91,11 @@ Nada disso é estrutural. É puxada de qualidade em pontos específicos.
 - **Feito 2026-05-26:** Backend (`get_student_invoices_controller.ts`) agora retorna `schoolPaymentInfo: { name, pixKey, pixKeyType }`. Frontend mostra botão "Como pagar" com Popover: se escola tem `pixKey`, exibe chave copiável com tipo e favorecido; senão, fallback genérico "entre em contato com a secretaria". Validado via Chrome MCP impersonando Alessandra Adriana (Silva Gomes, Asaas desabilitado): popover com fallback genérico aparece em todas as faturas pendentes/atrasadas/abertas, zero botões em faturas pagas.
 
 ### 2. [risco] Aluno autorresponsável sem segmentação de UI
-- [ ] **Onde:** `inertia/pages/aluno/*` (nenhuma condicional por `isSelfResponsible` encontrada).
+- [x] **Onde:** `inertia/pages/aluno/*` (nenhuma condicional por `isSelfResponsible` encontrada).
 - **Problema:** CONTEXT.md trata aluno autorresponsável (TECHNICAL/UNIVERSITY/OTHER, 18+) como caso real, mas o front do aluno não distingue: aluno técnico de 19 anos pode receber UI gamified ou não enxergar pagamentos próprios. Também tem ângulo de privacidade (row-level access).
 - **Fix:** Backend devolve `isSelfResponsible` + `segment` no `me`. Front roteia para layout adulto (sem gamification, com abas financeiro/documentos) quando `isSelfResponsible`. Validar autorização por aluno no servidor.
 - **Esforço:** 1d.
+- **Feito 2026-05-28 (sessão 6):** Spec + plano em `docs/superpowers/`. **Insight:** o gate de gamificação já é por idade (≤14), e autorresponsável é 18+ → já não-gamified; o gap real era acesso aos próprios dados. **Solução:** aluno autorresponsável vira seu próprio responsável via self-link em `StudentHasResponsible` (`studentId === responsibleId === user.id`), desbloqueando a checagem IDOR existente dos controllers `/responsavel` sem alterá-los. (a) `ensureSelfResponsibleLink` (idempotente) + hook na matrícula online (`finish_enrollment_controller`, dentro da transação) + comando `backfill:self-responsible-links`. (b) `resolveSelfResponsibleContext` expõe `isSelfResponsible`/`segment`/`studentId` no payload via `me.ts` (REST) e `inertia_middleware` (shared props) + tipo no frontend. (c) Defense-in-depth: `computeGamified` faz `&& !isSelfResponsible` (nunca gamified mesmo com birthDate errado). (d) Grupo "Minha Conta" no `aluno-layout` + 5 páginas adultas `/aluno/{financeiro,documentos,autorizacoes,matricula,comunicados}` reusando os containers do responsável, gated por middleware `requireSelfResponsible`. **Verificação:** 17 testes funcionais passando (incl. acesso cruzado → 403), typecheck verde, revisão holística final READY TO MERGE (IDOR sólido, paths de payload consistentes). Threshold de idade/transição teen (#36) ficou fora de escopo.
 
 ### 3. [design] Sign-in viola DESIGN.md em 4 frentes ao mesmo tempo
 - [x] **Onde:** `inertia/pages/auth/sign-in.tsx`.
@@ -346,4 +355,4 @@ Nada disso é estrutural. É puxada de qualidade em pontos específicos.
 3. Onde tem `[design]` confirmado por arquivo:linha, dá pra rodar `/impeccable polish <path>` direto.
 4. Onde tem `[feature]` ou `[negocio]`, vale `brainstorming` antes pra fechar escopo.
 
-Última atualização: 2026-05-28 (sessão 5: autorização eletrônica via Autentique #30 finalizada + WhatsApp default ON).
+Última atualização: 2026-05-28 (sessão 6: segmentação do aluno autorresponsável #2 — P0 concluído).
