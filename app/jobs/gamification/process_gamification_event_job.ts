@@ -5,6 +5,8 @@ import StudentGamification from '#models/student_gamification'
 import Achievement from '#models/achievement'
 import Student from '#models/student'
 import db from '@adonisjs/lucid/services/db'
+import { notificationService } from '#services/notification_service'
+import logger from '@adonisjs/core/services/logger'
 
 interface ProcessEventPayload {
   eventId: string
@@ -38,12 +40,24 @@ export default class ProcessGamificationEventJob extends Job<ProcessEventPayload
 
         if (!event) {
           console.warn(`[WORKER] Event ${eventId} not found - skipping`)
-          return { achievementsUnlocked: 0, pointsAwarded: 0 }
+          return {
+            achievementsUnlocked: 0,
+            pointsAwarded: 0,
+            unlockedAchievements: [],
+            userId: null,
+            levelUp: null,
+          }
         }
 
         if (event.processed) {
           console.log(`[WORKER] Event ${eventId} already processed, skipping`)
-          return { achievementsUnlocked: 0, pointsAwarded: 0 }
+          return {
+            achievementsUnlocked: 0,
+            pointsAwarded: 0,
+            unlockedAchievements: [],
+            userId: null,
+            levelUp: null,
+          }
         }
 
         let studentGamification = await StudentGamification.query({ client: trx })
@@ -65,12 +79,15 @@ export default class ProcessGamificationEventJob extends Job<ProcessEventPayload
           )
         }
 
+        const previousLevel = studentGamification.currentLevel
+
         const student = await Student.query({ client: trx })
           .where('id', event.studentId)
           .preload('user')
           .first()
 
         const schoolId = student?.user?.schoolId
+        const userId = student?.user?.id ?? null
 
         // OPTIMIZATION: Filter achievements by eventType at DB level
         // This avoids fetching all achievements and filtering in memory
@@ -97,6 +114,12 @@ export default class ProcessGamificationEventJob extends Job<ProcessEventPayload
 
         let achievementsUnlocked = 0
         let pointsAwarded = 0
+        const unlockedAchievements: Array<{
+          id: string
+          name: string
+          description: string | null
+          points: number
+        }> = []
 
         for (const achievement of achievements) {
           // Check if already unlocked (idempotency)
@@ -131,6 +154,12 @@ export default class ProcessGamificationEventJob extends Job<ProcessEventPayload
           })
 
           achievementsUnlocked++
+          unlockedAchievements.push({
+            id: achievement.id,
+            name: achievement.name,
+            description: achievement.description,
+            points: achievement.points,
+          })
 
           if (achievement.points > 0) {
             const newTotalPoints = studentGamification.totalPoints + achievement.points
@@ -164,8 +193,61 @@ export default class ProcessGamificationEventJob extends Job<ProcessEventPayload
         event.useTransaction(trx)
         await event.save()
 
-        return { achievementsUnlocked, pointsAwarded }
+        const leveledUp =
+          studentGamification.currentLevel > previousLevel
+            ? { newLevel: studentGamification.currentLevel, previousLevel }
+            : null
+
+        return {
+          achievementsUnlocked,
+          pointsAwarded,
+          unlockedAchievements,
+          userId,
+          levelUp: leveledUp,
+        }
       })
+
+      // Post-commit: dispatch notifications across all channels (in-app, email,
+      // WhatsApp, push) via NotificationService — respects user preferences.
+      if (result.userId) {
+        for (const ach of result.unlockedAchievements) {
+          try {
+            await notificationService.send({
+              userId: result.userId,
+              type: 'ACHIEVEMENT_UNLOCKED',
+              title: `Conquista desbloqueada: ${ach.name}`,
+              message: ach.description
+                ? `${ach.description} (+${ach.points} pontos)`
+                : `Você ganhou ${ach.points} pontos!`,
+              actionUrl: '/aluno/loja/pontos',
+              data: { achievementId: ach.id, points: ach.points },
+            })
+          } catch (err) {
+            logger.error(
+              { err, achievementId: ach.id, userId: result.userId },
+              'Failed to send achievement notification'
+            )
+          }
+        }
+
+        if (result.levelUp) {
+          try {
+            await notificationService.send({
+              userId: result.userId,
+              type: 'LEVEL_UP',
+              title: `Novo nível: ${result.levelUp.newLevel}!`,
+              message: `Você subiu do nível ${result.levelUp.previousLevel} para o ${result.levelUp.newLevel}. Continue assim!`,
+              actionUrl: '/aluno/loja/pontos',
+              data: result.levelUp,
+            })
+          } catch (err) {
+            logger.error(
+              { err, levelUp: result.levelUp, userId: result.userId },
+              'Failed to send level up notification'
+            )
+          }
+        }
+      }
 
       const duration = Date.now() - startTime
       console.log('[WORKER] Processing completed:', {

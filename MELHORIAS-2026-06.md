@@ -430,10 +430,11 @@ Documento de melhorias organizado por módulo funcional. Cada módulo tem três 
 - **Problema:** Ranking mostra todos os alunos juntos. Aluno de 7 anos compete com aluno de 14.
 - **Fix:** Filtro por turma/série. Ranking "Minha turma" como default.
 
-#### 6.2 Conquistas sem notificação push `P3` `[XS]`
-- **Onde:** `inertia/pages/escola/gamificacao/conquistas.tsx`
-- **Problema:** Aluno desbloqueia conquista e não sabe até abrir o app.
-- **Fix:** Push notification com mensagem celebratória quando conquista é desbloqueada.
+#### 6.2 ~~Conquistas sem notificação multi-canal~~ `P3` `[XS]` FEITO
+- [x] **Onde:** `app/jobs/gamification/process_gamification_event_job.ts`
+- **Problema:** Aluno desbloqueia conquista e não sabe até abrir o app. Push + email + WhatsApp + in-app não eram disparados.
+- **Fix:** Job agora coleta achievements desbloqueados durante a transação (com nome/descrição/pontos) e detecta level up. Pós-commit, dispara `notificationService.send()` que cuida dos 4 canais (in-app, email, WhatsApp, push) respeitando `NotificationPreference` do usuário. Tipos `ACHIEVEMENT_UNLOCKED` e `LEVEL_UP` já existiam no enum + UI de preferências. Try/catch envolvendo cada dispatch — falha num canal não impede os outros.
+- **Validado 2026-05-28:** Typecheck verde.
 
 #### 6.3 Desafios sem progresso visual `P2` `[XS]`
 - **Onde:** `inertia/pages/escola/gamificacao/desafios.tsx`
@@ -563,10 +564,11 @@ Documento de melhorias organizado por módulo funcional. Cada módulo tem três 
 
 ### Polish
 
-#### 8.1 Eventos sem lembrete automático `P2` `[S]`
-- **Onde:** `EventNotification` model existe mas sem job de lembrete.
-- **Problema:** Reunião de pais amanhã e responsável não recebeu lembrete.
-- **Fix:** Job de lembrete em D-3 e D-0 (dia anterior) pra eventos com audiência. Push + email.
+#### 8.1 Eventos com lembrete D-3 e D-0 (D-1 já existe) `P2` `[S]`
+- **Onde:** `start/jobs/send_academic_digest.ts`, `EventNotification` model.
+- **Verificado 2026-05-28:** O `SendDailyAcademicDigestJob` JÁ manda email diário "Amanhã na escola" com provas + atividades + **eventos** (D-1). `SendWeeklyAcademicDigestJob` cobre próximos 7 dias.
+- **Gap real:** (a) Lembrete **D-3** pra eventos importantes (reunião de pais, passeio que exige autorização) — antecedência maior. (b) Lembrete **D-0 no dia do evento** via push (não só email-digest da véspera). (c) Push notification individual por evento (digest é email agrupado).
+- **Fix:** Job que detecta eventos com `requiresAuthorization=true` ou `category in (PARENTS_MEETING, FIELD_TRIP)` e dispara via `notificationService.send()` 3 dias antes + manhã do dia. Reaproveita infra dos 4 canais já implementada.
 
 #### 8.2 Calendário sem visualização de feriados `P3` `[XS]`
 - **Onde:** `inertia/pages/responsavel/calendario.tsx`
