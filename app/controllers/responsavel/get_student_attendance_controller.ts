@@ -51,7 +51,11 @@ export default class GetStudentAttendanceController {
 
     const attendances = await attendancesQuery
       .preload('attendance', (query) => {
-        query.preload('calendarSlot')
+        query.preload('calendarSlot', (slotQuery) => {
+          slotQuery.preload('teacherHasClass', (thcQuery) => {
+            thcQuery.preload('subject')
+          })
+        })
       })
       .orderBy('createdAt', 'desc')
       .paginate(page, limit)
@@ -84,6 +88,7 @@ export default class GetStudentAttendanceController {
       id: a.id,
       date: a.attendance?.date?.toISO() || a.createdAt.toISO() || '',
       status: a.status,
+      subject: a.attendance?.calendarSlot?.teacherHasClass?.subject?.name ?? null,
       justification: a.justification,
     }))
 

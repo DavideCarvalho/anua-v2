@@ -186,7 +186,7 @@ function autoNameFields(template: Template): Template {
 }
 
 interface PdfTemplateDesignerProps {
-  basePdf: string | ArrayBuffer
+  basePdf: Template['basePdf']
   initialTemplate?: Template
   onSave: (template: Template) => void
   className?: string

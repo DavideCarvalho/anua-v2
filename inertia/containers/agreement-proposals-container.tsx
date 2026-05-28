@@ -164,12 +164,12 @@ export function AgreementProposalsContainer() {
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-muted-foreground">
                     <FileText className="mr-1 inline h-3 w-3" />
-                    {proposal.invoices.length} fatura(s) incluída(s)
+                    {proposal.invoices?.length ?? 0} fatura(s) incluída(s)
                   </p>
                   <div className="flex flex-wrap gap-1">
-                    {proposal.invoices.map((pi) => (
+                    {proposal.invoices?.map((pi) => (
                       <Badge key={pi.id} variant="outline" className="text-xs">
-                        {pi.invoice.month}/{pi.invoice.year} — {formatCurrency(pi.amount)} ({pi.overdueDays}d)
+                        {pi.invoice?.month}/{pi.invoice?.year} — {formatCurrency(pi.amount)} ({pi.overdueDays}d)
                       </Badge>
                     ))}
                   </div>

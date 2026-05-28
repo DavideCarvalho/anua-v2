@@ -1407,49 +1407,43 @@ export function ScheduleGrid({
         <AlertDialogContent className="z-[110] !max-w-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle>Presenças serão perdidas</AlertDialogTitle>
-            <AlertDialogDescription asChild>
-              <div className="space-y-3">
-                <p>
-                  {attendanceConflict?.attendanceCount} presença(s) registrada(s) em horários que
-                  serão removidos serão perdidas permanentemente.
-                </p>
-                {attendanceConflict && attendanceConflict.affectedAttendances.length > 0 && (
-                  <div className="max-h-48 overflow-auto rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="h-8 text-xs">Data</TableHead>
-                          <TableHead className="h-8 text-xs">Horário</TableHead>
-                          <TableHead className="h-8 text-xs">Disciplina</TableHead>
-                          <TableHead className="h-8 text-right text-xs">Alunos</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {attendanceConflict.affectedAttendances.map((a, i) => (
-                          <TableRow key={i}>
-                            <TableCell className="whitespace-nowrap py-1.5 text-xs">
-                              {a.date}{' '}
-                              <span className="text-muted-foreground">
-                                ({DAYS_OF_WEEK.find((d) => d.number === a.dayOfWeek)?.label})
-                              </span>
-                            </TableCell>
-                            <TableCell className="whitespace-nowrap py-1.5 text-xs">
-                              {a.startTime}–{a.endTime}
-                            </TableCell>
-                            <TableCell className="py-1.5 text-xs">
-                              {a.subjectName ?? '—'}
-                            </TableCell>
-                            <TableCell className="py-1.5 text-right text-xs">
-                              {a.studentCount}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </div>
+            <AlertDialogDescription>
+              {attendanceConflict?.attendanceCount} presença(s) registrada(s) em horários que serão
+              removidos serão perdidas permanentemente.
             </AlertDialogDescription>
+            {attendanceConflict && attendanceConflict.affectedAttendances.length > 0 && (
+              <div className="max-h-48 overflow-auto rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="h-8 text-xs">Data</TableHead>
+                      <TableHead className="h-8 text-xs">Horário</TableHead>
+                      <TableHead className="h-8 text-xs">Disciplina</TableHead>
+                      <TableHead className="h-8 text-right text-xs">Alunos</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {attendanceConflict.affectedAttendances.map((a, i) => (
+                      <TableRow key={i}>
+                        <TableCell className="whitespace-nowrap py-1.5 text-xs">
+                          {a.date}{' '}
+                          <span className="text-muted-foreground">
+                            ({DAYS_OF_WEEK.find((d) => d.number === a.dayOfWeek)?.label})
+                          </span>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap py-1.5 text-xs">
+                          {a.startTime}–{a.endTime}
+                        </TableCell>
+                        <TableCell className="py-1.5 text-xs">{a.subjectName ?? '—'}</TableCell>
+                        <TableCell className="py-1.5 text-right text-xs">
+                          {a.studentCount}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={saveMutation.isPending}>Cancelar</AlertDialogCancel>

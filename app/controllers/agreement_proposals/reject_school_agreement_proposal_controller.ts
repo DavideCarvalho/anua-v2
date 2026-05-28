@@ -3,12 +3,15 @@ import { DateTime } from 'luxon'
 import AgreementProposal from '#models/agreement_proposal'
 import AgreementProposalTransformer from '#transformers/agreement_proposal_transformer'
 import AppException from '#exceptions/app_exception'
+import { rejectAgreementProposalValidator } from '#validators/agreement'
 
 export default class RejectAgreementProposalController {
   async handle(ctx: HttpContext) {
     const { params, request, serialize } = ctx
     const user = ctx.auth?.user
     if (!user) throw AppException.badRequest('Não autenticado')
+
+    const { reason } = await request.validateUsing(rejectAgreementProposalValidator)
 
     const proposal = await AgreementProposal.query()
       .where('id', params.id)
@@ -25,7 +28,7 @@ export default class RejectAgreementProposalController {
     proposal.status = 'REJECTED_BY_SCHOOL'
     proposal.rejectedById = user.id
     proposal.rejectedAt = DateTime.now()
-    proposal.rejectionReason = request.input('reason', '')
+    proposal.rejectionReason = reason ?? ''
     await proposal.save()
 
     return serialize(AgreementProposalTransformer.transform(proposal))

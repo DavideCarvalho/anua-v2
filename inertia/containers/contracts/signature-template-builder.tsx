@@ -102,8 +102,36 @@ async function urlToBase64(url: string): Promise<string> {
 type EntityKind = 'contract' | 'event'
 
 interface TemplateData {
-  pdfUrl: string
+  pdfUrl: string | null
   schemas: SerializedField[][]
+}
+
+/**
+ * Converte os campos serializados (subconjunto estrito) de volta pro formato
+ * de schema do pdfme. Construímos object literals frescos pra satisfazer a
+ * index signature que o `Template['schemas']` exige.
+ */
+function toDesignerSchemas(pages: SerializedField[][]): Template['schemas'] {
+  return pages.map((page) =>
+    page.map((field): Template['schemas'][number][number] => ({
+      name: field.name,
+      type: field.type,
+      position: field.position,
+      width: field.width,
+      height: field.height,
+      rotate: field.rotate,
+      format: field.format,
+      fontSize: field.fontSize,
+      alignment: field.alignment,
+      fontColor: field.fontColor,
+      backgroundColor: field.backgroundColor,
+      locale: field.locale,
+      opacity: field.opacity,
+      required: field.required,
+      readOnly: field.readOnly,
+      content: field.content,
+    }))
+  )
 }
 
 interface EndpointAdapter {
@@ -199,14 +227,15 @@ export function SignatureTemplateBuilder({
 
   useEffect(() => {
     const existing = adapter.templateData
-    if (!existing) return
+    if (!existing || !existing.pdfUrl) return
+    const pdfUrl = existing.pdfUrl
     let cancelled = false
     ;(async () => {
       try {
-        const dataUrl = await urlToBase64(existing.pdfUrl)
+        const dataUrl = await urlToBase64(pdfUrl)
         if (cancelled) return
         setPdfBase64(dataUrl)
-        setInitialTemplate({ basePdf: dataUrl, schemas: existing.schemas })
+        setInitialTemplate({ basePdf: dataUrl, schemas: toDesignerSchemas(existing.schemas) })
       } catch {
         toast.error('Falha ao carregar template existente')
       }

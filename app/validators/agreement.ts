@@ -23,3 +23,9 @@ export const createAgreementValidator = vine.compile(
       .optional(),
   })
 )
+
+export const rejectAgreementProposalValidator = vine.compile(
+  vine.object({
+    reason: vine.string().trim().optional(),
+  })
+)

@@ -6203,12 +6203,12 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/api/v1/agreement-proposals/:id/reject'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/agreement').rejectAgreementProposalValidator)>>
       paramsTuple: [ParamValue]
       params: { id: ParamValue }
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/agreement').rejectAgreementProposalValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/agreement_proposals/reject_school_agreement_proposal_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/agreement_proposals/reject_school_agreement_proposal_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/agreement_proposals/reject_school_agreement_proposal_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'api.v1.invoices.index': {

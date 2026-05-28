@@ -226,7 +226,7 @@ export function StudentAttendanceContainer({
                         </div>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {attendance.notes || '-'}
+                        {attendance.justification || '-'}
                       </TableCell>
                     </TableRow>
                   )

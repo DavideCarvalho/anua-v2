@@ -18,7 +18,6 @@ import {
 } from '../../../components/ui/command'
 import { Input } from '../../../components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover'
-import { Textarea } from '../../../components/ui/textarea'
 import { RichTextEditor } from '../../../components/ui/rich-text-editor'
 import {
   readEscolaDashboardViewMode,

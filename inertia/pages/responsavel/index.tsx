@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../../components/ui/dialog'
-import { AlertCircle, BookOpen, DollarSign, Bell, FileText, CreditCard, Users, CheckCircle2 } from 'lucide-react'
+import { AlertCircle, BookOpen, DollarSign, Bell, FileText, CreditCard, CheckCircle2 } from 'lucide-react'
 import { EmptyState } from '../../components/ui/empty-state'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '~/lib/api'

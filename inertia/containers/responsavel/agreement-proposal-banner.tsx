@@ -91,9 +91,9 @@ export function AgreementProposalBanner({ studentId }: { studentId: string }) {
                 Faturas incluídas:
               </p>
               <div className="flex flex-wrap gap-1">
-                {proposal.invoices.map((pi) => (
+                {proposal.invoices?.map((pi) => (
                   <Badge key={pi.id} variant="outline" className="text-xs">
-                    {pi.invoice.month}/{pi.invoice.year} — {formatCurrency(pi.amount)}
+                    {pi.invoice?.month}/{pi.invoice?.year} — {formatCurrency(pi.amount)}
                   </Badge>
                 ))}
               </div>
