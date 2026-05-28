@@ -35,6 +35,34 @@ export function registerAlunoPageRoutes() {
         .get('/matricula', [aluno.ShowAlunoMatriculaPage])
         .as('matricula')
         .use(middleware.requireSelfResponsible())
+      router
+        .get('/notas', [aluno.ShowAlunoNotasPage])
+        .as('notas')
+        .use(middleware.requireSelfResponsible())
+      router
+        .get('/frequencia', [aluno.ShowAlunoFrequenciaPage])
+        .as('frequencia')
+        .use(middleware.requireSelfResponsible())
+      router
+        .get('/horario', [aluno.ShowAlunoHorarioPage])
+        .as('horario')
+        .use(middleware.requireSelfResponsible())
+      router
+        .get('/atividades', [aluno.ShowAlunoAtividadesPage])
+        .as('atividades')
+        .use(middleware.requireSelfResponsible())
+      router
+        .get('/calendario', [aluno.ShowAlunoCalendarioPage])
+        .as('calendario')
+        .use(middleware.requireSelfResponsible())
+      router
+        .get('/ocorrencias', [aluno.ShowAlunoOcorrenciasPage])
+        .as('ocorrencias')
+        .use(middleware.requireSelfResponsible())
+      router
+        .get('/cantina', [aluno.ShowAlunoCantinaPage])
+        .as('cantina')
+        .use(middleware.requireSelfResponsible())
     })
     .prefix('/aluno')
     .use([middleware.auth(), middleware.impersonation()])

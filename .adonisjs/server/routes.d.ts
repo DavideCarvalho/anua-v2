@@ -190,6 +190,13 @@ export type ScannedRoutes = {
     'web.aluno.autorizacoes': { paramsTuple?: []; params?: {} }
     'web.aluno.comunicados': { paramsTuple?: []; params?: {} }
     'web.aluno.matricula': { paramsTuple?: []; params?: {} }
+    'web.aluno.notas': { paramsTuple?: []; params?: {} }
+    'web.aluno.frequencia': { paramsTuple?: []; params?: {} }
+    'web.aluno.horario': { paramsTuple?: []; params?: {} }
+    'web.aluno.atividades': { paramsTuple?: []; params?: {} }
+    'web.aluno.calendario': { paramsTuple?: []; params?: {} }
+    'web.aluno.ocorrencias': { paramsTuple?: []; params?: {} }
+    'web.aluno.cantina': { paramsTuple?: []; params?: {} }
     'api.v1.auth.login': { paramsTuple?: []; params?: {} }
     'api.v1.auth.send_code': { paramsTuple?: []; params?: {} }
     'api.v1.auth.verify_code': { paramsTuple?: []; params?: {} }
@@ -957,6 +964,13 @@ export type ScannedRoutes = {
     'web.aluno.autorizacoes': { paramsTuple?: []; params?: {} }
     'web.aluno.comunicados': { paramsTuple?: []; params?: {} }
     'web.aluno.matricula': { paramsTuple?: []; params?: {} }
+    'web.aluno.notas': { paramsTuple?: []; params?: {} }
+    'web.aluno.frequencia': { paramsTuple?: []; params?: {} }
+    'web.aluno.horario': { paramsTuple?: []; params?: {} }
+    'web.aluno.atividades': { paramsTuple?: []; params?: {} }
+    'web.aluno.calendario': { paramsTuple?: []; params?: {} }
+    'web.aluno.ocorrencias': { paramsTuple?: []; params?: {} }
+    'web.aluno.cantina': { paramsTuple?: []; params?: {} }
     'api.v1.auth.me': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.escola_stats': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.escola_insights': { paramsTuple?: []; params?: {} }
@@ -1423,6 +1437,13 @@ export type ScannedRoutes = {
     'web.aluno.autorizacoes': { paramsTuple?: []; params?: {} }
     'web.aluno.comunicados': { paramsTuple?: []; params?: {} }
     'web.aluno.matricula': { paramsTuple?: []; params?: {} }
+    'web.aluno.notas': { paramsTuple?: []; params?: {} }
+    'web.aluno.frequencia': { paramsTuple?: []; params?: {} }
+    'web.aluno.horario': { paramsTuple?: []; params?: {} }
+    'web.aluno.atividades': { paramsTuple?: []; params?: {} }
+    'web.aluno.calendario': { paramsTuple?: []; params?: {} }
+    'web.aluno.ocorrencias': { paramsTuple?: []; params?: {} }
+    'web.aluno.cantina': { paramsTuple?: []; params?: {} }
     'api.v1.auth.me': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.escola_stats': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.escola_insights': { paramsTuple?: []; params?: {} }

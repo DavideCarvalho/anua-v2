@@ -1122,6 +1122,48 @@ const routes = {
     tokens: [{"old":"/aluno/matricula","type":0,"val":"aluno","end":""},{"old":"/aluno/matricula","type":0,"val":"matricula","end":""}],
     types: placeholder as Registry['web.aluno.matricula']['types'],
   },
+  'web.aluno.notas': {
+    methods: ["GET","HEAD"],
+    pattern: '/aluno/notas',
+    tokens: [{"old":"/aluno/notas","type":0,"val":"aluno","end":""},{"old":"/aluno/notas","type":0,"val":"notas","end":""}],
+    types: placeholder as Registry['web.aluno.notas']['types'],
+  },
+  'web.aluno.frequencia': {
+    methods: ["GET","HEAD"],
+    pattern: '/aluno/frequencia',
+    tokens: [{"old":"/aluno/frequencia","type":0,"val":"aluno","end":""},{"old":"/aluno/frequencia","type":0,"val":"frequencia","end":""}],
+    types: placeholder as Registry['web.aluno.frequencia']['types'],
+  },
+  'web.aluno.horario': {
+    methods: ["GET","HEAD"],
+    pattern: '/aluno/horario',
+    tokens: [{"old":"/aluno/horario","type":0,"val":"aluno","end":""},{"old":"/aluno/horario","type":0,"val":"horario","end":""}],
+    types: placeholder as Registry['web.aluno.horario']['types'],
+  },
+  'web.aluno.atividades': {
+    methods: ["GET","HEAD"],
+    pattern: '/aluno/atividades',
+    tokens: [{"old":"/aluno/atividades","type":0,"val":"aluno","end":""},{"old":"/aluno/atividades","type":0,"val":"atividades","end":""}],
+    types: placeholder as Registry['web.aluno.atividades']['types'],
+  },
+  'web.aluno.calendario': {
+    methods: ["GET","HEAD"],
+    pattern: '/aluno/calendario',
+    tokens: [{"old":"/aluno/calendario","type":0,"val":"aluno","end":""},{"old":"/aluno/calendario","type":0,"val":"calendario","end":""}],
+    types: placeholder as Registry['web.aluno.calendario']['types'],
+  },
+  'web.aluno.ocorrencias': {
+    methods: ["GET","HEAD"],
+    pattern: '/aluno/ocorrencias',
+    tokens: [{"old":"/aluno/ocorrencias","type":0,"val":"aluno","end":""},{"old":"/aluno/ocorrencias","type":0,"val":"ocorrencias","end":""}],
+    types: placeholder as Registry['web.aluno.ocorrencias']['types'],
+  },
+  'web.aluno.cantina': {
+    methods: ["GET","HEAD"],
+    pattern: '/aluno/cantina',
+    tokens: [{"old":"/aluno/cantina","type":0,"val":"aluno","end":""},{"old":"/aluno/cantina","type":0,"val":"cantina","end":""}],
+    types: placeholder as Registry['web.aluno.cantina']['types'],
+  },
   'api.v1.auth.login': {
     methods: ["POST"],
     pattern: '/api/v1/auth/login',

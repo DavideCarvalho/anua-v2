@@ -261,6 +261,13 @@ export interface ApiDefinition {
       autorizacoes: typeof routes['web.aluno.autorizacoes']
       comunicados: typeof routes['web.aluno.comunicados']
       matricula: typeof routes['web.aluno.matricula']
+      notas: typeof routes['web.aluno.notas']
+      frequencia: typeof routes['web.aluno.frequencia']
+      horario: typeof routes['web.aluno.horario']
+      atividades: typeof routes['web.aluno.atividades']
+      calendario: typeof routes['web.aluno.calendario']
+      ocorrencias: typeof routes['web.aluno.ocorrencias']
+      cantina: typeof routes['web.aluno.cantina']
     }
   }
   api: {

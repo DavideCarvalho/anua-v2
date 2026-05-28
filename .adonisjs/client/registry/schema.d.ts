@@ -2239,6 +2239,90 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_matricula_page_controller').default['handle']>>>
     }
   }
+  'web.aluno.notas': {
+    methods: ["GET","HEAD"]
+    pattern: '/aluno/notas'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_notas_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_notas_page_controller').default['handle']>>>
+    }
+  }
+  'web.aluno.frequencia': {
+    methods: ["GET","HEAD"]
+    pattern: '/aluno/frequencia'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_frequencia_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_frequencia_page_controller').default['handle']>>>
+    }
+  }
+  'web.aluno.horario': {
+    methods: ["GET","HEAD"]
+    pattern: '/aluno/horario'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_horario_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_horario_page_controller').default['handle']>>>
+    }
+  }
+  'web.aluno.atividades': {
+    methods: ["GET","HEAD"]
+    pattern: '/aluno/atividades'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_atividades_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_atividades_page_controller').default['handle']>>>
+    }
+  }
+  'web.aluno.calendario': {
+    methods: ["GET","HEAD"]
+    pattern: '/aluno/calendario'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_calendario_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_calendario_page_controller').default['handle']>>>
+    }
+  }
+  'web.aluno.ocorrencias': {
+    methods: ["GET","HEAD"]
+    pattern: '/aluno/ocorrencias'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_ocorrencias_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_ocorrencias_page_controller').default['handle']>>>
+    }
+  }
+  'web.aluno.cantina': {
+    methods: ["GET","HEAD"]
+    pattern: '/aluno/cantina'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_cantina_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_cantina_page_controller').default['handle']>>>
+    }
+  }
   'api.v1.auth.login': {
     methods: ["POST"]
     pattern: '/api/v1/auth/login'
