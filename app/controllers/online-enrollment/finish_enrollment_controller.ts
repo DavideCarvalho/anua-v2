@@ -21,6 +21,7 @@ import LevelAssignedToCourseHasAcademicPeriod from '#models/level_assigned_to_co
 import Role from '#models/role'
 
 import { finishEnrollmentValidator } from '#validators/enrollment'
+import { ensureSelfResponsibleLink } from '#services/self_responsible_link'
 import { createVerificationCode } from '#services/otp_service'
 import OtpCodeMail from '#mails/otp_code_mail'
 import { notificationService } from '#services/notification_service'
@@ -272,6 +273,12 @@ export default class FinishEnrollmentController {
       }
 
       // 8. Responsáveis
+      // Aluno autorresponsável vira seu próprio responsável (self-link) pra
+      // desbloquear acesso aos próprios dados via stack /responsavel.
+      if (data.student.isSelfResponsible) {
+        await ensureSelfResponsibleLink(student, trx)
+      }
+
       const responsibleUserIds: string[] = []
       const responsibleUsers: { id: string; email: string; isPedagogical: boolean }[] = []
       for (const responsible of data.responsibles) {
