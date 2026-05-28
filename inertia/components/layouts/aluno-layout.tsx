@@ -13,6 +13,11 @@ import {
   Gem,
   Coins,
   Gamepad2,
+  Wallet,
+  FileText,
+  ShieldCheck,
+  GraduationCap,
+  Megaphone,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 
@@ -90,6 +95,29 @@ const gamifiedNavigation: NavItem[] = [
   },
 ]
 
+const selfResponsibleNavigation: NavItem[] = [
+  { title: 'Financeiro', route: 'web.aluno.financeiro', href: '/aluno/financeiro', icon: Wallet },
+  { title: 'Documentos', route: 'web.aluno.documentos', href: '/aluno/documentos', icon: FileText },
+  {
+    title: 'Autorizações',
+    route: 'web.aluno.autorizacoes',
+    href: '/aluno/autorizacoes',
+    icon: ShieldCheck,
+  },
+  {
+    title: 'Matrícula',
+    route: 'web.aluno.matricula',
+    href: '/aluno/matricula',
+    icon: GraduationCap,
+  },
+  {
+    title: 'Comunicados',
+    route: 'web.aluno.comunicados',
+    href: '/aluno/comunicados',
+    icon: Megaphone,
+  },
+]
+
 function CartBadge() {
   const { totalItems } = useCart()
   if (totalItems <= 0) return null
@@ -156,6 +184,28 @@ function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        {user?.isSelfResponsible && !gamified ? (
+          <SidebarGroup>
+            <SidebarGroupLabel>Minha Conta</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {selfResponsibleNavigation.map((item) => {
+                  const isActive = pathname === item.href
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
+                        <Link href={item.href}>
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ) : null}
       </SidebarContent>
 
       <SidebarFooter className="border-t">
