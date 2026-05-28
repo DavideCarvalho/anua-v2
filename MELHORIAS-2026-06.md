@@ -288,10 +288,10 @@ Documento de melhorias organizado por módulo funcional. Cada módulo tem três 
 - **Problema:** Editor de comunicado é textarea simples. Sem negrito, itálico, lista, link.
 - **Fix:** Substituir por Tiptap (já usado no chat de IA) com toolbar mínima: bold, italic, lista, link.
 
-#### 4.2 Comunicados sem anexos `P2` `[S]`
-- **Onde:** `inertia/pages/escola/comunicados/novo.tsx`
-- **Problema:** Coordenadora quer enviar circular com PDF anexo. Não consegue.
-- **Fix:** Campo de upload de arquivos (PDF, imagem) no form de comunicado. Exibir no portal do responsável com botão de download.
+#### 4.2 ~~Comunicados sem anexos~~ `P2` `[S]` FALSO POSITIVO
+- [~] **Onde:** `inertia/pages/escola/comunicados/novo.tsx`
+- **Verificado 2026-05-28:** Form já tem upload de até 5 anexos via `attachmentsInputRef`, state `attachments: File[]`, envio multipart com `FormData`. Validação de quantidade (≤5) e exibição de lista no UI. Backend recebe via `formData.append('attachments', file)`.
+- **Conclusão:** Item descartado. Se houver melhoria (drag-and-drop, preview de imagem, limite por tipo MIME), criar item específico.
 
 #### 4.3 ~~Feed/mural com implementação mínima~~ `P3` `[S]` FALSO POSITIVO
 - [~] **Onde:** `inertia/pages/escola/mural.tsx`
