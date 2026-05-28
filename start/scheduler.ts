@@ -14,6 +14,8 @@ import CreateMealRecurrenceReservationsJob from '#jobs/canteen/create_meal_recur
 import SendEnrollmentRemindersJob from '#jobs/enrollment/send_enrollment_reminders_job'
 import SendDailyAcademicDigestJob from '#jobs/notifications/send_daily_academic_digest_job'
 import SendWeeklyAcademicDigestJob from '#jobs/notifications/send_weekly_academic_digest_job'
+import SendEventDayRemindersJob from '#jobs/notifications/send_event_day_reminders_job'
+import SendParentalConsentRemindersJob from '#jobs/notifications/send_parental_consent_reminders_job'
 
 const tz = 'America/Sao_Paulo'
 
@@ -58,6 +60,12 @@ await SendDailyAcademicDigestJob.schedule({}).cron('0 19 * * *').timezone(tz)
 
 // 07:00 (segunda) - Email "esta semana na escola" pros responsáveis pedagógicos
 await SendWeeklyAcademicDigestJob.schedule({}).cron('0 7 * * 1').timezone(tz)
+
+// 07:30 (todo dia) - Push matinal D-0 lembrando eventos importantes do dia
+await SendEventDayRemindersJob.schedule({}).cron('30 7 * * *').timezone(tz)
+
+// 10:00 (todo dia) - Lembrete D-3 de autorizações parentais pendentes
+await SendParentalConsentRemindersJob.schedule({}).cron('0 10 * * *').timezone(tz)
 
 // Gamificação: a cada 15 minutos - Retry de eventos que falharam
 await RetryPendingEventsJob.schedule({} as never)

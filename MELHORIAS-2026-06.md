@@ -564,11 +564,17 @@ Documento de melhorias organizado por módulo funcional. Cada módulo tem três 
 
 ### Polish
 
-#### 8.1 Eventos com lembrete D-3 e D-0 (D-1 já existe) `P2` `[S]`
-- **Onde:** `start/jobs/send_academic_digest.ts`, `EventNotification` model.
-- **Verificado 2026-05-28:** O `SendDailyAcademicDigestJob` JÁ manda email diário "Amanhã na escola" com provas + atividades + **eventos** (D-1). `SendWeeklyAcademicDigestJob` cobre próximos 7 dias.
-- **Gap real:** (a) Lembrete **D-3** pra eventos importantes (reunião de pais, passeio que exige autorização) — antecedência maior. (b) Lembrete **D-0 no dia do evento** via push (não só email-digest da véspera). (c) Push notification individual por evento (digest é email agrupado).
-- **Fix:** Job que detecta eventos com `requiresAuthorization=true` ou `category in (PARENTS_MEETING, FIELD_TRIP)` e dispara via `notificationService.send()` 3 dias antes + manhã do dia. Reaproveita infra dos 4 canais já implementada.
+#### 8.1 ~~Eventos com lembrete D-3, D-0 + push imediato em cancel/reschedule~~ `P2` `[S]` FEITO
+- [x] **Onde:** `start/jobs/send_academic_digest.ts`, `start/jobs/send_event_day_reminders.ts`, `start/jobs/send_parental_consent_reminders.ts`, `app/services/event_notification_service.ts`.
+- **Problema:** Daily digest cobria D-1 mas faltava (a) D-3 pra organizar com antecedência, (b) D-0 manhã com push, (c) push imediato em cancelamento/mudança/autorização pendente.
+- **Fix em 3 partes:**
+  - **Parte 1 — Daily digest com seção "Daqui a 3 dias":** Adicionado bucket `'tomorrow' | 'in-3-days'` ao `DigestItem`. Quando `kind='daily'`, segunda janela carrega só eventos importantes (`PARENTS_MEETING`, `FIELD_TRIP`, `SPORTS_EVENT`, `SCHOOL_PARTY`, `ARTS_SHOW`, `SCIENCE_FAIR`, eventos com `requiresParentalConsent=true`, ou priority `HIGH`/`URGENT`). Nova seção no email com pill violeta e copy "Eventos importantes que pedem preparo antecipado".
+  - **Parte 2 — Job de push D-0 matinal (`SendEventDayRemindersJob` 7:30h):** Busca eventos importantes do dia, resolve audiências (SCHOOL/CLASS/LEVEL/ACADEMIC_PERIOD), agrupa por destinatário (1 push mesmo com 3 eventos), dispara via `notificationService.send()` (4 canais). Idempotente por `(userId, bucket-dia)`.
+  - **Parte 3 — Push imediato em mudança de evento + lembrete autorização:**
+    - `notifyEventCancelled()` plugado no `cancel_event_controller` — push pra todos os destinatários quando evento é cancelado.
+    - `notifyEventRescheduled()` plugado no `update_event_controller` — detecta mudança de `startDate` ou `location` em evento `PUBLISHED` e notifica.
+    - `SendParentalConsentRemindersJob` 10h diário — lembrete D-3 pra `EventParentalConsent` com `status='PENDING'`, throttle 24h via `reminderSentAt`.
+- **Validado 2026-05-28:** Typecheck verde. Todos respeitam `NotificationPreference` (4 canais via `notificationService`).
 
 #### 8.2 Calendário sem visualização de feriados `P3` `[XS]`
 - **Onde:** `inertia/pages/responsavel/calendario.tsx`

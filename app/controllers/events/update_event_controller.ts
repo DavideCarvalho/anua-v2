@@ -18,6 +18,7 @@ import {
 import AppException from '#exceptions/app_exception'
 import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import EventTransformer from '#transformers/event_transformer'
+import { notifyEventRescheduled } from '#services/event_notification_service'
 
 function hasExplicitTime(value: string) {
   return /[T\s]\d{2}:\d{2}/.test(value)
@@ -52,6 +53,8 @@ export default class UpdateEventController {
           event: Event
           shouldDispatchInvitations: boolean
           paymentIdsToReconcile: string[]
+          changedFields: { date: boolean; location: boolean }
+          wasPublished: boolean
         }
 
     try {
@@ -73,6 +76,9 @@ export default class UpdateEventController {
         }
 
         const previousRequiresParentalConsent = event.requiresParentalConsent
+        const previousStartDateIso = event.startDate?.toISO() ?? null
+        const previousLocation = event.location
+        const wasPublished = event.status === 'PUBLISHED'
 
         if (data.title !== undefined) event.title = data.title
         if (data.description !== undefined) event.description = data.description
@@ -322,11 +328,17 @@ export default class UpdateEventController {
         }
 
         await event.save()
+
+        const dateChanged = (event.startDate?.toISO() ?? null) !== previousStartDateIso
+        const locationChanged = (event.location ?? null) !== (previousLocation ?? null)
+
         return {
           type: 'ok' as const,
           event,
           shouldDispatchInvitations,
           paymentIdsToReconcile: Array.from(paymentIdsToReconcile),
+          changedFields: { date: dateChanged, location: locationChanged },
+          wasPublished,
         }
       })
     } catch (error) {
@@ -382,6 +394,23 @@ export default class UpdateEventController {
     await event.load('organizer')
     await event.load('school')
     await event.load('eventAudiences')
+
+    // Push imediato pra responsáveis/alunos quando data ou local mudam num
+    // evento já publicado. Eventos em DRAFT não notificam (ainda não
+    // visíveis pra família).
+    if (
+      result.wasPublished &&
+      (result.changedFields.date || result.changedFields.location)
+    ) {
+      try {
+        await notifyEventRescheduled({ event, changedFields: result.changedFields })
+      } catch (error) {
+        logger.error(
+          { error, eventId: event.id },
+          '[UPDATE_EVENT] falha ao notificar reagendamento'
+        )
+      }
+    }
 
     return response.ok(await serialize(EventTransformer.transform(event)))
   }

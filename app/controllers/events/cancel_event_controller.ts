@@ -8,6 +8,7 @@ import { DateTime } from 'luxon'
 import type StudentPayment from '#models/student_payment'
 import AppException from '#exceptions/app_exception'
 import EventTransformer from '#transformers/event_transformer'
+import { notifyEventCancelled } from '#services/event_notification_service'
 
 type CancelResult =
   | { type: 'not_found' }
@@ -104,6 +105,15 @@ export default class CancelEventController {
     await event.load('organizer')
     await event.load('school')
     await event.load('eventAudiences')
+
+    // Push imediato pra todos os destinatários do evento (responsáveis +
+    // alunos autorresponsáveis). Fora da transação pra não bloquear o
+    // response em caso de erro do canal externo.
+    try {
+      await notifyEventCancelled({ event })
+    } catch (error) {
+      logger.error({ error, eventId: event.id }, '[CANCEL_EVENT] falha ao notificar cancelamento')
+    }
 
     return response.ok(await serialize(EventTransformer.transform(event)))
   }

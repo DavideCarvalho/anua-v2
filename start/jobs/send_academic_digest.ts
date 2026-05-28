@@ -17,15 +17,32 @@ const BR_TZ = 'America/Sao_Paulo'
 export type DigestKind = 'daily' | 'weekly'
 
 type DigestItemKind = 'exam' | 'assignment' | 'event'
+type DigestItemBucket = 'tomorrow' | 'in-3-days'
 
 interface DigestItem {
   kind: DigestItemKind
+  bucket: DigestItemBucket
   title: string
   subject: string | null
   description: string | null
   dateIso: string // pra ordenação
   weekdayLabel: string // "QUI", "SEG" — uppercase, 3 chars
   dayLabel: string // "22 mai" — destaque
+}
+
+const IMPORTANT_EVENT_TYPES = [
+  'PARENTS_MEETING',
+  'FIELD_TRIP',
+  'SPORTS_EVENT',
+  'SCHOOL_PARTY',
+  'ARTS_SHOW',
+  'SCIENCE_FAIR',
+] as const
+
+function isImportantEvent(ev: Event): boolean {
+  if (ev.requiresParentalConsent) return true
+  if (ev.priority === 'HIGH' || ev.priority === 'URGENT') return true
+  return (IMPORTANT_EVENT_TYPES as readonly string[]).includes(ev.type)
 }
 
 interface StudentBlock {
@@ -61,6 +78,21 @@ function resolveWindow(kind: DigestKind, now: DateTime) {
     start: startBr.toUTC(),
     end: endBr.toUTC(),
     bucket: startBr.toISO()!.slice(0, 10), // YYYY-MM-DD da segunda
+  }
+}
+
+/**
+ * Janela exata do 3º dia (D+3) usada como "Daqui a 3 dias" no daily digest.
+ * Só pega eventos importantes (filtrados em loadStudentItems com eventsOnly=true).
+ * Sem overlap com a janela "amanhã" (D+1) porque é um dia inteiro à parte.
+ */
+function resolveD3Window(now: DateTime) {
+  const nowBr = now.setZone(BR_TZ)
+  const startBr = nowBr.plus({ days: 3 }).startOf('day')
+  const endBr = startBr.endOf('day')
+  return {
+    start: startBr.toUTC(),
+    end: endBr.toUTC(),
   }
 }
 
@@ -158,13 +190,32 @@ function joinNamesPt(names: string[]): string {
   return `${names.slice(0, -1).join(', ')} e ${names[names.length - 1]}`
 }
 
-function renderStudentBlock(block: StudentBlock, showHeader: boolean): string {
+function renderBucketSections(items: DigestItem[]): string {
   const grouped: Record<DigestItemKind, DigestItem[]> = { exam: [], assignment: [], event: [] }
-  for (const item of block.items) grouped[item.kind].push(item)
-
-  const sectionsHtml = (['exam', 'assignment', 'event'] as DigestItemKind[])
+  for (const item of items) grouped[item.kind].push(item)
+  return (['exam', 'assignment', 'event'] as DigestItemKind[])
     .map((k) => renderSection(k, grouped[k]))
     .join('')
+}
+
+function renderBucketHeader(label: string, sublabel: string): string {
+  return `
+    <tr><td style="padding:24px 32px 0 32px;">
+      <div style="display:inline-block;font-size:10px;font-weight:700;letter-spacing:2px;color:${ANUA_VIOLET};text-transform:uppercase;background:${ANUA_VIOLET_SOFT};padding:4px 10px;border-radius:9999px;">${escapeHtml(label)}</div>
+      <div style="margin-top:6px;font-size:13px;color:${TEXT_MUTED};">${escapeHtml(sublabel)}</div>
+    </td></tr>`
+}
+
+function renderStudentBlock(block: StudentBlock, showHeader: boolean): string {
+  const tomorrow = block.items.filter((i) => i.bucket === 'tomorrow')
+  const d3 = block.items.filter((i) => i.bucket === 'in-3-days')
+
+  const tomorrowHtml = tomorrow.length > 0 ? renderBucketSections(tomorrow) : ''
+  const d3Html =
+    d3.length > 0
+      ? renderBucketHeader('Daqui a 3 dias', 'Eventos importantes que pedem preparo antecipado') +
+        renderBucketSections(d3)
+      : ''
 
   const headerHtml = showHeader
     ? `
@@ -174,7 +225,7 @@ function renderStudentBlock(block: StudentBlock, showHeader: boolean): string {
       </td></tr>`
     : ''
 
-  return headerHtml + sectionsHtml
+  return headerHtml + tomorrowHtml + d3Html
 }
 
 function renderFooterCopy(opts: { recipientType: RecipientType; studentNames: string[] }): string {
@@ -286,34 +337,29 @@ interface ClassContext {
  * Carrega provas, atividades e eventos pra um aluno na janela. Eventos seguem
  * a mesma regra de audiência do calendar controller (SCHOOL/CLASS/
  * ACADEMIC_PERIOD/LEVEL) — por isso precisa do contexto completo da turma.
+ *
+ * `eventsOnly` (default false): quando true, ignora exams/assignments e
+ * retorna só eventos importantes. Usado pra a seção "Daqui a 3 dias" do
+ * daily digest, que polui menos focando em PARENTS_MEETING, FIELD_TRIP,
+ * eventos com autorização parental, ou prioridade HIGH/URGENT.
  */
 async function loadStudentItems(
   ctx: ClassContext,
   start: DateTime,
-  end: DateTime
+  end: DateTime,
+  bucket: DigestItemBucket = 'tomorrow',
+  eventsOnly: boolean = false
 ): Promise<DigestItem[]> {
   const startSql = start.toSQL()!
   const endSql = end.toSQL()!
   const { classId, schoolId, levelId, academicPeriodIds } = ctx
 
-  const [exams, assignments, events] = await Promise.all([
-    Exam.query()
-      .where('classId', classId)
-      .where('examDate', '>=', startSql)
-      .where('examDate', '<=', endSql)
-      .where('status', '!=', 'CANCELLED')
-      .preload('subject')
-      .orderBy('examDate', 'asc'),
-    Assignment.query()
-      .whereHas('teacherHasClass', (q) => q.where('classId', classId))
-      .where('dueDate', '>=', startSql)
-      .where('dueDate', '<=', endSql)
-      .preload('teacherHasClass', (q) => q.preload('subject'))
-      .orderBy('dueDate', 'asc'),
+  const buildEventQuery = () =>
     Event.query()
       .where('schoolId', schoolId)
       .where('startDate', '>=', startSql)
       .where('startDate', '<=', endSql)
+      .where('status', '!=', 'CANCELLED')
       .where((query) => {
         query.whereHas('eventAudiences', (audienceQuery) => {
           audienceQuery.where('scopeType', 'SCHOOL').where('scopeId', schoolId)
@@ -334,14 +380,33 @@ async function loadStudentItems(
           })
         }
       })
-      .orderBy('startDate', 'asc'),
-  ])
+      .orderBy('startDate', 'asc')
+
+  const [exams, assignments, events] = eventsOnly
+    ? [[] as Exam[], [] as Assignment[], await buildEventQuery()]
+    : await Promise.all([
+        Exam.query()
+          .where('classId', classId)
+          .where('examDate', '>=', startSql)
+          .where('examDate', '<=', endSql)
+          .where('status', '!=', 'CANCELLED')
+          .preload('subject')
+          .orderBy('examDate', 'asc'),
+        Assignment.query()
+          .whereHas('teacherHasClass', (q) => q.where('classId', classId))
+          .where('dueDate', '>=', startSql)
+          .where('dueDate', '<=', endSql)
+          .preload('teacherHasClass', (q) => q.preload('subject'))
+          .orderBy('dueDate', 'asc'),
+        buildEventQuery(),
+      ])
 
   const items: DigestItem[] = []
 
   for (const exam of exams) {
     items.push({
       kind: 'exam',
+      bucket,
       title: exam.title,
       subject: exam.subject?.name ?? null,
       description: exam.description,
@@ -353,6 +418,7 @@ async function loadStudentItems(
   for (const a of assignments) {
     items.push({
       kind: 'assignment',
+      bucket,
       title: a.name,
       subject: a.teacherHasClass?.subject?.name ?? null,
       description: a.description,
@@ -362,8 +428,10 @@ async function loadStudentItems(
   }
 
   for (const ev of events) {
+    if (eventsOnly && !isImportantEvent(ev)) continue
     items.push({
       kind: 'event',
+      bucket,
       title: ev.title,
       subject: ev.shortDescription,
       description: ev.description,
@@ -516,6 +584,10 @@ export async function sendAcademicDigest(payload: DigestPayload): Promise<Digest
   const { start, end, bucket } = resolveWindow(kind, now)
   const markerType = kind === 'daily' ? 'ACADEMIC_DIGEST_DAILY' : 'ACADEMIC_DIGEST_WEEKLY'
 
+  // Só no daily: incluir seção "Daqui a 3 dias" com eventos importantes (PARENTS_MEETING,
+  // FIELD_TRIP, etc). Dá antecedência maior pro responsável organizar.
+  const d3Window = kind === 'daily' ? resolveD3Window(now) : null
+
   // 1ª passada: pra cada aluno com classId, calcula items + lista destinatários.
   // Não filtrar por enrollmentStatus — handler confia em StudentHasResponsible.
   const students = await Student.query()
@@ -537,7 +609,12 @@ export async function sendAcademicDigest(payload: DigestPayload): Promise<Digest
       academicPeriodIds: student.class.academicPeriods.map((p) => p.id),
     }
 
-    const items = await loadStudentItems(ctx, start, end)
+    const tomorrowItems = await loadStudentItems(ctx, start, end, 'tomorrow')
+    const d3Items = d3Window
+      ? await loadStudentItems(ctx, d3Window.start, d3Window.end, 'in-3-days', true)
+      : []
+    const items = [...tomorrowItems, ...d3Items]
+
     if (items.length === 0) {
       stats.studentsWithoutItems++
       continue
