@@ -22,7 +22,7 @@ export function AnnouncementBody({ html, className }: AnnouncementBodyProps) {
     <div
       className={cn(
         'prose prose-sm dark:prose-invert max-w-none text-foreground',
-        '[&_a]:text-primary [&_a]:underline',
+        '[&_a]:text-primary',
         className
       )}
       dangerouslySetInnerHTML={{ __html: safe }}

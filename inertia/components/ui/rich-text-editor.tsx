@@ -82,7 +82,8 @@ export function RichTextEditor({
         class: cn(
           'tiptap-rich-text block min-h-[200px] w-full bg-transparent px-3 py-2.5 text-sm',
           'focus:outline-none disabled:opacity-50',
-          'prose prose-sm dark:prose-invert max-w-none'
+          'prose prose-sm dark:prose-invert max-w-none',
+          '[&_a]:text-primary'
         ),
       },
     },
