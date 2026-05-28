@@ -301,7 +301,7 @@ export default function EscolaDashboard() {
   const quickActions = [
     {
       label: 'Alunos',
-      description: 'Matrículas e cadastros',
+      description: 'Matrículas e alunos',
       route: 'web.escola.administrativo.alunos',
       icon: Users,
       visible: true,

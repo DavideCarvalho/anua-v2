@@ -26,8 +26,19 @@ export function Stepper({
   className,
   onStepClick,
 }: StepperProps) {
+  const currentStepTitle = steps[currentStep]?.title ?? ''
   return (
     <nav aria-label="Progress" className={cn('w-full', className)}>
+      <div
+        role="progressbar"
+        aria-valuenow={currentStep + 1}
+        aria-valuemin={1}
+        aria-valuemax={steps.length}
+        aria-valuetext={`Passo ${currentStep + 1} de ${steps.length}: ${currentStepTitle}`}
+        className="sr-only"
+      >
+        {`Passo ${currentStep + 1} de ${steps.length}: ${currentStepTitle}`}
+      </div>
       <ol className="flex items-start justify-between gap-2">
         {steps.map((step, index) => {
           const isComplete = currentStep > index

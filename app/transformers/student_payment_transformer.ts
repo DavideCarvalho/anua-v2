@@ -66,6 +66,9 @@ export default class StudentPaymentTransformer extends BaseTransformer<StudentPa
         'updatedAt',
       ]),
       discountSource: resolveDiscountSource(this.resource),
+      invoicePaymentMethod: this.resource.$preloaded.invoice
+        ? this.resource.invoice.paymentMethod
+        : null,
       student: StudentTransformer.transform(this.whenLoaded(this.resource.student))?.depth(2),
       studentHasExtraClass: StudentHasExtraClassTransformer.transform(
         this.whenLoaded(this.resource.studentHasExtraClass)

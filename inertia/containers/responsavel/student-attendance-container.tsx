@@ -1,8 +1,10 @@
+import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Calendar, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
+import type { Route } from '@tuyau/core/types'
 import { cn } from '../../lib/utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import {
@@ -15,6 +17,32 @@ import {
 } from '../../components/ui/table'
 
 import { api } from '~/lib/api'
+
+type StudentAttendanceResponse = Route.Response<'api.v1.responsavel.api.student_attendance'>
+type AttendanceRecord = StudentAttendanceResponse['data'][number]
+
+const CONSECUTIVE_ABSENCE_THRESHOLD = 3
+
+function findConsecutiveAbsenceIds(records: AttendanceRecord[]): Set<string> {
+  const flagged = new Set<string>()
+  const sorted = [...records].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  )
+  let runStart = 0
+  for (let i = 0; i <= sorted.length; i += 1) {
+    const isAbsent = i < sorted.length && sorted[i].status === 'ABSENT'
+    if (!isAbsent) {
+      const runLength = i - runStart
+      if (runLength >= CONSECUTIVE_ABSENCE_THRESHOLD) {
+        for (let j = runStart; j < i; j += 1) {
+          flagged.add(sorted[j].id)
+        }
+      }
+      runStart = i + 1
+    }
+  }
+  return flagged
+}
 
 interface StudentAttendanceContainerProps {
   studentId: string
@@ -32,6 +60,11 @@ export function StudentAttendanceContainer({
       params: { studentId },
       query: subPeriodId ? { subPeriodId } : undefined,
     })
+  )
+
+  const consecutiveAbsenceIds = useMemo(
+    () => findConsecutiveAbsenceIds(data?.data ?? []),
+    [data?.data]
   )
 
   if (isLoading) {
@@ -92,8 +125,26 @@ export function StudentAttendanceContainer({
     return 'text-red-600'
   }
 
+  const hasConsecutiveAbsences = consecutiveAbsenceIds.size > 0
+
   return (
     <div className="space-y-6">
+      {hasConsecutiveAbsences && (
+        <div
+          role="alert"
+          className="flex items-start gap-3 rounded-lg ring-1 ring-red-600/20 bg-red-500/10 p-4 text-red-700 dark:text-red-400"
+        >
+          <AlertTriangle className="h-5 w-5 mt-0.5 shrink-0" />
+          <div className="text-sm">
+            <p className="font-medium">Atenção: padrão de faltas detectado</p>
+            <p className="mt-0.5 text-red-700/80 dark:text-red-400/80">
+              {studentName} teve {CONSECUTIVE_ABSENCE_THRESHOLD} ou mais faltas consecutivas.
+              Verifique o histórico abaixo.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Summary Card */}
       <Card>
         <CardHeader>
@@ -157,23 +208,29 @@ export function StudentAttendanceContainer({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.data.map((attendance: any) => (
-                  <TableRow key={attendance.id}>
-                    <TableCell>
-                      {format(new Date(attendance.date), "dd 'de' MMMM, yyyy", { locale: ptBR })}
-                    </TableCell>
-                    <TableCell>{attendance.subject || '-'}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-center gap-2">
-                        {getStatusIcon(attendance.status)}
-                        <span>{getStatusText(attendance.status)}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {attendance.notes || '-'}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {data.data.map((attendance: AttendanceRecord) => {
+                  const isInAbsenceRun = consecutiveAbsenceIds.has(attendance.id)
+                  return (
+                    <TableRow
+                      key={attendance.id}
+                      className={cn(isInAbsenceRun && 'bg-red-500/5 hover:bg-red-500/10')}
+                    >
+                      <TableCell>
+                        {format(new Date(attendance.date), "dd 'de' MMMM, yyyy", { locale: ptBR })}
+                      </TableCell>
+                      <TableCell>{attendance.subject || '-'}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center justify-center gap-2">
+                          {getStatusIcon(attendance.status)}
+                          <span>{getStatusText(attendance.status)}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {attendance.notes || '-'}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
           )}

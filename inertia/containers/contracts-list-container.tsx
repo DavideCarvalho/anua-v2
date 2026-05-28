@@ -339,11 +339,15 @@ function ContractsListContent() {
               }
             >
               <SelectTrigger className="w-[220px]">
-                <SelectValue placeholder="Academic Period" />
+                <SelectValue>
+                  {academicPeriodId
+                    ? academicPeriods.find((p) => p.id === academicPeriodId)?.name
+                    : 'Todos os períodos'}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All periods</SelectItem>
-                {academicPeriods.map((period: any) => (
+                <SelectItem value="all">Todos os períodos</SelectItem>
+                {academicPeriods.map((period) => (
                   <SelectItem key={period.id} value={period.id}>
                     {period.name}
                   </SelectItem>
@@ -363,10 +367,14 @@ function ContractsListContent() {
               disabled={!academicPeriodId}
             >
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Course" />
+                <SelectValue>
+                  {courseId
+                    ? courses.find((c) => c.courseId === courseId)?.name
+                    : 'Todos os cursos'}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All courses</SelectItem>
+                <SelectItem value="all">Todos os cursos</SelectItem>
                 {courses.map((course) => (
                   <SelectItem key={course.courseId} value={course.courseId}>
                     {course.name}
@@ -386,10 +394,17 @@ function ContractsListContent() {
               disabled={!courseId}
             >
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Class" />
+                <SelectValue>
+                  {classId
+                    ? (() => {
+                        const c = classes.find((cls) => cls.id === classId)
+                        return c ? `${c.name} (${c.levelName})` : 'Todas as turmas'
+                      })()
+                    : 'Todas as turmas'}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All classes</SelectItem>
+                <SelectItem value="all">Todas as turmas</SelectItem>
                 {classes.map((classItem) => (
                   <SelectItem key={classItem.id} value={classItem.id}>
                     {classItem.name} ({classItem.levelName})
@@ -408,12 +423,16 @@ function ContractsListContent() {
               }
             >
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Status" />
+                <SelectValue>
+                  {statusFilter === 'active' && 'Apenas ativos'}
+                  {statusFilter === 'inactive' && 'Apenas inativos'}
+                  {statusFilter === 'all' && 'Todos'}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="active">Active only</SelectItem>
-                <SelectItem value="inactive">Inactive only</SelectItem>
-                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="active">Apenas ativos</SelectItem>
+                <SelectItem value="inactive">Apenas inativos</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
               </SelectContent>
             </Select>
 

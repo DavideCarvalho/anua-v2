@@ -17,12 +17,15 @@ export default class ListStudentPaymentsController {
       type,
       month,
       year,
+      overdueMin,
+      overdueMax,
       page = 1,
       limit = 20,
     } = payload
 
     const query = StudentPayment.query()
       .preload('student', (q) => q.preload('user'))
+      .preload('invoice')
       .orderBy('dueDate', 'desc')
 
     if (selectedSchoolIds && selectedSchoolIds.length > 0) {
@@ -69,12 +72,24 @@ export default class ListStudentPaymentsController {
       })
     }
 
+    if (overdueMin || overdueMax) {
+      const now = new Date()
+      if (overdueMax) {
+        const minDate = new Date(now)
+        minDate.setDate(minDate.getDate() - overdueMax)
+        query.where('dueDate', '>=', minDate.toISOString().slice(0, 10))
+      }
+      if (overdueMin) {
+        const maxDate = new Date(now)
+        maxDate.setDate(maxDate.getDate() - overdueMin)
+        query.where('dueDate', '<=', maxDate.toISOString().slice(0, 10))
+      }
+    }
+
     const payments = await query.paginate(page, limit)
 
     const data = payments.all()
     const metadata = payments.getMeta()
-
-    console.log(data, metadata)
 
     return serialize(StudentPaymentTransformer.paginate(data, metadata))
   }

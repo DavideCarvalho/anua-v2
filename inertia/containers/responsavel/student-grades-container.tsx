@@ -68,6 +68,12 @@ export function StudentGradesContainer({
     return 'text-red-600'
   }
 
+  const getGradePill = (average: number) => {
+    if (average >= 7) return 'bg-green-500/10 ring-1 ring-green-600/20 text-green-700 dark:text-green-400'
+    if (average >= 5) return 'bg-yellow-500/10 ring-1 ring-yellow-600/20 text-yellow-700 dark:text-yellow-400'
+    return 'bg-red-500/10 ring-1 ring-red-600/20 text-red-700 dark:text-red-400'
+  }
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'GRADED':
@@ -142,10 +148,15 @@ export function StudentGradesContainer({
                       <p className="text-sm text-muted-foreground">Media Ponderada Final</p>
                     </div>
                     <div className="text-right">
-                      <p className={cn('text-2xl font-bold', getGradeColor(subject.average))}>
+                      <span
+                        className={cn(
+                          'inline-flex items-center justify-center px-2.5 py-0.5 rounded-md text-2xl font-bold',
+                          getGradePill(subject.average)
+                        )}
+                      >
                         {subject.average.toFixed(1)}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
+                      </span>
+                      <p className="text-xs text-muted-foreground mt-1">
                         {subject.totalScore}/{subject.maxPossibleScore} pts
                       </p>
                     </div>
@@ -164,16 +175,18 @@ export function StudentGradesContainer({
                           )}
                         </div>
                         <div className="text-right">
-                          <p
-                            className={cn(
-                              'text-xl font-bold',
-                              sp.finalGrade !== null
-                                ? getGradeColor(sp.finalGrade)
-                                : 'text-muted-foreground'
-                            )}
-                          >
-                            {sp.finalGrade !== null ? sp.finalGrade.toFixed(1) : '-'}
-                          </p>
+                          {sp.finalGrade !== null ? (
+                            <span
+                              className={cn(
+                                'inline-flex items-center justify-center px-2 py-0.5 rounded-md text-xl font-bold',
+                                getGradePill(sp.finalGrade)
+                              )}
+                            >
+                              {sp.finalGrade.toFixed(1)}
+                            </span>
+                          ) : (
+                            <span className="text-xl font-bold text-muted-foreground">-</span>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center justify-between text-sm">
@@ -205,10 +218,15 @@ export function StudentGradesContainer({
               </p>
             </div>
             <div className="text-right">
-              <p className={cn('text-2xl font-bold', getGradeColor(subject.average))}>
+              <span
+                className={cn(
+                  'inline-flex items-center justify-center px-2.5 py-0.5 rounded-md text-2xl font-bold',
+                  getGradePill(subject.average)
+                )}
+              >
                 {subject.average.toFixed(1)}
-              </p>
-              <p className="text-xs text-muted-foreground">
+              </span>
+              <p className="text-xs text-muted-foreground mt-1">
                 {subject.totalScore}/{subject.maxPossibleScore} pts
               </p>
             </div>
@@ -231,10 +249,15 @@ export function StudentGradesContainer({
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
             <div className="text-center p-4 bg-muted rounded-lg">
-              <p className={cn('text-3xl font-bold', getGradeColor(data.summary.overallAverage))}>
+              <span
+                className={cn(
+                  'inline-flex items-center justify-center px-3 py-1 rounded-lg text-3xl font-bold',
+                  getGradePill(data.summary.overallAverage)
+                )}
+              >
                 {data.summary.overallAverage.toFixed(1)}
-              </p>
-              <p className="text-sm text-muted-foreground">Media Geral</p>
+              </span>
+              <p className="text-sm text-muted-foreground mt-2">Media Geral</p>
             </div>
             <div className="text-center p-4 bg-muted rounded-lg">
               <p className="text-3xl font-bold">{data.summary.totalScore}</p>

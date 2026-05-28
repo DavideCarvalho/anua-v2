@@ -9,9 +9,39 @@ import {
   CardTitle,
 } from '../../../components/ui/card'
 import { Button } from '../../../components/ui/button'
-import { FileText, UserPlus, ClipboardList, ArrowRight } from 'lucide-react'
+import { EmptyState } from '../../../components/ui/empty-state'
+import { FileText, UserPlus, ClipboardList, ArrowRight, CalendarPlus } from 'lucide-react'
 
-export default function MatriculasPage() {
+export default function MatriculasPage({ hasActivePeriod }: { hasActivePeriod: boolean }) {
+  if (!hasActivePeriod) {
+    return (
+      <EscolaLayout>
+        <Head title="Matrículas" />
+
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Matrículas</h1>
+            <p className="text-muted-foreground">Gerencie o processo de matrícula de novos alunos</p>
+          </div>
+
+          <EmptyState
+            icon={CalendarPlus}
+            title="Nenhum período letivo ativo"
+            description="Configure um período letivo para começar a matricular alunos."
+            action={
+              <Link route="web.escola.periodosLetivos">
+                <Button className="gap-2">
+                  Configurar período letivo
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            }
+          />
+        </div>
+      </EscolaLayout>
+    )
+  }
+
   return (
     <EscolaLayout>
       <Head title="Matrículas" />

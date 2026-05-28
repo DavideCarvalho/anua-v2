@@ -39,6 +39,11 @@ import {
   Handshake,
   FilterX,
   FileText,
+  QrCode,
+  Landmark,
+  CreditCard,
+  Banknote,
+  Receipt,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Checkbox } from '../components/ui/checkbox'
@@ -204,6 +209,38 @@ function getDaysOverdueClass(days: number): string {
   return 'text-amber-600 dark:text-amber-400'
 }
 
+const paymentMethodConfig: Record<string, { label: string; icon: typeof QrCode }> = {
+  PIX: { label: 'PIX', icon: QrCode },
+  BOLETO: { label: 'Boleto', icon: Landmark },
+  CREDIT_CARD: { label: 'Cartão', icon: CreditCard },
+  CASH: { label: 'Dinheiro', icon: Banknote },
+  OTHER: { label: 'Outro', icon: Receipt },
+}
+
+const overdueRanges = [
+  { value: '_all', label: 'Todas faixas', min: undefined, max: undefined },
+  { value: '1-15', label: '1–15 dias', min: 1, max: 15 },
+  { value: '16-30', label: '16–30 dias', min: 16, max: 30 },
+  { value: '31-60', label: '31–60 dias', min: 31, max: 60 },
+  { value: '61-90', label: '61–90 dias', min: 61, max: 90 },
+  { value: '90+', label: '> 90 dias', min: 91, max: undefined },
+] as const
+
+type OverdueRange = (typeof overdueRanges)[number]['value']
+
+function PaymentMethodBadge({ method }: { method: Payment['invoicePaymentMethod'] }) {
+  if (!method) return <span className="text-muted-foreground">-</span>
+  const cfg = paymentMethodConfig[method]
+  if (!cfg) return <span className="text-xs text-muted-foreground">{method}</span>
+  const MethodIcon = cfg.icon
+  return (
+    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+      <MethodIcon className="h-3.5 w-3.5" />
+      {cfg.label}
+    </span>
+  )
+}
+
 // Container Export
 export function StudentPaymentsContainer({
   status,
@@ -247,6 +284,8 @@ function StudentPaymentsContent({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [proposalDialogOpen, setProposalDialogOpen] = useState(false)
   const [proposalInstallments, setProposalInstallments] = useState(2)
+  const [overdueRange, setOverdueRange] = useState<OverdueRange>('_all')
+  const selectedRange = overdueRanges.find((r) => r.value === overdueRange)
   const queryClient = useQueryClient()
 
   function openModal(payment: Payment, modal: ModalType) {
@@ -302,10 +341,11 @@ function StudentPaymentsContent({
   )
   const classes: ClassItem[] = classesData?.data ?? []
 
-  const hasActiveFilters = !!(filterStatus || filterType || filterMonth || filterYear || classId)
+  const hasActiveFilters = !!(filterStatus || filterType || filterMonth || filterYear || classId || overdueRange !== '_all')
 
   function clearFilters() {
     setFilters({ status: null, type: null, month: null, year: null, classId: null, page: 1 })
+    setOverdueRange('_all')
   }
 
   const { data, isLoading, error, refetch } = useQuery(
@@ -319,6 +359,8 @@ function StudentPaymentsContent({
         month: filterMonth || undefined,
         year: filterYear || undefined,
         classId: classId || undefined,
+        overdueMin: selectedRange?.min ?? undefined,
+        overdueMax: selectedRange?.max ?? undefined,
       },
     })
   )
@@ -478,6 +520,40 @@ function StudentPaymentsContent({
         </div>
       )}
 
+      {activeStatus === 'OVERDUE' && (
+        <div className="flex items-center gap-2">
+          <Select
+            value={overdueRange}
+            onValueChange={(v) => { setOverdueRange(v as OverdueRange); setFilters({ page: 1 }) }}
+          >
+            <SelectTrigger className="w-40">
+              <SelectValue>
+                {overdueRanges.find((r) => r.value === overdueRange)?.label ?? 'Todas faixas'}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="_all">Todas faixas</SelectItem>
+              <SelectItem value="1-15">1–15 dias</SelectItem>
+              <SelectItem value="16-30">16–30 dias</SelectItem>
+              <SelectItem value="31-60">31–60 dias</SelectItem>
+              <SelectItem value="61-90">61–90 dias</SelectItem>
+              <SelectItem value="90+">{'> 90 dias'}</SelectItem>
+            </SelectContent>
+          </Select>
+          {overdueRange !== '_all' && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setOverdueRange('_all')}
+              className="text-muted-foreground"
+            >
+              <FilterX className="h-4 w-4 mr-1" />
+              Limpar
+            </Button>
+          )}
+        </div>
+      )}
+
       {isLoading && <StudentPaymentsSkeleton />}
 
       {error instanceof Error && (
@@ -509,6 +585,7 @@ function StudentPaymentsContent({
                   <th className="text-left p-4 font-medium">Atraso</th>
                   <th className="text-left p-4 font-medium">Valor</th>
                   <th className="text-left p-4 font-medium">Status</th>
+                  <th className="text-left p-4 font-medium">Método</th>
                   <th className="text-right p-4 font-medium">Ações</th>
                 </tr>
               </thead>
@@ -553,6 +630,9 @@ function StudentPaymentsContent({
                           <StatusIcon className="h-3 w-3" />
                           {config.label}
                         </span>
+                      </td>
+                      <td className="p-4">
+                        <PaymentMethodBadge method={payment.invoicePaymentMethod} />
                       </td>
                       <td className="p-4 text-right">
                         {ACTIONABLE_STATUSES.includes(payment.status as PaymentStatus) && (

@@ -51,6 +51,8 @@ export const listStudentPaymentsValidator = vine.compile(
       .optional(),
     month: vine.number().min(1).max(12).optional(),
     year: vine.number().min(2020).max(2100).optional(),
+    overdueMin: vine.number().min(1).optional(),
+    overdueMax: vine.number().min(1).optional(),
     page: vine.number().min(1).optional(),
     limit: vine.number().min(1).max(100).optional(),
   })
