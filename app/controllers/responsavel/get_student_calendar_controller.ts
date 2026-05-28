@@ -2,15 +2,41 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 
 import AppException from '#exceptions/app_exception'
+import AcademicPeriodHoliday from '#models/academic_period_holiday'
 import Assignment from '#models/assignment'
 import Event from '#models/event'
 import EventParentalConsent from '#models/event_parental_consent'
+import type { ParentalConsentStatus } from '#models/event_parental_consent'
 import Exam from '#models/exam'
 import Student from '#models/student'
 import StudentHasResponsible from '#models/student_has_responsible'
 import { getStudentCalendarValidator } from '#validators/responsavel_calendar'
 
 type CalendarView = 'list' | 'week' | 'month'
+
+type CalendarConsent = {
+  id: string
+  status: ParentalConsentStatus
+  hasSignatureSubmission: boolean
+}
+
+type CalendarItemBase = {
+  id: string
+  sourceId: string
+  title: string
+  description: string | null
+  startAt: string
+  endAt: string | null
+  allDay: boolean
+  className: string | null
+  subjectName: string | null
+  status: string | null
+  colorToken: string
+}
+
+type CalendarItem =
+  | (CalendarItemBase & { sourceType: 'assignment' | 'exam' | 'holiday' })
+  | (CalendarItemBase & { sourceType: 'event'; consent: CalendarConsent | null })
 
 function resolveRange(view: CalendarView, from?: string, to?: string) {
   const now = DateTime.now()
@@ -176,6 +202,14 @@ export default class GetStudentCalendarController {
         }
       })
 
+    const holidays =
+      academicPeriodIds.length > 0
+        ? await AcademicPeriodHoliday.query()
+            .whereIn('academicPeriodId', academicPeriodIds)
+            .where('date', '>=', rangeStart.toISODate()!)
+            .where('date', '<=', rangeEnd.toISODate()!)
+        : []
+
     // Carrega consents do responsável logado pra esses eventos.
     // Mapeia por eventId → { id, status, hasTemplate }.
     const eventIds = events.map((e) => e.id)
@@ -198,8 +232,8 @@ export default class GetStudentCalendarController {
       ])
     )
 
-    const items = [
-      ...assignments.map((assignment) => ({
+    const items: CalendarItem[] = [
+      ...assignments.map((assignment): CalendarItem => ({
         id: `assignment:${assignment.id}`,
         sourceType: 'assignment',
         sourceId: assignment.id,
@@ -213,7 +247,7 @@ export default class GetStudentCalendarController {
         status: null,
         colorToken: 'assignment',
       })),
-      ...exams.map((exam) => ({
+      ...exams.map((exam): CalendarItem => ({
         id: `exam:${exam.id}`,
         sourceType: 'exam',
         sourceId: exam.id,
@@ -227,7 +261,7 @@ export default class GetStudentCalendarController {
         status: exam.status,
         colorToken: 'exam',
       })),
-      ...events.map((event) => ({
+      ...events.map((event): CalendarItem => ({
         id: `event:${event.id}`,
         sourceType: 'event',
         sourceId: event.id,
@@ -241,6 +275,22 @@ export default class GetStudentCalendarController {
         status: event.status,
         colorToken: 'event',
         consent: consentByEventId.get(event.id) ?? null,
+      })),
+      ...holidays.map((holiday): CalendarItem => ({
+        id: `holiday:${holiday.id}`,
+        sourceType: 'holiday',
+        sourceId: holiday.id,
+        title: 'Feriado',
+        description: null,
+        // Feriado é data pura (sem hora). Emitimos como local flutuante
+        // (sem offset) pra não deslocar de dia ao virar pro fuso do browser.
+        startAt: `${holiday.date.toISODate()!}T00:00:00`,
+        endAt: null,
+        allDay: true,
+        className: null,
+        subjectName: null,
+        status: null,
+        colorToken: 'holiday',
       })),
     ].sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime())
 

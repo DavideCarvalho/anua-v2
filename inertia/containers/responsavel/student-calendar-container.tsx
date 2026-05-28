@@ -50,18 +50,21 @@ interface StudentCalendarContainerProps {
 function getTypeLabel(type: CalendarItem['sourceType']) {
   if (type === 'assignment') return 'Atividade'
   if (type === 'exam') return 'Prova'
+  if (type === 'holiday') return 'Feriado'
   return 'Evento'
 }
 
 function getTypeVariant(type: CalendarItem['sourceType']): 'default' | 'secondary' | 'destructive' {
   if (type === 'assignment') return 'secondary'
   if (type === 'exam') return 'destructive'
+  if (type === 'holiday') return 'secondary'
   return 'default'
 }
 
 function getTypeDotClass(type: CalendarItem['sourceType']) {
   if (type === 'assignment') return 'bg-amber-500'
   if (type === 'exam') return 'bg-rose-500'
+  if (type === 'holiday') return 'bg-emerald-500'
   return 'bg-sky-500'
 }
 
@@ -540,6 +543,9 @@ export function StudentCalendarContainer({
             </span>
             <span className="inline-flex items-center gap-1 text-muted-foreground">
               <span className="h-2 w-2 rounded-full bg-sky-500" /> Eventos
+            </span>
+            <span className="inline-flex items-center gap-1 text-muted-foreground">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" /> Feriados
             </span>
           </div>
         </div>
