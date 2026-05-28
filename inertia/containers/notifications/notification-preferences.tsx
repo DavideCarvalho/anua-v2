@@ -229,8 +229,8 @@ function PreferenceSection({
                     <Label className="text-sm">Email</Label>
                   </div>
                   <Switch
-                    checked={grouped[type]?.email ?? false}
-                    onCheckedChange={() => onToggle(type, 'email', grouped[type]?.email ?? false)}
+                    checked={grouped[type]?.email ?? true}
+                    onCheckedChange={() => onToggle(type, 'email', grouped[type]?.email ?? true)}
                     disabled={isUpdating}
                   />
                 </div>
@@ -241,8 +241,8 @@ function PreferenceSection({
                     <Label className="text-sm">WhatsApp</Label>
                   </div>
                   <Switch
-                    checked={grouped[type]?.whatsApp ?? false}
-                    onCheckedChange={() => onToggle(type, 'whatsapp', grouped[type]?.whatsApp ?? false)}
+                    checked={grouped[type]?.whatsApp ?? true}
+                    onCheckedChange={() => onToggle(type, 'whatsapp', grouped[type]?.whatsApp ?? true)}
                     disabled={isUpdating}
                   />
                 </div>

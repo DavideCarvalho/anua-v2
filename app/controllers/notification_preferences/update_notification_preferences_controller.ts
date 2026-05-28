@@ -62,7 +62,7 @@ export default class UpdateNotificationPreferencesController {
         let enableEmail = true
         let enablePush = true
         let enableSms = false
-        let enableWhatsApp = false
+        let enableWhatsApp = true
 
         for (const { channel, enabled } of channelPrefs) {
           const field = getChannelField(channel)

@@ -107,7 +107,7 @@ export async function sendParentalConsentReminders(
     try {
       await notificationService.send({
         userId: consent.responsibleId,
-        type: 'EVENT_REMINDER',
+        type: 'PARENTAL_CONSENT_REMINDER',
         title: `Autorização pendente: ${event.title}`,
         message: `${studentName} ainda não tem autorização assinada pro evento que acontece ${whenLabel}.`,
         actionUrl: '/responsavel/autorizacoes',

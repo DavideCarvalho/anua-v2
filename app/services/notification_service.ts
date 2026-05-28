@@ -66,7 +66,7 @@ export class NotificationService {
     const enableEmail =
       channels?.email !== undefined ? channels.email : pref ? pref.enableEmail : true
     const enableWhatsApp =
-      channels?.whatsApp !== undefined ? channels.whatsApp : pref ? pref.enableWhatsApp : false
+      channels?.whatsApp !== undefined ? channels.whatsApp : pref ? pref.enableWhatsApp : true
 
     const dispatches: Promise<unknown>[] = []
 
