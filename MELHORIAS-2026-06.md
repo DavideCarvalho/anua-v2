@@ -11,6 +11,8 @@ Documento de melhorias organizado por módulo funcional. Cada módulo tem três 
 
 **Fontes:** auditoria do codebase (controllers, pages, services, models), pesquisa de features dos concorrentes (sites, docs, reviews), AUDITORIA-2026-05.md (itens abertos referenciados mas não duplicados).
 
+**⚠ Nota sobre falsos positivos:** A auditoria inicial flaggeou várias páginas como "shells vazios" baseando-se no tamanho em bytes do arquivo `.tsx`. Isso é incorreto — o pattern do codebase é Page = shell fino (header + delegação) → Container faz o trabalho real. Items marcados `FALSO POSITIVO` foram verificados e descartados.
+
 ---
 
 ## 1. Matrícula & Rematrícula
@@ -193,10 +195,11 @@ Documento de melhorias organizado por módulo funcional. Cada módulo tem três 
 - **Fix:** Adicionado helper `getGradePill` que retorna classes de pílula completa (`bg-{cor}/10 ring-1 ring-{cor}/20 text-{cor}-700`). Aplicado em 4 pontos: média geral do resumo, média ponderada por disciplina, nota final por sub-período, nota da disciplina sem sub-período. Faixa: verde >= 7, amarelo 5-6.9, vermelho < 5.
 - **Validado 2026-05-28:** Chrome MCP impersonando Cleiton Pai (responsável escola teste completo 3). Pílula vermelha "0.0" da média geral visível com background tinted + ring vermelho. Suporte light+dark mode.
 
-#### 3.2 Página de matérias é shell mínimo `P3` `[S]`
-- **Onde:** `inertia/pages/escola/administrativo/materias.tsx` (1.8KB)
-- **Problema:** Página existe mas é praticamente vazia. CRUD de matérias funciona via API mas UI é pobre.
-- **Fix:** Implementar listagem com busca, edição inline, associação com professores.
+#### 3.2 ~~Página de matérias é shell mínimo~~ `P3` `[S]` FALSO POSITIVO
+- [~] **Onde:** `inertia/pages/escola/administrativo/materias.tsx`
+- **Problema reportado:** Página com 1.8KB — interpretado como "shell vazio".
+- **Verificado 2026-05-28:** Page é shell fino por design (pattern do codebase). Delega pra `SubjectsTableContainer` (5KB, 168 linhas) que faz CRUD completo, com `NewSubjectModal` e `EditSubjectModal`. Listagem, criação e edição funcionais.
+- **Conclusão:** Item descartado. Se houver melhoria real (busca, edição inline, associação com professores), criar item específico após auditoria do container.
 
 #### 3.3 ~~Frequência sem destaque visual pra padrões (faltas consecutivas)~~ `P2` `[XS]` FEITO (testado)
 - [x] **Onde:** `inertia/containers/responsavel/student-attendance-container.tsx`
@@ -290,11 +293,11 @@ Documento de melhorias organizado por módulo funcional. Cada módulo tem três 
 - **Problema:** Coordenadora quer enviar circular com PDF anexo. Não consegue.
 - **Fix:** Campo de upload de arquivos (PDF, imagem) no form de comunicado. Exibir no portal do responsável com botão de download.
 
-#### 4.3 Feed/mural com implementação mínima `P3` `[S]`
-- **Onde:** `inertia/pages/escola/mural.tsx` (1.6KB)
-- **Problema:** Página de mural existe mas é praticamente vazia.
-- **Fix:** Implementar feed cronológico com posts, fotos, reações. Timeline da escola.
-- **Quem tem:** ClassDojo (Stories com fotos/vídeos), Bloomz, Agenda Edu.
+#### 4.3 ~~Feed/mural com implementação mínima~~ `P3` `[S]` FALSO POSITIVO
+- [~] **Onde:** `inertia/pages/escola/mural.tsx`
+- **Problema reportado:** Página com 1.6KB — interpretado como "shell vazio".
+- **Verificado 2026-05-28:** Mural tem H1, descrição, botão "Nova publicação", `PostsFeed` com Suspense fallback, `NewPostModal`. Feed cronológico funcional. Auditar containers (`posts-feed`, `post-card`) pra ver se faltam features (fotos múltiplas, reações além de like).
+- **Conclusão:** Item descartado. Melhorias específicas (Stories estilo ClassDojo, vídeos, reações) ficam como features novas no módulo Comunicação.
 
 ### Evolução
 
@@ -491,10 +494,11 @@ Documento de melhorias organizado por módulo funcional. Cada módulo tem três 
 
 ### Polish
 
-#### 7.1 Páginas de funcionários e professores são shells mínimos `P3` `[S]`
-- **Onde:** `funcionarios.tsx` (603 bytes), `professores.tsx` (1.6KB)
-- **Problema:** Containers fazem o trabalho mas as páginas são cascas sem empty states, filtros visíveis ou ações rápidas.
-- **Fix:** Adicionar header com contagem, busca inline, e botão de ação primária nas páginas.
+#### 7.1 ~~Páginas de funcionários e professores são shells mínimos~~ `P3` `[S]` FALSO POSITIVO
+- [~] **Onde:** `funcionarios.tsx`, `professores.tsx`
+- **Problema reportado:** Páginas pequenas (603 bytes e 1.6KB) — interpretado como "shells sem conteúdo".
+- **Verificado 2026-05-28:** Funcionarios tem H1, descrição e `EmployeesListContainer`. Professores tem **tabs** (Lista + Ausências) com `TeachersListContainer` e `TeacherAbsencesTable`. Pattern do codebase: page fina → container faz o trabalho.
+- **Conclusão:** Item descartado. Se faltam filtros/empty states, auditar containers individualmente.
 
 #### 7.2 Parceiros/fornecedores sem informação útil `P3` `[XS]`
 - **Onde:** `inertia/pages/escola/administrativo/parceiros.tsx` (1.5KB)
