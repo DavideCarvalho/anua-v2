@@ -3,6 +3,7 @@ import User from '#models/user'
 import School from '#models/school'
 import AppException from '#exceptions/app_exception'
 import UserTransformer from '#transformers/user_transformer'
+import { resolveSelfResponsibleContext } from '#services/self_responsible_context'
 
 export default class MeController {
   async handle({ response, auth, effectiveUser, selectedSchoolIds, serialize }: HttpContext) {
@@ -29,6 +30,8 @@ export default class MeController {
       await user.load('school')
     }
 
-    return response.ok(await serialize(UserTransformer.transform(user)))
+    const ctx = await resolveSelfResponsibleContext(user)
+    const dto = await serialize(UserTransformer.transform(user))
+    return response.ok({ ...dto, ...ctx })
   }
 }

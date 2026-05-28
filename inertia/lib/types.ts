@@ -40,6 +40,16 @@ export interface UserDto {
   updatedAt: string | null
   role?: RoleDto
   school?: SchoolDto
+  isSelfResponsible: boolean
+  segment:
+    | 'KINDERGARTEN'
+    | 'ELEMENTARY'
+    | 'HIGHSCHOOL'
+    | 'TECHNICAL'
+    | 'UNIVERSITY'
+    | 'OTHER'
+    | null
+  studentId: string | null
 }
 
 export interface UserSchool {

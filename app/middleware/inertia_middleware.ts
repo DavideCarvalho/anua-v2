@@ -8,6 +8,7 @@ import School from '#models/school'
 import Student from '#models/student'
 import StudentAvatar from '#models/student_avatar'
 import StudentGamification from '#models/student_gamification'
+import { resolveSelfResponsibleContext } from '#services/self_responsible_context'
 
 const GAMIFIED_AGE_THRESHOLD = 14
 
@@ -60,6 +61,10 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
         await user.load('school')
       }
       userDto = new UserDto(user)
+      const selfCtx = await resolveSelfResponsibleContext(user)
+      userDto.isSelfResponsible = selfCtx.isSelfResponsible
+      userDto.segment = selfCtx.segment
+      userDto.studentId = selfCtx.studentId
     }
 
     const userSchools = (ctx as HttpContext & { userSchools?: unknown[] }).userSchools ?? []

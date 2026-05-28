@@ -1,5 +1,6 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type User from '#models/user'
+import type { AcademicPeriodSegment } from '#models/academic_period'
 import RoleDto from './role.dto.js'
 import SchoolDto from './school.dto.js'
 
@@ -25,6 +26,9 @@ export default class UserDto extends BaseModelDto {
   declare updatedAt: string | null
   declare role?: RoleDto
   declare school?: SchoolDto
+  declare isSelfResponsible: boolean
+  declare segment: AcademicPeriodSegment | null
+  declare studentId: string | null
 
   constructor(user?: User) {
     super()
@@ -52,5 +56,8 @@ export default class UserDto extends BaseModelDto {
     this.updatedAt = user.updatedAt ? user.updatedAt.toISO() : null
     this.role = user.role ? new RoleDto(user.role) : undefined
     this.school = user.school ? new SchoolDto(user.school) : undefined
+    this.isSelfResponsible = false
+    this.segment = null
+    this.studentId = null
   }
 }
