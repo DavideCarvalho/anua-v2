@@ -25,6 +25,13 @@ function isGamifiedStudent(user: {
   return age <= GAMIFIED_AGE_THRESHOLD
 }
 
+export function computeGamified(
+  student: { isSelfResponsible: boolean },
+  user: { id: string; birthDate?: string | null; role?: { name: string } | null }
+): boolean {
+  return isGamifiedStudent(user) && !student.isSelfResponsible
+}
+
 export default class InertiaMiddleware extends BaseInertiaMiddleware {
   async share(ctx: HttpContext) {
     const { session, auth } = ctx
@@ -86,7 +93,7 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
       if (student) {
         await student.load('user')
         const bd = student.user?.birthDate
-        gamified = isGamifiedStudent({
+        gamified = computeGamified(student, {
           id: student.id,
           birthDate: bd instanceof DateTime ? bd.toISO() : bd,
           role: userDto.role,
