@@ -44,6 +44,7 @@ test.group('backfill:self-responsible-links', (group) => {
 
     const stats = await backfillSelfResponsibleLinks()
 
+    assert.equal(stats.processed, 2)
     assert.equal(stats.created, 2)
     for (const s of [selfA, selfB]) {
       const link = await StudentHasResponsible.query()
@@ -58,6 +59,7 @@ test.group('backfill:self-responsible-links', (group) => {
     await makeStudent('bf-idem', true)
     await backfillSelfResponsibleLinks()
     const stats = await backfillSelfResponsibleLinks()
+    assert.equal(stats.processed, 1)
     assert.equal(stats.created, 0)
   })
 })
