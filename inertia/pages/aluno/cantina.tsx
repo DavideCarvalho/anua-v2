@@ -16,16 +16,14 @@ export default function AlunoCantinaPage() {
           <p className="text-muted-foreground">Seu saldo e consumo na cantina</p>
         </div>
         {user?.studentId ? (
-          <StudentBalanceContainer studentId={user.studentId} studentName={user.name} />
+          <>
+            <StudentBalanceContainer studentId={user.studentId} studentName={user.name} />
+            <StudentCanteenPurchasesContainer studentId={user.studentId} />
+            <MealRecurrenceConfig studentId={user.studentId} />
+          </>
         ) : (
           <p className="text-muted-foreground">Nenhuma informação disponível.</p>
         )}
-        {user?.studentId ? (
-          <StudentCanteenPurchasesContainer studentId={user.studentId} />
-        ) : null}
-        {user?.studentId ? (
-          <MealRecurrenceConfig studentId={user.studentId} />
-        ) : null}
       </div>
     </AlunoLayout>
   )
