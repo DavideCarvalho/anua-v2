@@ -47,5 +47,6 @@ test.group('GET me — campos de autorresponsável', (group) => {
     const body = response.body()
     assert.isTrue(body.isSelfResponsible)
     assert.equal(body.studentId, user.id)
+    assert.isNull(body.segment)
   })
 })

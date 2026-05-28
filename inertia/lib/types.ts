@@ -1,5 +1,7 @@
 // Shared types for frontend
 
+import type { AcademicPeriodSegment } from './formatters'
+
 export interface RoleDto {
   id: string
   name: string
@@ -41,14 +43,7 @@ export interface UserDto {
   role?: RoleDto
   school?: SchoolDto
   isSelfResponsible: boolean
-  segment:
-    | 'KINDERGARTEN'
-    | 'ELEMENTARY'
-    | 'HIGHSCHOOL'
-    | 'TECHNICAL'
-    | 'UNIVERSITY'
-    | 'OTHER'
-    | null
+  segment: AcademicPeriodSegment | null
   studentId: string | null
 }
 
