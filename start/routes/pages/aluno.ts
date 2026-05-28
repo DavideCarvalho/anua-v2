@@ -15,6 +15,26 @@ export function registerAlunoPageRoutes() {
       router.get('/idle', [aluno.ShowAlunoIdlePage]).as('idle')
       router.get('/jogo', [aluno.ShowAlunoJogoPage]).as('jogo')
       router.get('/loja/:id', [aluno.ShowAlunoLojaStorePage]).as('loja.store')
+      router
+        .get('/financeiro', [aluno.ShowAlunoFinanceiroPage])
+        .as('financeiro')
+        .use(middleware.requireSelfResponsible())
+      router
+        .get('/documentos', [aluno.ShowAlunoDocumentosPage])
+        .as('documentos')
+        .use(middleware.requireSelfResponsible())
+      router
+        .get('/autorizacoes', [aluno.ShowAlunoAutorizacoesPage])
+        .as('autorizacoes')
+        .use(middleware.requireSelfResponsible())
+      router
+        .get('/comunicados', [aluno.ShowAlunoComunicadosPage])
+        .as('comunicados')
+        .use(middleware.requireSelfResponsible())
+      router
+        .get('/matricula', [aluno.ShowAlunoMatriculaPage])
+        .as('matricula')
+        .use(middleware.requireSelfResponsible())
     })
     .prefix('/aluno')
     .use([middleware.auth(), middleware.impersonation()])

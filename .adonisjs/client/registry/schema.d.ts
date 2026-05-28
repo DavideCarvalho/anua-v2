@@ -2179,6 +2179,66 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_loja_store_page_controller').default['handle']>>>
     }
   }
+  'web.aluno.financeiro': {
+    methods: ["GET","HEAD"]
+    pattern: '/aluno/financeiro'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_financeiro_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_financeiro_page_controller').default['handle']>>>
+    }
+  }
+  'web.aluno.documentos': {
+    methods: ["GET","HEAD"]
+    pattern: '/aluno/documentos'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_documentos_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_documentos_page_controller').default['handle']>>>
+    }
+  }
+  'web.aluno.autorizacoes': {
+    methods: ["GET","HEAD"]
+    pattern: '/aluno/autorizacoes'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_autorizacoes_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_autorizacoes_page_controller').default['handle']>>>
+    }
+  }
+  'web.aluno.comunicados': {
+    methods: ["GET","HEAD"]
+    pattern: '/aluno/comunicados'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_comunicados_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_comunicados_page_controller').default['handle']>>>
+    }
+  }
+  'web.aluno.matricula': {
+    methods: ["GET","HEAD"]
+    pattern: '/aluno/matricula'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_matricula_page_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/aluno/show_aluno_matricula_page_controller').default['handle']>>>
+    }
+  }
   'api.v1.auth.login': {
     methods: ["POST"]
     pattern: '/api/v1/auth/login'

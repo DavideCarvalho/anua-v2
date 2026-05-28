@@ -256,6 +256,11 @@ export interface ApiDefinition {
       }
       idle: typeof routes['web.aluno.idle']
       jogo: typeof routes['web.aluno.jogo']
+      financeiro: typeof routes['web.aluno.financeiro']
+      documentos: typeof routes['web.aluno.documentos']
+      autorizacoes: typeof routes['web.aluno.autorizacoes']
+      comunicados: typeof routes['web.aluno.comunicados']
+      matricula: typeof routes['web.aluno.matricula']
     }
   }
   api: {

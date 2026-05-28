@@ -1092,6 +1092,36 @@ const routes = {
     tokens: [{"old":"/aluno/loja/:id","type":0,"val":"aluno","end":""},{"old":"/aluno/loja/:id","type":0,"val":"loja","end":""},{"old":"/aluno/loja/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['web.aluno.loja.store']['types'],
   },
+  'web.aluno.financeiro': {
+    methods: ["GET","HEAD"],
+    pattern: '/aluno/financeiro',
+    tokens: [{"old":"/aluno/financeiro","type":0,"val":"aluno","end":""},{"old":"/aluno/financeiro","type":0,"val":"financeiro","end":""}],
+    types: placeholder as Registry['web.aluno.financeiro']['types'],
+  },
+  'web.aluno.documentos': {
+    methods: ["GET","HEAD"],
+    pattern: '/aluno/documentos',
+    tokens: [{"old":"/aluno/documentos","type":0,"val":"aluno","end":""},{"old":"/aluno/documentos","type":0,"val":"documentos","end":""}],
+    types: placeholder as Registry['web.aluno.documentos']['types'],
+  },
+  'web.aluno.autorizacoes': {
+    methods: ["GET","HEAD"],
+    pattern: '/aluno/autorizacoes',
+    tokens: [{"old":"/aluno/autorizacoes","type":0,"val":"aluno","end":""},{"old":"/aluno/autorizacoes","type":0,"val":"autorizacoes","end":""}],
+    types: placeholder as Registry['web.aluno.autorizacoes']['types'],
+  },
+  'web.aluno.comunicados': {
+    methods: ["GET","HEAD"],
+    pattern: '/aluno/comunicados',
+    tokens: [{"old":"/aluno/comunicados","type":0,"val":"aluno","end":""},{"old":"/aluno/comunicados","type":0,"val":"comunicados","end":""}],
+    types: placeholder as Registry['web.aluno.comunicados']['types'],
+  },
+  'web.aluno.matricula': {
+    methods: ["GET","HEAD"],
+    pattern: '/aluno/matricula',
+    tokens: [{"old":"/aluno/matricula","type":0,"val":"aluno","end":""},{"old":"/aluno/matricula","type":0,"val":"matricula","end":""}],
+    types: placeholder as Registry['web.aluno.matricula']['types'],
+  },
   'api.v1.auth.login': {
     methods: ["POST"],
     pattern: '/api/v1/auth/login',

@@ -185,6 +185,11 @@ export type ScannedRoutes = {
     'web.aluno.idle': { paramsTuple?: []; params?: {} }
     'web.aluno.jogo': { paramsTuple?: []; params?: {} }
     'web.aluno.loja.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'web.aluno.financeiro': { paramsTuple?: []; params?: {} }
+    'web.aluno.documentos': { paramsTuple?: []; params?: {} }
+    'web.aluno.autorizacoes': { paramsTuple?: []; params?: {} }
+    'web.aluno.comunicados': { paramsTuple?: []; params?: {} }
+    'web.aluno.matricula': { paramsTuple?: []; params?: {} }
     'api.v1.auth.login': { paramsTuple?: []; params?: {} }
     'api.v1.auth.send_code': { paramsTuple?: []; params?: {} }
     'api.v1.auth.verify_code': { paramsTuple?: []; params?: {} }
@@ -947,6 +952,11 @@ export type ScannedRoutes = {
     'web.aluno.idle': { paramsTuple?: []; params?: {} }
     'web.aluno.jogo': { paramsTuple?: []; params?: {} }
     'web.aluno.loja.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'web.aluno.financeiro': { paramsTuple?: []; params?: {} }
+    'web.aluno.documentos': { paramsTuple?: []; params?: {} }
+    'web.aluno.autorizacoes': { paramsTuple?: []; params?: {} }
+    'web.aluno.comunicados': { paramsTuple?: []; params?: {} }
+    'web.aluno.matricula': { paramsTuple?: []; params?: {} }
     'api.v1.auth.me': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.escola_stats': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.escola_insights': { paramsTuple?: []; params?: {} }
@@ -1408,6 +1418,11 @@ export type ScannedRoutes = {
     'web.aluno.idle': { paramsTuple?: []; params?: {} }
     'web.aluno.jogo': { paramsTuple?: []; params?: {} }
     'web.aluno.loja.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'web.aluno.financeiro': { paramsTuple?: []; params?: {} }
+    'web.aluno.documentos': { paramsTuple?: []; params?: {} }
+    'web.aluno.autorizacoes': { paramsTuple?: []; params?: {} }
+    'web.aluno.comunicados': { paramsTuple?: []; params?: {} }
+    'web.aluno.matricula': { paramsTuple?: []; params?: {} }
     'api.v1.auth.me': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.escola_stats': { paramsTuple?: []; params?: {} }
     'api.v1.dashboard.escola_insights': { paramsTuple?: []; params?: {} }
