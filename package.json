@@ -43,7 +43,8 @@
     "#lib/*": "./app/lib/*.js",
     "#generated/*": "./.adonisjs/server/*.js",
     "#transformers/*": "./app/transformers/*.js",
-    "#ai/*": "./app/ai/*.js"
+    "#ai/*": "./app/ai/*.js",
+    "#commands/*": "./commands/*.js"
   },
   "packageManager": "pnpm@11.1.2",
   "devDependencies": {
