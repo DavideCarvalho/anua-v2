@@ -157,6 +157,7 @@ Documento de melhorias organizado por módulo funcional. Cada módulo tem três 
 - **Fix:** Integração com gateway (Asaas já oferece antecipação) ou fintech parceira. Dashboard mostrando valor disponível pra antecipação, taxa, e botão de solicitar.
 - **Quem tem:** Isaac ("Receita Garantida" — transfere valor mensal garantido independente de pagamento), Proesc (parceria Kedu).
 - **Impacto:** Diferencial comercial enorme. Isaac usa isso como principal argumento de venda.
+- **Doc de estratégia:** [`docs/antecipacao-recebiveis.md`](docs/antecipacao-recebiveis.md) — compara modelo passthrough Asaas (risco zero) vs modelo Isaac/FIDC, regulatório e mapeamento técnico.
 
 #### 2.11 Score de risco por família `P2` `[L]`
 - **Problema:** Escola não sabe quais famílias têm maior probabilidade de inadimplência.
