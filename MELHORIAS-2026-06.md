@@ -797,10 +797,11 @@ Documento de melhorias organizado por módulo funcional. Cada módulo tem três 
 
 ### Polish
 
-#### 12.1 Configurações da escola sem categorização `P3` `[XS]`
-- **Onde:** `inertia/pages/escola/configuracoes/index.tsx`
-- **Problema:** Todas as configs juntas. Conforme crescem os módulos, fica caótico.
-- **Fix:** Agrupar em seções: Geral, Financeiro, Pedagógico, Comunicação, Gamificação, Integrações.
+#### 12.1 ~~Configurações da escola sem categorização~~ `P3` `[XS]` FALSO POSITIVO
+- [~] **Onde:** `inertia/containers/settings/school-settings-form.tsx`
+- **Problema (não confirmado):** "Todas as configs juntas, sem categorização."
+- **Por quê é falso positivo:** O form já está agrupado em 3 seções com cards/títulos/descrições — "Informações Gerais", "Endereço" e "Configurações Acadêmicas". As demais categorias que a auditoria imaginava (Financeiro, Gamificação, Integrações) moram em páginas próprias (`/escola/financeiro/...` etc.), não nesta página, então não há o que recategorizar aqui.
+- **Nota:** Se um dia a decisão for ter uma página única de Configurações reunindo TODOS os settings espalhados em abas, aí vira um item novo [M]/[L] — não este.
 
 ### Evolução
 
