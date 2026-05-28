@@ -60,4 +60,5 @@ export const middleware = router.named({
   impersonation: () => import('#middleware/impersonation_middleware'),
   storeOwner: () => import('#middleware/store_owner_middleware'),
   canAccessAttendance: () => import('#middleware/can_access_attendance_middleware'),
+  requireSelfResponsible: () => import('#middleware/require_self_responsible_middleware'),
 })
