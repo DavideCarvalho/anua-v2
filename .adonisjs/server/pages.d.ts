@@ -39,22 +39,22 @@ declare module '@adonisjs/inertia/types' {
     'admin/seguros/faturamento': ExtractProps<(typeof import('../../inertia/pages/admin/seguros/faturamento.tsx'))['default']>
     'admin/seguros/index': ExtractProps<(typeof import('../../inertia/pages/admin/seguros/index.tsx'))['default']>
     'admin/seguros/sinistros': ExtractProps<(typeof import('../../inertia/pages/admin/seguros/sinistros.tsx'))['default']>
-    'aluno/autorizacoes': Record<string, never>
-    'aluno/comunicados': Record<string, never>
+    'aluno/autorizacoes': ExtractProps<(typeof import('../../inertia/pages/aluno/autorizacoes.tsx'))['default']>
+    'aluno/comunicados': ExtractProps<(typeof import('../../inertia/pages/aluno/comunicados.tsx'))['default']>
     'aluno/dashboard': ExtractProps<(typeof import('../../inertia/pages/aluno/dashboard.tsx'))['default']>
-    'aluno/documentos': Record<string, never>
-    'aluno/financeiro': Record<string, never>
+    'aluno/documentos': ExtractProps<(typeof import('../../inertia/pages/aluno/documentos.tsx'))['default']>
+    'aluno/financeiro': ExtractProps<(typeof import('../../inertia/pages/aluno/financeiro.tsx'))['default']>
     'aluno/idle': ExtractProps<(typeof import('../../inertia/pages/aluno/idle.tsx'))['default']>
     'aluno/jogo/create-character': ExtractProps<(typeof import('../../inertia/pages/aluno/jogo/create-character.tsx'))['default']>
     'aluno/jogo/fazendinha': ExtractProps<(typeof import('../../inertia/pages/aluno/jogo/fazendinha.tsx'))['default']>
     'aluno/jogo/tavern': ExtractProps<(typeof import('../../inertia/pages/aluno/jogo/tavern.tsx'))['default']>
     'aluno/kids_dashboard': ExtractProps<(typeof import('../../inertia/pages/aluno/kids_dashboard.tsx'))['default']>
-    'aluno/matricula': { matriculaId: string | null }
     'aluno/loja/carrinho': ExtractProps<(typeof import('../../inertia/pages/aluno/loja/carrinho.tsx'))['default']>
     'aluno/loja/index': ExtractProps<(typeof import('../../inertia/pages/aluno/loja/index.tsx'))['default']>
     'aluno/loja/pedidos': ExtractProps<(typeof import('../../inertia/pages/aluno/loja/pedidos.tsx'))['default']>
     'aluno/loja/pontos': ExtractProps<(typeof import('../../inertia/pages/aluno/loja/pontos.tsx'))['default']>
     'aluno/loja/store': ExtractProps<(typeof import('../../inertia/pages/aluno/loja/store.tsx'))['default']>
+    'aluno/matricula': ExtractProps<(typeof import('../../inertia/pages/aluno/matricula.tsx'))['default']>
     'auth/sign-in': ExtractProps<(typeof import('../../inertia/pages/auth/sign-in.tsx'))['default']>
     'auth/sign-in/components/decorative/floating-orbs': ExtractProps<(typeof import('../../inertia/pages/auth/sign-in/components/decorative/floating-orbs.tsx'))['default']>
     'auth/sign-in/components/decorative/grid-pattern': ExtractProps<(typeof import('../../inertia/pages/auth/sign-in/components/decorative/grid-pattern.tsx'))['default']>

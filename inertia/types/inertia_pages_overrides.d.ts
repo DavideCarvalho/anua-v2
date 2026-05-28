@@ -86,18 +86,6 @@ declare module '@adonisjs/inertia/types' {
       points: number
     }
 
-    'aluno/financeiro': Record<string, never>
-
-    'aluno/documentos': Record<string, never>
-
-    'aluno/autorizacoes': Record<string, never>
-
-    'aluno/comunicados': Record<string, never>
-
-    'aluno/matricula': {
-      matriculaId: string | null
-    }
-
     'escola/periodos-letivos/[slug]/cursos/[cursoSlug]/turmas/[turmaSlug]/situacao': {
       academicPeriodSlug: string
       courseSlug: string
