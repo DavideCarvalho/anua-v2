@@ -131,6 +131,9 @@ importers:
       '@pdfme/common':
         specifier: 6.1.2
         version: 6.1.2
+      '@pdfme/generator':
+        specifier: 6.1.2
+        version: 6.1.2(@pdfme/common@6.1.2)(@pdfme/schemas@6.1.2(@pdfme/common@6.1.2))
       '@pdfme/schemas':
         specifier: 6.1.2
         version: 6.1.2(@pdfme/common@6.1.2)
@@ -2881,6 +2884,12 @@ packages:
 
   '@pdfme/converter@6.1.2':
     resolution: {integrity: sha512-bbUgFpaccEJboMEPq4bsDYnsV09eBBZtu81VR0yC8Z3x2rRrRf06nj/UzQKPUrDV/gbv+XYUfXA4YB4N+pjU7A==}
+
+  '@pdfme/generator@6.1.2':
+    resolution: {integrity: sha512-JT+VR2pEDVDonaFJANI+0gCHczv26tyvG47XxGXyiLjZdqsD5BoFfsm0hbYXFQ3RKqM28z0ndbxm+Z+uN8/zrw==}
+    peerDependencies:
+      '@pdfme/common': latest
+      '@pdfme/schemas': latest
 
   '@pdfme/pdf-lib@6.1.2':
     resolution: {integrity: sha512-iDM554Ah3UmtcIT2OgaexntrF3ezKSDR4FjRHPofRscZzbsz27MW0hiBVlVGApdQSfel8sdANWl5Ldbaifanog==}
@@ -12569,6 +12578,13 @@ snapshots:
       unified: 11.0.5
     transitivePeerDependencies:
       - supports-color
+
+  '@pdfme/generator@6.1.2(@pdfme/common@6.1.2)(@pdfme/schemas@6.1.2(@pdfme/common@6.1.2))':
+    dependencies:
+      '@pdfme/common': 6.1.2
+      '@pdfme/pdf-lib': 6.1.2
+      '@pdfme/schemas': 6.1.2(@pdfme/common@6.1.2)
+      fontkit: 2.0.4
 
   '@pdfme/pdf-lib@6.1.2':
     dependencies:

@@ -90,6 +90,12 @@ export const ALLOWED_ATTACHMENT_TYPES: AllowedMimeType[] = [
 export const ALLOWED_ATTACHMENT_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'pdf']
 
 /**
+ * Contratos para assinatura — só PDF.
+ */
+export const ALLOWED_PDF_TYPES: AllowedMimeType[] = ['application/pdf']
+export const ALLOWED_PDF_EXTENSIONS = ['pdf']
+
+/**
  * Tamanho máximo por tipo de arquivo (em bytes)
  */
 export const MAX_FILE_SIZES = {

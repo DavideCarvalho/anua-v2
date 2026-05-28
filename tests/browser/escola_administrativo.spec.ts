@@ -67,7 +67,6 @@ test.group('Escola administrativo - Contratos (browser)', (group) => {
   registerPageTests('/escola/administrativo/contratos/novo')
   registerPageTests(`/escola/administrativo/contratos/${FAKE_UUID}/editar`)
   registerPageTests(`/escola/administrativo/contratos/${FAKE_UUID}/assinaturas`)
-  registerPageTests(`/escola/administrativo/contratos/${FAKE_UUID}/docuseal`)
   registerPageTests(`/escola/administrativo/contratos/${FAKE_UUID}/financeiro`)
 })
 

@@ -60,3 +60,6 @@ node_modules/.vite
 .cursor/
 server-stats-dashboard-error.log
 usage-report-week.md
+
+# Test PDFs (local fixtures)
+contrato-escola-teste.pdf

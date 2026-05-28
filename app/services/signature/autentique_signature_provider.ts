@@ -151,14 +151,14 @@ export default class AutentiqueSignatureProvider implements SignatureProvider {
       action: signer.action,
     }
 
-    if (signer.email) mapped.email = signer.email
-    if (signer.phone) {
+    // Autentique exige apenas UM canal por signer (email XOR phone).
+    if (signer.email) {
+      mapped.email = signer.email
+      mapped.delivery_method = 'DELIVERY_METHOD_EMAIL'
+    } else if (signer.phone) {
       mapped.phone = signer.phone
-      if (signer.deliveryMethod === 'WHATSAPP') {
-        mapped.delivery_method = 'DELIVERY_METHOD_WHATSAPP'
-      } else if (signer.deliveryMethod === 'SMS') {
-        mapped.delivery_method = 'DELIVERY_METHOD_SMS'
-      }
+      mapped.delivery_method =
+        signer.deliveryMethod === 'SMS' ? 'DELIVERY_METHOD_SMS' : 'DELIVERY_METHOD_WHATSAPP'
     }
     if (signer.cpf) mapped.configs = { cpf: signer.cpf }
     if (signer.positions?.length) {
@@ -185,11 +185,22 @@ export default class AutentiqueSignatureProvider implements SignatureProvider {
   }
 
   private async parseResponse<T>(response: Response): Promise<T> {
-    const json = (await response.json()) as {
-      data: T
-      errors?: Array<{ message: string }>
+    const text = await response.text()
+    let json: { data?: T; errors?: Array<{ message: string; extensions?: unknown }> }
+    try {
+      json = JSON.parse(text)
+    } catch {
+      throw new Error(`Autentique resposta não-JSON (status ${response.status}): ${text.slice(0, 500)}`)
     }
-    if (json.errors) throw new Error(json.errors[0]?.message ?? 'Autentique API error')
+    if (json.errors && json.errors.length > 0) {
+      const details = json.errors
+        .map((e) => `${e.message}${e.extensions ? ` | ${JSON.stringify(e.extensions)}` : ''}`)
+        .join(' | ')
+      throw new Error(`Autentique: ${details}`)
+    }
+    if (!json.data) {
+      throw new Error(`Autentique resposta sem data (status ${response.status}): ${text.slice(0, 500)}`)
+    }
     return json.data
   }
 

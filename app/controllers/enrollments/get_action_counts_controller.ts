@@ -48,7 +48,7 @@ export default class GetActionCountsController {
       `
       SELECT
         COUNT(*) FILTER (
-          WHERE shl."docusealSignatureStatus" IS NULL
+          WHERE shl."signatureStatus" IS NULL
             AND COALESCE(docs.approved_count, 0) >= COALESCE(req.required_count, 0)
             AND COALESCE(req.required_count, 0) > 0
         ) AS needs_offline_signature,

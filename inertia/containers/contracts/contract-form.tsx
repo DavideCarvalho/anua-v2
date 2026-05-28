@@ -33,6 +33,7 @@ import {
 } from '../../components/ui/select'
 import type { Route } from '@tuyau/core/types'
 import { api } from '~/lib/api'
+import { SignatureTemplateBuilder } from './signature-template-builder'
 import { centsToReaisString, reaisStringToCents } from '~/lib/currency_input_adapter'
 
 type ContractResponse = Route.Response<'api.v1.contracts.show'>
@@ -151,6 +152,7 @@ const steps = [
   { title: 'Pagamento', description: 'Valores e parcelas' },
   { title: 'Juros e Descontos', description: 'Multas e incentivos' },
   { title: 'Documentos', description: 'Documentos exigidos' },
+  { title: 'Assinatura', description: 'Campos de assinatura digital' },
   { title: 'Revisão', description: 'Confirme os dados' },
 ]
 
@@ -920,8 +922,21 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                 </div>
               )}
 
-              {/* Step 4: Revisão */}
+              {/* Step 4: Assinatura Digital */}
               {currentStep === 4 && (
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-medium">Assinatura Digital</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Faça upload do PDF do contrato e posicione os campos de assinatura. Opcional — pule se ainda não tem o documento pronto.
+                    </p>
+                  </div>
+                  <SignatureTemplateBuilder contractId={initialData?.id ?? 'new'} />
+                </div>
+              )}
+
+              {/* Step 5: Revisão */}
+              {currentStep === 5 && (
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-lg font-medium mb-2">Revise as informações do contrato</h3>
@@ -1116,12 +1131,12 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                   >
                     Cancelar
                   </Button>
-                  {currentStep < 4 && (
+                  {currentStep < steps.length - 1 && (
                     <Button type="button" onClick={handleNext}>
                       Próximo
                     </Button>
                   )}
-                  {currentStep === 4 && (
+                  {currentStep === steps.length - 1 && (
                     <Button type="submit" disabled={isSubmitting}>
                       {isSubmitting ? (
                         <>

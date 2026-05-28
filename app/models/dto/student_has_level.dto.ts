@@ -1,6 +1,6 @@
 import { BaseModelDto } from '@adocasts.com/dto/base'
 import type StudentHasLevel from '#models/student_has_level'
-import type { DocusealSignatureStatus } from '#models/student_has_level'
+import type { SignatureStatus } from '#models/student_has_level'
 import AcademicPeriodDto from './academic_period.dto.js'
 import { ContractDto } from './contract.dto.js'
 import ScholarshipDto from './scholarship.dto.js'
@@ -22,8 +22,8 @@ export default class StudentHasLevelDto extends BaseModelDto {
   declare enrollmentInstallments: number | null
   declare installments: number | null
   declare paymentDay: number | null
-  declare docusealSubmissionId: string | null
-  declare docusealSignatureStatus: DocusealSignatureStatus | null
+  declare signatureSubmissionId: string | null
+  declare signatureStatus: SignatureStatus | null
   declare documentSignedAt: Date | null
   declare enrollmentPaymentId: string | null
   declare signedContractFilePath: string | null
@@ -55,8 +55,8 @@ export default class StudentHasLevelDto extends BaseModelDto {
     this.enrollmentInstallments = model.enrollmentInstallments
     this.installments = model.installments
     this.paymentDay = model.paymentDay
-    this.docusealSubmissionId = model.docusealSubmissionId
-    this.docusealSignatureStatus = model.docusealSignatureStatus
+    this.signatureSubmissionId = model.signatureSubmissionId
+    this.signatureStatus = model.signatureStatus
     this.documentSignedAt = model.documentSignedAt ? model.documentSignedAt.toJSDate() : null
     this.enrollmentPaymentId = model.enrollmentPaymentId
     this.signedContractFilePath = model.signedContractFilePath

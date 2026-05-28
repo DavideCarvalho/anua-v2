@@ -83,7 +83,7 @@ export function MatriculaAxesContainer({ matriculaId }: MatriculaAxesContainerPr
 
   if (!data) return <MatriculaAxesSkeleton />
 
-  return <MatriculaAxesContent data={data} />
+  return <MatriculaAxesContent data={data} matriculaId={matriculaId} />
 }
 
 type AxesData = Route.Response<'api.v1.responsavel.api.enrollment_axes'>
@@ -97,7 +97,13 @@ function useDocumentsQuery(studentId: string, enabled: boolean) {
   })
 }
 
-function MatriculaAxesContent({ data }: { data: AxesData }) {
+function MatriculaAxesContent({
+  data,
+  matriculaId,
+}: {
+  data: AxesData
+  matriculaId: string
+}) {
   const queryClient = useQueryClient()
   const { axes } = data
   const deadline = relativeDeadlineLabel(data.enrollmentDeadline)
@@ -240,7 +246,7 @@ function MatriculaAxesContent({ data }: { data: AxesData }) {
           defaultOpen={false}
           highlightNext={firstPendingKey(axes) === 'signature'}
         >
-          <SignatureContent status={axes.signature} />
+          <SignatureContent status={axes.signature} matriculaId={matriculaId} />
         </AxisSection>
 
         <AxisSection
@@ -708,7 +714,13 @@ function DocsRow({
   )
 }
 
-function SignatureContent({ status }: { status: AxesData['axes']['signature'] }) {
+function SignatureContent({
+  status,
+  matriculaId,
+}: {
+  status: AxesData['axes']['signature']
+  matriculaId: string
+}) {
   if (status === 'NOT_APPLICABLE') {
     return (
       <p className="text-sm text-muted-foreground">
@@ -735,11 +747,56 @@ function SignatureContent({ status }: { status: AxesData['axes']['signature'] })
       </p>
     )
   }
+  return <SignaturePendingActions matriculaId={matriculaId} />
+}
+
+function SignaturePendingActions({ matriculaId }: { matriculaId: string }) {
+  const { data, isLoading, isError } = useQuery({
+    ...api.api.v1.responsavel.api.enrollmentSignatureLink.queryOptions({
+      params: { matriculaId },
+    }),
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  })
+
+  if (isLoading) {
+    return (
+      <p className="text-sm text-muted-foreground flex items-center gap-2">
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        Buscando link de assinatura...
+      </p>
+    )
+  }
+
+  if (isError) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        Não conseguimos carregar o link agora. Tente recarregar a página em alguns segundos.
+      </p>
+    )
+  }
+
+  if (!data?.signatureLink) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        A escola vai enviar o contrato pra assinatura digital em breve. Você receberá um e-mail
+        assim que estiver disponível.
+      </p>
+    )
+  }
+
   return (
-    <p className="text-sm text-muted-foreground">
-      A escola vai enviar o contrato pra assinatura digital em breve. Você receberá um e-mail
-      assim que estiver disponível.
-    </p>
+    <div className="space-y-3">
+      <p className="text-sm text-muted-foreground">
+        Seu contrato está pronto pra assinatura digital.
+      </p>
+      <Button asChild className="gap-2">
+        <a href={data.signatureLink} target="_blank" rel="noopener noreferrer">
+          Assinar contrato
+          <ExternalLink className="h-3.5 w-3.5" />
+        </a>
+      </Button>
+    </div>
   )
 }
 

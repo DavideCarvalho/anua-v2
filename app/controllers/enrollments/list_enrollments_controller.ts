@@ -28,17 +28,14 @@ interface RawRow {
   docs_rejected: string | number | null
   docs_pending: string | number | null
   docs_required: string | number | null
-  docuseal_signature_status: string | null
+  signature_status: string | null
   payment_status: PaymentAxisStatus
   class_allocated: boolean
 }
 
 /**
- * Mapeia o enum legado `DocusealSignatureStatus`
- * (`PENDING`|`SIGNED`|`DECLINED`|`EXPIRED`) pro enum interno normalizado.
- *
- * Quando ADR-0002 (signature provider abstraction) for escrito, este mapa some —
- * a coluna passa a ser `signature_status` com o enum interno direto.
+ * Mapeia o enum de coluna (`PENDING`|`SIGNED`|`DECLINED`|`EXPIRED`)
+ * pro enum interno normalizado usado pelo eixo de matrícula.
  */
 function mapLegacySignatureStatus(legacy: string | null): SignatureAxisStatus {
   if (legacy === null) return 'NOT_APPLICABLE'
@@ -105,7 +102,7 @@ export default class ListEnrollmentsController {
         sch."discountPercentage" AS scholarship_discount,
         shl."paymentMethod" AS payment_method,
         shl."createdAt" AS created_at,
-        shl."docusealSignatureStatus" AS docuseal_signature_status,
+        shl."signatureStatus" AS signature_status,
         COALESCE(docs.approved_count, 0) AS docs_approved,
         COALESCE(docs.rejected_count, 0) AS docs_rejected,
         COALESCE(docs.pending_count, 0) AS docs_pending,
@@ -177,7 +174,7 @@ export default class ListEnrollmentsController {
       const required = Number(r.docs_required ?? 0)
 
       const docsStatus = computeDocsStatus(approved, rejected, required)
-      const signatureStatus = mapLegacySignatureStatus(r.docuseal_signature_status)
+      const signatureStatus = mapLegacySignatureStatus(r.signature_status)
       const paymentStatus = r.payment_status
       const classStatus: ClassAxisStatus = r.class_allocated ? 'ALLOCATED' : 'PENDING'
 

@@ -80,6 +80,11 @@ export function registerResponsavelApiRoutes() {
         .get('/matriculas/:matriculaId', [controllers.responsavel.GetEnrollmentAxes])
         .as('enrollment_axes')
       router
+        .get('/matriculas/:matriculaId/signature-link', [
+          controllers.responsavel.GetSignatureLink,
+        ])
+        .as('enrollment_signature_link')
+      router
         .get('/students/:studentId/occurrences', [controllers.responsavel.GetStudentOccurrences])
         .as('student_occurrences')
       router

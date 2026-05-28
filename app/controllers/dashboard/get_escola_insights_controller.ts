@@ -331,7 +331,7 @@ export default class GetEscolaInsightsController {
     // 4. Contracts awaiting signature
     const pendingSignatures = await StudentHasLevel.query()
       .whereNull('deletedAt')
-      .where('docusealSignatureStatus', 'PENDING')
+      .where('signatureStatus', 'PENDING')
       .whereHas('student', (studentQ) => {
         studentQ.whereHas('user', (userQ) => {
           userQ.where('schoolId', schoolId).whereNull('deletedAt')

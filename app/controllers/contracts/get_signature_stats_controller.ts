@@ -50,9 +50,9 @@ export default class GetSignatureStatsController {
           courseName: coursePeriod?.course?.name ?? '-',
           levelName: levelAssignment?.level?.name ?? '-',
           academicPeriod: coursePeriod?.academicPeriod?.name ?? '-',
-          signatureStatus: shl.docusealSignatureStatus ?? 'PENDING',
+          signatureStatus: shl.signatureStatus ?? 'PENDING',
           signedAt: shl.documentSignedAt ? shl.documentSignedAt.toISODate() : null,
-          submissionId: shl.docusealSubmissionId,
+          submissionId: shl.signatureSubmissionId,
         }
       })
 

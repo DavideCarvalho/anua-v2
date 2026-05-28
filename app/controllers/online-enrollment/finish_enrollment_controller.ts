@@ -407,6 +407,24 @@ export default class FinishEnrollmentController {
         }
       }
 
+      // Inicia fluxo de assinatura — fire and forget. Erro não quebra matrícula.
+      const { startEnrollmentSignature } = await import(
+        '#services/signature/enrollment_signature_service'
+      )
+      startEnrollmentSignature(studentHasLevel.id)
+        .then((outcome) => {
+          logger.info(
+            { studentHasLevelId: studentHasLevel.id, outcome },
+            '[finish_enrollment] Signature flow outcome'
+          )
+        })
+        .catch((err) => {
+          logger.error(
+            { studentHasLevelId: studentHasLevel.id, error: err },
+            '[finish_enrollment] Signature flow crashed'
+          )
+        })
+
       // Evento 1 — matrícula iniciada — pra todos os responsáveis (ou aluno autorresponsável)
       const notificationRecipientIds = data.student.isSelfResponsible
         ? [student.id]

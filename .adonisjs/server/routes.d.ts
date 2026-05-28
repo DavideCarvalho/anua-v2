@@ -73,7 +73,6 @@ export type ScannedRoutes = {
     'web.escola.administrativo.contratos.novo': { paramsTuple?: []; params?: {} }
     'web.escola.administrativo.contratos.editar': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'web.escola.administrativo.contratos.assinaturas': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'web.escola.administrativo.contratos.docuseal': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'web.escola.administrativo.contratos.financeiro': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
     'web.escola.administrativo.bolsas': { paramsTuple?: []; params?: {} }
     'web.escola.administrativo.parceiros': { paramsTuple?: []; params?: {} }
@@ -211,6 +210,7 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.student_documents': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.upload_student_document': { paramsTuple: [ParamValue,ParamValue]; params: {'studentId': ParamValue,'submissionId': ParamValue} }
     'api.v1.responsavel.api.enrollment_axes': { paramsTuple: [ParamValue]; params: {'matriculaId': ParamValue} }
+    'api.v1.responsavel.api.enrollment_signature_link': { paramsTuple: [ParamValue]; params: {'matriculaId': ParamValue} }
     'api.v1.responsavel.api.student_occurrences': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.acknowledge_occurrence': { paramsTuple: [ParamValue,ParamValue]; params: {'studentId': ParamValue,'occurrenceId': ParamValue} }
     'api.v1.responsavel.api.student_overview': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
@@ -246,6 +246,7 @@ export type ScannedRoutes = {
     'api.v1.admin.ai.tool_calls': { paramsTuple?: []; params?: {} }
     'api.v1.admin.ai.tokens.summary': { paramsTuple?: []; params?: {} }
     'api.v1.asaas.webhook': { paramsTuple?: []; params?: {} }
+    'api.v1.webhooks.autentique': { paramsTuple?: []; params?: {} }
     'api.v1.asaas.subaccounts.create': { paramsTuple?: []; params?: {} }
     'api.v1.asaas.subaccounts.status': { paramsTuple?: []; params?: {} }
     'api.v1.schools.index': { paramsTuple?: []; params?: {} }
@@ -307,9 +308,9 @@ export type ScannedRoutes = {
     'api.v1.contracts.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.contracts.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.contracts.get_signature_stats': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
-    'api.v1.contracts.get_docuseal_template': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
-    'api.v1.contracts.upload_docuseal_template': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
-    'api.v1.contracts.delete_docuseal_template': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
+    'api.v1.contracts.get_signature_template': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
+    'api.v1.contracts.upload_signature_template': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
+    'api.v1.contracts.delete_signature_template': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
     'api.v1.contracts.payment_days.index': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
     'api.v1.contracts.payment_days.store': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
     'api.v1.contracts.payment_days.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'contractId': ParamValue,'id': ParamValue} }
@@ -830,7 +831,6 @@ export type ScannedRoutes = {
     'web.escola.administrativo.contratos.novo': { paramsTuple?: []; params?: {} }
     'web.escola.administrativo.contratos.editar': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'web.escola.administrativo.contratos.assinaturas': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'web.escola.administrativo.contratos.docuseal': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'web.escola.administrativo.contratos.financeiro': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
     'web.escola.administrativo.bolsas': { paramsTuple?: []; params?: {} }
     'web.escola.administrativo.parceiros': { paramsTuple?: []; params?: {} }
@@ -962,6 +962,7 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.student_schedule': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_documents': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.enrollment_axes': { paramsTuple: [ParamValue]; params: {'matriculaId': ParamValue} }
+    'api.v1.responsavel.api.enrollment_signature_link': { paramsTuple: [ParamValue]; params: {'matriculaId': ParamValue} }
     'api.v1.responsavel.api.student_occurrences': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_overview': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_gamification': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
@@ -1012,7 +1013,7 @@ export type ScannedRoutes = {
     'api.v1.contracts.index': { paramsTuple?: []; params?: {} }
     'api.v1.contracts.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.contracts.get_signature_stats': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
-    'api.v1.contracts.get_docuseal_template': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
+    'api.v1.contracts.get_signature_template': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
     'api.v1.contracts.payment_days.index': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
     'api.v1.contracts.interest_config.show': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
     'api.v1.contracts.early_discounts.index': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
@@ -1289,7 +1290,6 @@ export type ScannedRoutes = {
     'web.escola.administrativo.contratos.novo': { paramsTuple?: []; params?: {} }
     'web.escola.administrativo.contratos.editar': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'web.escola.administrativo.contratos.assinaturas': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'web.escola.administrativo.contratos.docuseal': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'web.escola.administrativo.contratos.financeiro': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
     'web.escola.administrativo.bolsas': { paramsTuple?: []; params?: {} }
     'web.escola.administrativo.parceiros': { paramsTuple?: []; params?: {} }
@@ -1421,6 +1421,7 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.student_schedule': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_documents': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.enrollment_axes': { paramsTuple: [ParamValue]; params: {'matriculaId': ParamValue} }
+    'api.v1.responsavel.api.enrollment_signature_link': { paramsTuple: [ParamValue]; params: {'matriculaId': ParamValue} }
     'api.v1.responsavel.api.student_occurrences': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_overview': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_gamification': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
@@ -1471,7 +1472,7 @@ export type ScannedRoutes = {
     'api.v1.contracts.index': { paramsTuple?: []; params?: {} }
     'api.v1.contracts.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.contracts.get_signature_stats': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
-    'api.v1.contracts.get_docuseal_template': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
+    'api.v1.contracts.get_signature_template': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
     'api.v1.contracts.payment_days.index': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
     'api.v1.contracts.interest_config.show': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
     'api.v1.contracts.early_discounts.index': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
@@ -1695,7 +1696,7 @@ export type ScannedRoutes = {
     'api.v1.students.enrollments.cancel': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'enrollmentId': ParamValue} }
     'api.v1.responsibles.remove': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.contracts.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
-    'api.v1.contracts.delete_docuseal_template': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
+    'api.v1.contracts.delete_signature_template': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
     'api.v1.contracts.payment_days.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'contractId': ParamValue,'id': ParamValue} }
     'api.v1.contracts.early_discounts.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'contractId': ParamValue,'id': ParamValue} }
     'api.v1.courses.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -1757,6 +1758,7 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.inquiries.mark-read': { paramsTuple: [ParamValue]; params: {'inquiryId': ParamValue} }
     'api.v1.admin.send_changelog_digest': { paramsTuple?: []; params?: {} }
     'api.v1.asaas.webhook': { paramsTuple?: []; params?: {} }
+    'api.v1.webhooks.autentique': { paramsTuple?: []; params?: {} }
     'api.v1.asaas.subaccounts.create': { paramsTuple?: []; params?: {} }
     'api.v1.schools.store': { paramsTuple?: []; params?: {} }
     'api.v1.schools.upload_logo': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -1772,7 +1774,7 @@ export type ScannedRoutes = {
     'api.v1.responsibles.assign': { paramsTuple?: []; params?: {} }
     'api.v1.responsible_addresses.create': { paramsTuple?: []; params?: {} }
     'api.v1.contracts.store': { paramsTuple?: []; params?: {} }
-    'api.v1.contracts.upload_docuseal_template': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
+    'api.v1.contracts.upload_signature_template': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
     'api.v1.contracts.payment_days.store': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
     'api.v1.contracts.early_discounts.store': { paramsTuple: [ParamValue]; params: {'contractId': ParamValue} }
     'api.v1.contract_documents.store': { paramsTuple?: []; params?: {} }

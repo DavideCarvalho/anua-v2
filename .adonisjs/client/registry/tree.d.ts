@@ -100,7 +100,6 @@ export interface ApiDefinition {
           novo: typeof routes['web.escola.administrativo.contratos.novo']
           editar: typeof routes['web.escola.administrativo.contratos.editar']
           assinaturas: typeof routes['web.escola.administrativo.contratos.assinaturas']
-          docuseal: typeof routes['web.escola.administrativo.contratos.docuseal']
           financeiro: typeof routes['web.escola.administrativo.contratos.financeiro']
         }
         bolsas: typeof routes['web.escola.administrativo.bolsas']
@@ -294,6 +293,7 @@ export interface ApiDefinition {
           studentDocuments: typeof routes['api.v1.responsavel.api.student_documents']
           uploadStudentDocument: typeof routes['api.v1.responsavel.api.upload_student_document']
           enrollmentAxes: typeof routes['api.v1.responsavel.api.enrollment_axes']
+          enrollmentSignatureLink: typeof routes['api.v1.responsavel.api.enrollment_signature_link']
           studentOccurrences: typeof routes['api.v1.responsavel.api.student_occurrences']
           acknowledgeOccurrence: typeof routes['api.v1.responsavel.api.acknowledge_occurrence']
           studentOverview: typeof routes['api.v1.responsavel.api.student_overview']
@@ -352,6 +352,9 @@ export interface ApiDefinition {
           create: typeof routes['api.v1.asaas.subaccounts.create']
           status: typeof routes['api.v1.asaas.subaccounts.status']
         }
+      }
+      webhooks: {
+        autentique: typeof routes['api.v1.webhooks.autentique']
       }
       schools: {
         index: typeof routes['api.v1.schools.index']
@@ -437,9 +440,9 @@ export interface ApiDefinition {
         update: typeof routes['api.v1.contracts.update']
         destroy: typeof routes['api.v1.contracts.destroy']
         getSignatureStats: typeof routes['api.v1.contracts.get_signature_stats']
-        getDocusealTemplate: typeof routes['api.v1.contracts.get_docuseal_template']
-        uploadDocusealTemplate: typeof routes['api.v1.contracts.upload_docuseal_template']
-        deleteDocusealTemplate: typeof routes['api.v1.contracts.delete_docuseal_template']
+        getSignatureTemplate: typeof routes['api.v1.contracts.get_signature_template']
+        uploadSignatureTemplate: typeof routes['api.v1.contracts.upload_signature_template']
+        deleteSignatureTemplate: typeof routes['api.v1.contracts.delete_signature_template']
         paymentDays: {
           index: typeof routes['api.v1.contracts.payment_days.index']
           store: typeof routes['api.v1.contracts.payment_days.store']

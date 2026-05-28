@@ -19,7 +19,6 @@ export default class ContractTransformer extends BaseTransformer<Contract> {
         'endDate',
         'enrollmentValue',
         'ammount',
-        'docusealTemplateId',
         'paymentType',
         'enrollmentValueInstallments',
         'enrollmentPaymentUntilDays',

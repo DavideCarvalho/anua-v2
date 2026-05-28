@@ -850,7 +850,7 @@ export class CommentLikeSchema extends BaseModel {
 }
 
 export class ContractSchema extends BaseModel {
-  static $columns = ['academicPeriodId', 'ammount', 'createdAt', 'description', 'docusealTemplateId', 'endDate', 'enrollmentFeeDueDays', 'enrollmentPaymentUntilDays', 'enrollmentValue', 'enrollmentValueInstallments', 'flexibleInstallments', 'hasInsurance', 'id', 'installments', 'isActive', 'name', 'paymentType', 'schoolId', 'updatedAt'] as const
+  static $columns = ['academicPeriodId', 'ammount', 'createdAt', 'description', 'endDate', 'enrollmentFeeDueDays', 'enrollmentPaymentUntilDays', 'enrollmentValue', 'enrollmentValueInstallments', 'flexibleInstallments', 'hasInsurance', 'id', 'installments', 'isActive', 'name', 'paymentType', 'schoolId', 'signatureTemplatePdfKey', 'signatureTemplateSchemas', 'updatedAt'] as const
   $columns = ContractSchema.$columns
   @column()
   declare academicPeriodId: string | null
@@ -860,8 +860,6 @@ export class ContractSchema extends BaseModel {
   declare createdAt: DateTime
   @column()
   declare description: string | null
-  @column()
-  declare docusealTemplateId: string | null
   @column.date()
   declare endDate: DateTime | null
   @column()
@@ -888,6 +886,10 @@ export class ContractSchema extends BaseModel {
   declare paymentType: any
   @column()
   declare schoolId: string
+  @column()
+  declare signatureTemplatePdfKey: string | null
+  @column()
+  declare signatureTemplateSchemas: any | null
   @column.dateTime()
   declare updatedAt: DateTime
 }
@@ -3298,7 +3300,7 @@ export class StudentHasExtraClassAttendanceSchema extends BaseModel {
 }
 
 export class StudentHasLevelSchema extends BaseModel {
-  static $columns = ['academicPeriodId', 'classId', 'contractId', 'contractUrl', 'createdAt', 'deletedAt', 'documentSignedAt', 'docusealSignatureStatus', 'docusealSubmissionId', 'enrollmentInstallments', 'enrollmentPaymentId', 'id', 'installments', 'levelAssignedToCourseAcademicPeriodId', 'levelId', 'paymentDay', 'paymentMethod', 'scholarshipId', 'signedContractFilePath', 'studentId', 'updatedAt'] as const
+  static $columns = ['academicPeriodId', 'classId', 'contractId', 'contractUrl', 'createdAt', 'deletedAt', 'documentSignedAt', 'enrollmentInstallments', 'enrollmentPaymentId', 'id', 'installments', 'levelAssignedToCourseAcademicPeriodId', 'levelId', 'paymentDay', 'paymentMethod', 'scholarshipId', 'signatureStatus', 'signatureSubmissionId', 'signedContractFilePath', 'studentId', 'updatedAt'] as const
   $columns = StudentHasLevelSchema.$columns
   @column()
   declare academicPeriodId: string | null
@@ -3314,10 +3316,6 @@ export class StudentHasLevelSchema extends BaseModel {
   declare deletedAt: DateTime | null
   @column.date()
   declare documentSignedAt: DateTime | null
-  @column()
-  declare docusealSignatureStatus: any | null
-  @column()
-  declare docusealSubmissionId: string | null
   @column()
   declare enrollmentInstallments: number | null
   @column()
@@ -3336,6 +3334,10 @@ export class StudentHasLevelSchema extends BaseModel {
   declare paymentMethod: string | null
   @column()
   declare scholarshipId: string | null
+  @column()
+  declare signatureStatus: any | null
+  @column()
+  declare signatureSubmissionId: string | null
   @column()
   declare signedContractFilePath: string | null
   @column()

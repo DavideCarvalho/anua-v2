@@ -16,7 +16,6 @@ export class ContractDto extends BaseModelDto {
   declare endDate: string | null
   declare enrollmentValue: number | null
   declare amount: number
-  declare docusealTemplateId: string | null
   declare paymentType: ContractPaymentType
   declare enrollmentValueInstallments: number
   declare enrollmentPaymentUntilDays: number | null
@@ -46,7 +45,6 @@ export class ContractDto extends BaseModelDto {
     this.enrollmentValue = instance.enrollmentValue
     // Note: Model uses ammount (typo in DB)
     this.amount = instance.ammount
-    this.docusealTemplateId = instance.docusealTemplateId
     this.paymentType = instance.paymentType
     this.enrollmentValueInstallments = instance.enrollmentValueInstallments
     this.enrollmentPaymentUntilDays = instance.enrollmentPaymentUntilDays
@@ -80,7 +78,6 @@ export class CreateContractDto extends BaseModelDto {
   declare endDate?: string
   declare enrollmentValue?: number
   declare amount: number
-  declare docusealTemplateId?: string
   declare paymentType: ContractPaymentType
   declare enrollmentValueInstallments?: number
   declare enrollmentPaymentUntilDays?: number
@@ -96,7 +93,6 @@ export class CreateContractDto extends BaseModelDto {
     endDate?: string
     enrollmentValue?: number
     amount: number
-    docusealTemplateId?: string
     paymentType: ContractPaymentType
     enrollmentValueInstallments?: number
     enrollmentPaymentUntilDays?: number
@@ -112,7 +108,6 @@ export class CreateContractDto extends BaseModelDto {
     this.endDate = data.endDate
     this.enrollmentValue = data.enrollmentValue
     this.amount = data.amount
-    this.docusealTemplateId = data.docusealTemplateId
     this.paymentType = data.paymentType
     this.enrollmentValueInstallments = data.enrollmentValueInstallments
     this.enrollmentPaymentUntilDays = data.enrollmentPaymentUntilDays
@@ -128,7 +123,6 @@ export class UpdateContractDto extends BaseModelDto {
   declare endDate?: string
   declare enrollmentValue?: number
   declare amount?: number
-  declare docusealTemplateId?: string
   declare paymentType?: ContractPaymentType
   declare enrollmentValueInstallments?: number
   declare enrollmentPaymentUntilDays?: number
@@ -143,7 +137,6 @@ export class UpdateContractDto extends BaseModelDto {
     endDate?: string
     enrollmentValue?: number
     amount?: number
-    docusealTemplateId?: string
     paymentType?: ContractPaymentType
     enrollmentValueInstallments?: number
     enrollmentPaymentUntilDays?: number
@@ -158,7 +151,6 @@ export class UpdateContractDto extends BaseModelDto {
     this.endDate = data.endDate
     this.enrollmentValue = data.enrollmentValue
     this.amount = data.amount
-    this.docusealTemplateId = data.docusealTemplateId
     this.paymentType = data.paymentType
     this.enrollmentValueInstallments = data.enrollmentValueInstallments
     this.enrollmentPaymentUntilDays = data.enrollmentPaymentUntilDays

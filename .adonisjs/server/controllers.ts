@@ -44,9 +44,18 @@ export const controllers = {
     GetSchoolHealth: () => import('#controllers/admin/get_school_health_controller'),
     GetServerStats: () => import('#controllers/admin/get_server_stats_controller'),
     ListAiToolCalls: () => import('#controllers/admin/list_ai_tool_calls_controller'),
+    SendChangelogDigest: () => import('#controllers/admin/send_changelog_digest_controller'),
     SetImpersonation: () => import('#controllers/admin/set_impersonation_controller'),
     TriggerMissingPayments: () => import('#controllers/admin/trigger_missing_payments_controller'),
-    SendChangelogDigest: () => import('#controllers/admin/send_changelog_digest_controller'),
+  },
+  agreementProposals: {
+    AcceptAgreementProposal: () => import('#controllers/agreement_proposals/accept_agreement_proposal_controller'),
+    ApproveSchoolAgreementProposal: () => import('#controllers/agreement_proposals/approve_school_agreement_proposal_controller'),
+    CreateAgreementProposal: () => import('#controllers/agreement_proposals/create_agreement_proposal_controller'),
+    ListSchoolAgreementProposals: () => import('#controllers/agreement_proposals/list_school_agreement_proposals_controller'),
+    ListStudentAgreementProposals: () => import('#controllers/agreement_proposals/list_student_agreement_proposals_controller'),
+    RejectResponsibleAgreementProposal: () => import('#controllers/agreement_proposals/reject_responsible_agreement_proposal_controller'),
+    RejectSchoolAgreementProposal: () => import('#controllers/agreement_proposals/reject_school_agreement_proposal_controller'),
   },
   agreements: {
     CreateAgreement: () => import('#controllers/agreements/create_agreement_controller'),
@@ -232,8 +241,6 @@ export const controllers = {
     AddContractPaymentDay: () => import('#controllers/contracts/add_contract_payment_day_controller'),
     CreateContract: () => import('#controllers/contracts/create_contract_controller'),
     DeleteContract: () => import('#controllers/contracts/delete_contract_controller'),
-    DeleteDocusealTemplate: () => import('#controllers/contracts/delete_docuseal_template_controller'),
-    GetDocusealTemplate: () => import('#controllers/contracts/get_docuseal_template_controller'),
     GetSignatureStats: () => import('#controllers/contracts/get_signature_stats_controller'),
     ListContractEarlyDiscounts: () => import('#controllers/contracts/list_contract_early_discounts_controller'),
     ListContractPaymentDays: () => import('#controllers/contracts/list_contract_payment_days_controller'),
@@ -245,7 +252,9 @@ export const controllers = {
     UpdateContract: () => import('#controllers/contracts/update_contract_controller'),
     UpdateContractEarlyDiscount: () => import('#controllers/contracts/update_contract_early_discount_controller'),
     UpdateContractInterestConfig: () => import('#controllers/contracts/update_contract_interest_config_controller'),
-    UploadDocusealTemplate: () => import('#controllers/contracts/upload_docuseal_template_controller'),
+    UploadSignatureTemplate: () => import('#controllers/contracts/upload_signature_template_controller'),
+    GetSignatureTemplate: () => import('#controllers/contracts/get_signature_template_controller'),
+    DeleteSignatureTemplate: () => import('#controllers/contracts/delete_signature_template_controller'),
   },
   courseHasAcademicPeriods: {
     CreateCourseHasAcademicPeriod: () => import('#controllers/course_has_academic_periods/create_course_has_academic_period_controller'),
@@ -399,8 +408,8 @@ export const controllers = {
     ListNotifications: () => import('#controllers/notifications/list_notifications_controller'),
     MarkAllRead: () => import('#controllers/notifications/mark_all_read_controller'),
     MarkNotificationRead: () => import('#controllers/notifications/mark_notification_read_controller'),
-    ShowNotification: () => import('#controllers/notifications/show_notification_controller'),
     PushSubscription: () => import('#controllers/notifications/push_subscription_controller'),
+    ShowNotification: () => import('#controllers/notifications/show_notification_controller'),
   },
   occurrences: {
     CreateOccurrence: () => import('#controllers/occurrences/create_occurrence_controller'),
@@ -463,7 +472,6 @@ export const controllers = {
       ShowConfiguracaoPagamentosPage: () => import('#controllers/pages/escola/show_configuracao_pagamentos_page_controller'),
       ShowConfiguracoesPage: () => import('#controllers/pages/escola/show_configuracoes_page_controller'),
       ShowContratoAssinaturasPage: () => import('#controllers/pages/escola/show_contrato_assinaturas_page_controller'),
-      ShowContratoDocusealPage: () => import('#controllers/pages/escola/show_contrato_docuseal_page_controller'),
       ShowContratoFinanceiroPage: () => import('#controllers/pages/escola/show_contrato_financeiro_page_controller'),
       ShowContratosPage: () => import('#controllers/pages/escola/show_contratos_page_controller'),
       ShowCursoTurmasPage: () => import('#controllers/pages/escola/show_curso_turmas_page_controller'),
@@ -633,6 +641,7 @@ export const controllers = {
     UpdateProfile: () => import('#controllers/responsavel/update_profile_controller'),
     UpdateStudentMealRecurrence: () => import('#controllers/responsavel/update_student_meal_recurrence_controller'),
     UploadStudentDocument: () => import('#controllers/responsavel/upload_student_document_controller'),
+    GetSignatureLink: () => import('#controllers/responsavel/get_signature_link_controller'),
   },
   responsibleAddresses: {
     CreateResponsibleAddress: () => import('#controllers/responsible-addresses/create_responsible_address_controller'),
@@ -897,13 +906,7 @@ export const controllers = {
   whatsapp: {
     WhatsappWebhook: () => import('#controllers/whatsapp/whatsapp_webhook_controller'),
   },
-  agreementProposals: {
-    ListSchoolAgreementProposals: () => import('#controllers/agreement_proposals/list_school_agreement_proposals_controller'),
-    ListStudentAgreementProposals: () => import('#controllers/agreement_proposals/list_student_agreement_proposals_controller'),
-    AcceptAgreementProposal: () => import('#controllers/agreement_proposals/accept_agreement_proposal_controller'),
-    CreateAgreementProposal: () => import('#controllers/agreement_proposals/create_agreement_proposal_controller'),
-    ApproveSchoolAgreementProposal: () => import('#controllers/agreement_proposals/approve_school_agreement_proposal_controller'),
-    RejectSchoolAgreementProposal: () => import('#controllers/agreement_proposals/reject_school_agreement_proposal_controller'),
-    RejectResponsibleAgreementProposal: () => import('#controllers/agreement_proposals/reject_responsible_agreement_proposal_controller'),
+  webhooks: {
+    AutentiqueWebhook: () => import('#controllers/webhooks/autentique_webhook_controller'),
   },
 }

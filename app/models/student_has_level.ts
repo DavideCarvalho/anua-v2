@@ -14,7 +14,7 @@ import IndividualDiscount from './individual_discount.js'
 import Class_ from './class.js'
 import StudentPayment from './student_payment.js'
 
-export type DocusealSignatureStatus = 'PENDING' | 'SIGNED' | 'DECLINED' | 'EXPIRED'
+export type SignatureStatus = 'PENDING' | 'SIGNED' | 'DECLINED' | 'EXPIRED'
 
 export default class StudentHasLevel extends compose(BaseModel, Auditable) {
   @beforeCreate()
@@ -65,11 +65,11 @@ export default class StudentHasLevel extends compose(BaseModel, Auditable) {
   @column({ columnName: 'paymentDay' })
   declare paymentDay: number | null
 
-  @column({ columnName: 'docusealSubmissionId' })
-  declare docusealSubmissionId: string | null
+  @column({ columnName: 'signatureSubmissionId' })
+  declare signatureSubmissionId: string | null
 
-  @column({ columnName: 'docusealSignatureStatus' })
-  declare docusealSignatureStatus: DocusealSignatureStatus | null
+  @column({ columnName: 'signatureStatus' })
+  declare signatureStatus: SignatureStatus | null
 
   @column.date({ columnName: 'documentSignedAt' })
   declare documentSignedAt: DateTime | null

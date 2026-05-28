@@ -58,7 +58,7 @@ export async function computeAxesStatus(studentHasLevelId: string): Promise<Axes
   const result = await db.rawQuery(
     `
     SELECT
-      shl."docusealSignatureStatus" AS docuseal_signature_status,
+      shl."signatureStatus" AS signature_status,
       shl."classId" AS class_id,
       shl."updatedAt" AS shl_updated_at,
       COALESCE(docs.approved_count, 0) AS docs_approved,
@@ -99,7 +99,7 @@ export async function computeAxesStatus(studentHasLevelId: string): Promise<Axes
 
   const row = result.rows[0] as
     | {
-        docuseal_signature_status: string | null
+        signature_status: string | null
         class_id: string | null
         shl_updated_at: string | null
         docs_approved: string | number | null
@@ -124,7 +124,7 @@ export async function computeAxesStatus(studentHasLevelId: string): Promise<Axes
   else if (required === 0 || approved >= required) docsStatus = 'COMPLETE'
   else docsStatus = 'PENDING'
 
-  const signature = mapLegacySignatureStatus(row.docuseal_signature_status)
+  const signature = mapLegacySignatureStatus(row.signature_status)
   const payment = row.payment_status
   const classAllocation: ClassAxisStatus = row.class_id ? 'ALLOCATED' : 'PENDING'
 

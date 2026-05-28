@@ -434,6 +434,26 @@ export default class EnrollStudentController {
           // Log error but don't fail enrollment
           logger.error({ error: jobError }, '[ENROLL] Failed to dispatch payment job')
         }
+
+        // Inicia fluxo de assinatura — fire and forget. Erro aqui não quebra
+        // a matrícula; status fica como SKIPPED/FAILED no log e admin pode
+        // re-disparar manualmente se necessário.
+        const { startEnrollmentSignature } = await import(
+          '#services/signature/enrollment_signature_service'
+        )
+        startEnrollmentSignature(createdStudentHasLevelId)
+          .then((outcome) => {
+            logger.info(
+              { studentHasLevelId: createdStudentHasLevelId, outcome },
+              '[ENROLL] Signature flow outcome'
+            )
+          })
+          .catch((err) => {
+            logger.error(
+              { studentHasLevelId: createdStudentHasLevelId, error: err },
+              '[ENROLL] Signature flow crashed'
+            )
+          })
       }
 
       // Load student with relationships

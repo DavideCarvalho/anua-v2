@@ -13,15 +13,16 @@ export function registerContractApiRoutes() {
       router
         .get('/:contractId/signature-stats', [controllers.contracts.GetSignatureStats])
         .as('contracts.get_signature_stats')
+      // Signature Template (PDF + posições de assinatura/data)
       router
-        .get('/:contractId/docuseal-template', [controllers.contracts.GetDocusealTemplate])
-        .as('contracts.get_docuseal_template')
+        .get('/:contractId/signature-template', [controllers.contracts.GetSignatureTemplate])
+        .as('contracts.get_signature_template')
       router
-        .post('/:contractId/docuseal-template', [controllers.contracts.UploadDocusealTemplate])
-        .as('contracts.upload_docuseal_template')
+        .post('/:contractId/signature-template', [controllers.contracts.UploadSignatureTemplate])
+        .as('contracts.upload_signature_template')
       router
-        .delete('/:contractId/docuseal-template', [controllers.contracts.DeleteDocusealTemplate])
-        .as('contracts.delete_docuseal_template')
+        .delete('/:contractId/signature-template', [controllers.contracts.DeleteSignatureTemplate])
+        .as('contracts.delete_signature_template')
 
       // Contract Payment Days
       router

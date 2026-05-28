@@ -420,12 +420,6 @@ const routes = {
     tokens: [{"old":"/escola/administrativo/contratos/:id/assinaturas","type":0,"val":"escola","end":""},{"old":"/escola/administrativo/contratos/:id/assinaturas","type":0,"val":"administrativo","end":""},{"old":"/escola/administrativo/contratos/:id/assinaturas","type":0,"val":"contratos","end":""},{"old":"/escola/administrativo/contratos/:id/assinaturas","type":1,"val":"id","end":""},{"old":"/escola/administrativo/contratos/:id/assinaturas","type":0,"val":"assinaturas","end":""}],
     types: placeholder as Registry['web.escola.administrativo.contratos.assinaturas']['types'],
   },
-  'web.escola.administrativo.contratos.docuseal': {
-    methods: ["GET","HEAD"],
-    pattern: '/escola/administrativo/contratos/:id/docuseal',
-    tokens: [{"old":"/escola/administrativo/contratos/:id/docuseal","type":0,"val":"escola","end":""},{"old":"/escola/administrativo/contratos/:id/docuseal","type":0,"val":"administrativo","end":""},{"old":"/escola/administrativo/contratos/:id/docuseal","type":0,"val":"contratos","end":""},{"old":"/escola/administrativo/contratos/:id/docuseal","type":1,"val":"id","end":""},{"old":"/escola/administrativo/contratos/:id/docuseal","type":0,"val":"docuseal","end":""}],
-    types: placeholder as Registry['web.escola.administrativo.contratos.docuseal']['types'],
-  },
   'web.escola.administrativo.contratos.financeiro': {
     methods: ["GET","HEAD"],
     pattern: '/escola/administrativo/contratos/:contractId/financeiro',
@@ -1248,6 +1242,12 @@ const routes = {
     tokens: [{"old":"/api/v1/responsavel/matriculas/:matriculaId","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId","type":0,"val":"matriculas","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId","type":1,"val":"matriculaId","end":""}],
     types: placeholder as Registry['api.v1.responsavel.api.enrollment_axes']['types'],
   },
+  'api.v1.responsavel.api.enrollment_signature_link': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/responsavel/matriculas/:matriculaId/signature-link',
+    tokens: [{"old":"/api/v1/responsavel/matriculas/:matriculaId/signature-link","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId/signature-link","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId/signature-link","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId/signature-link","type":0,"val":"matriculas","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId/signature-link","type":1,"val":"matriculaId","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId/signature-link","type":0,"val":"signature-link","end":""}],
+    types: placeholder as Registry['api.v1.responsavel.api.enrollment_signature_link']['types'],
+  },
   'api.v1.responsavel.api.student_occurrences': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/responsavel/students/:studentId/occurrences',
@@ -1457,6 +1457,12 @@ const routes = {
     pattern: '/api/v1/asaas/webhook',
     tokens: [{"old":"/api/v1/asaas/webhook","type":0,"val":"api","end":""},{"old":"/api/v1/asaas/webhook","type":0,"val":"v1","end":""},{"old":"/api/v1/asaas/webhook","type":0,"val":"asaas","end":""},{"old":"/api/v1/asaas/webhook","type":0,"val":"webhook","end":""}],
     types: placeholder as Registry['api.v1.asaas.webhook']['types'],
+  },
+  'api.v1.webhooks.autentique': {
+    methods: ["POST"],
+    pattern: '/api/v1/webhooks/autentique',
+    tokens: [{"old":"/api/v1/webhooks/autentique","type":0,"val":"api","end":""},{"old":"/api/v1/webhooks/autentique","type":0,"val":"v1","end":""},{"old":"/api/v1/webhooks/autentique","type":0,"val":"webhooks","end":""},{"old":"/api/v1/webhooks/autentique","type":0,"val":"autentique","end":""}],
+    types: placeholder as Registry['api.v1.webhooks.autentique']['types'],
   },
   'api.v1.asaas.subaccounts.create': {
     methods: ["POST"],
@@ -1824,23 +1830,23 @@ const routes = {
     tokens: [{"old":"/api/v1/contracts/:contractId/signature-stats","type":0,"val":"api","end":""},{"old":"/api/v1/contracts/:contractId/signature-stats","type":0,"val":"v1","end":""},{"old":"/api/v1/contracts/:contractId/signature-stats","type":0,"val":"contracts","end":""},{"old":"/api/v1/contracts/:contractId/signature-stats","type":1,"val":"contractId","end":""},{"old":"/api/v1/contracts/:contractId/signature-stats","type":0,"val":"signature-stats","end":""}],
     types: placeholder as Registry['api.v1.contracts.get_signature_stats']['types'],
   },
-  'api.v1.contracts.get_docuseal_template': {
+  'api.v1.contracts.get_signature_template': {
     methods: ["GET","HEAD"],
-    pattern: '/api/v1/contracts/:contractId/docuseal-template',
-    tokens: [{"old":"/api/v1/contracts/:contractId/docuseal-template","type":0,"val":"api","end":""},{"old":"/api/v1/contracts/:contractId/docuseal-template","type":0,"val":"v1","end":""},{"old":"/api/v1/contracts/:contractId/docuseal-template","type":0,"val":"contracts","end":""},{"old":"/api/v1/contracts/:contractId/docuseal-template","type":1,"val":"contractId","end":""},{"old":"/api/v1/contracts/:contractId/docuseal-template","type":0,"val":"docuseal-template","end":""}],
-    types: placeholder as Registry['api.v1.contracts.get_docuseal_template']['types'],
+    pattern: '/api/v1/contracts/:contractId/signature-template',
+    tokens: [{"old":"/api/v1/contracts/:contractId/signature-template","type":0,"val":"api","end":""},{"old":"/api/v1/contracts/:contractId/signature-template","type":0,"val":"v1","end":""},{"old":"/api/v1/contracts/:contractId/signature-template","type":0,"val":"contracts","end":""},{"old":"/api/v1/contracts/:contractId/signature-template","type":1,"val":"contractId","end":""},{"old":"/api/v1/contracts/:contractId/signature-template","type":0,"val":"signature-template","end":""}],
+    types: placeholder as Registry['api.v1.contracts.get_signature_template']['types'],
   },
-  'api.v1.contracts.upload_docuseal_template': {
+  'api.v1.contracts.upload_signature_template': {
     methods: ["POST"],
-    pattern: '/api/v1/contracts/:contractId/docuseal-template',
-    tokens: [{"old":"/api/v1/contracts/:contractId/docuseal-template","type":0,"val":"api","end":""},{"old":"/api/v1/contracts/:contractId/docuseal-template","type":0,"val":"v1","end":""},{"old":"/api/v1/contracts/:contractId/docuseal-template","type":0,"val":"contracts","end":""},{"old":"/api/v1/contracts/:contractId/docuseal-template","type":1,"val":"contractId","end":""},{"old":"/api/v1/contracts/:contractId/docuseal-template","type":0,"val":"docuseal-template","end":""}],
-    types: placeholder as Registry['api.v1.contracts.upload_docuseal_template']['types'],
+    pattern: '/api/v1/contracts/:contractId/signature-template',
+    tokens: [{"old":"/api/v1/contracts/:contractId/signature-template","type":0,"val":"api","end":""},{"old":"/api/v1/contracts/:contractId/signature-template","type":0,"val":"v1","end":""},{"old":"/api/v1/contracts/:contractId/signature-template","type":0,"val":"contracts","end":""},{"old":"/api/v1/contracts/:contractId/signature-template","type":1,"val":"contractId","end":""},{"old":"/api/v1/contracts/:contractId/signature-template","type":0,"val":"signature-template","end":""}],
+    types: placeholder as Registry['api.v1.contracts.upload_signature_template']['types'],
   },
-  'api.v1.contracts.delete_docuseal_template': {
+  'api.v1.contracts.delete_signature_template': {
     methods: ["DELETE"],
-    pattern: '/api/v1/contracts/:contractId/docuseal-template',
-    tokens: [{"old":"/api/v1/contracts/:contractId/docuseal-template","type":0,"val":"api","end":""},{"old":"/api/v1/contracts/:contractId/docuseal-template","type":0,"val":"v1","end":""},{"old":"/api/v1/contracts/:contractId/docuseal-template","type":0,"val":"contracts","end":""},{"old":"/api/v1/contracts/:contractId/docuseal-template","type":1,"val":"contractId","end":""},{"old":"/api/v1/contracts/:contractId/docuseal-template","type":0,"val":"docuseal-template","end":""}],
-    types: placeholder as Registry['api.v1.contracts.delete_docuseal_template']['types'],
+    pattern: '/api/v1/contracts/:contractId/signature-template',
+    tokens: [{"old":"/api/v1/contracts/:contractId/signature-template","type":0,"val":"api","end":""},{"old":"/api/v1/contracts/:contractId/signature-template","type":0,"val":"v1","end":""},{"old":"/api/v1/contracts/:contractId/signature-template","type":0,"val":"contracts","end":""},{"old":"/api/v1/contracts/:contractId/signature-template","type":1,"val":"contractId","end":""},{"old":"/api/v1/contracts/:contractId/signature-template","type":0,"val":"signature-template","end":""}],
+    types: placeholder as Registry['api.v1.contracts.delete_signature_template']['types'],
   },
   'api.v1.contracts.payment_days.index': {
     methods: ["GET","HEAD"],

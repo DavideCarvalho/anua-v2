@@ -91,9 +91,6 @@ export function registerEscolaPageRoutes() {
         .get('/administrativo/contratos/:id/assinaturas', [escola.ShowContratoAssinaturasPage])
         .as('administrativo.contratos.assinaturas')
       router
-        .get('/administrativo/contratos/:id/docuseal', [escola.ShowContratoDocusealPage])
-        .as('administrativo.contratos.docuseal')
-      router
         .get('/administrativo/contratos/:contractId/financeiro', [
           escola.ShowContratoFinanceiroPage,
         ])

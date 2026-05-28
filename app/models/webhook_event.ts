@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 import { v7 as uuidv7 } from 'uuid'
 import { BaseModel, column, beforeCreate } from '@adonisjs/lucid/orm'
 
-export type WebhookProvider = 'ASAAS' | 'ASAAS_RECARGA' | 'DOCUSEAL'
+export type WebhookProvider = 'ASAAS' | 'ASAAS_RECARGA' | 'AUTENTIQUE'
 export type WebhookEventStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED'
 
 export default class WebhookEvent extends BaseModel {

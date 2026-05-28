@@ -64,7 +64,6 @@ declare module '@adonisjs/inertia/types' {
     'escola/administrativo/bolsas': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/bolsas.tsx'))['default']>
     'escola/administrativo/contratos': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/contratos.tsx'))['default']>
     'escola/administrativo/contratos/assinaturas': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/contratos/assinaturas.tsx'))['default']>
-    'escola/administrativo/contratos/docuseal': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/contratos/docuseal.tsx'))['default']>
     'escola/administrativo/contratos/editar': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/contratos/editar.tsx'))['default']>
     'escola/administrativo/contratos/financeiro': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/contratos/financeiro.tsx'))['default']>
     'escola/administrativo/contratos/novo': ExtractProps<(typeof import('../../inertia/pages/escola/administrativo/contratos/novo.tsx'))['default']>

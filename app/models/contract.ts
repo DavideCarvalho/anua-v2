@@ -13,6 +13,27 @@ import StudentHasLevel from './student_has_level.js'
 
 export type ContractPaymentType = 'MONTHLY' | 'UPFRONT'
 
+export interface SignatureTemplateField {
+  name: string
+  type: 'signature' | 'date'
+  position: { x: number; y: number }
+  width: number
+  height: number
+  rotate?: number
+  format?: string
+  fontSize?: number
+  alignment?: string
+  fontColor?: string
+  backgroundColor?: string
+  locale?: string
+  opacity?: number
+  required?: boolean
+  readOnly?: boolean
+  content?: string
+}
+
+export type SignatureTemplateSchemas = SignatureTemplateField[][]
+
 export default class Contract extends compose(BaseModel, Auditable) {
   static table = 'Contract'
 
@@ -47,8 +68,20 @@ export default class Contract extends compose(BaseModel, Auditable) {
   @column({ columnName: 'ammount' })
   declare ammount: number // Note: typo in DB schema
 
-  @column({ columnName: 'docusealTemplateId' })
-  declare docusealTemplateId: string | null
+  @column({ columnName: 'signatureTemplatePdfKey' })
+  declare signatureTemplatePdfKey: string | null
+
+  @column({
+    columnName: 'signatureTemplateSchemas',
+    prepare: (value: SignatureTemplateSchemas | null) =>
+      value ? JSON.stringify(value) : null,
+    consume: (value: string | SignatureTemplateSchemas | null): SignatureTemplateSchemas | null => {
+      if (!value) return null
+      if (typeof value === 'string') return JSON.parse(value) as SignatureTemplateSchemas
+      return value
+    },
+  })
+  declare signatureTemplateSchemas: SignatureTemplateSchemas | null
 
   @column({ columnName: 'paymentType' })
   declare paymentType: ContractPaymentType

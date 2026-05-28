@@ -46,10 +46,10 @@ export default class GetEnrollmentFunnelStatsController {
           COUNT(DISTINCT shl.id) as total_enrollments,
           COUNT(DISTINCT CASE WHEN st."enrollmentStatus" = 'PENDING_DOCUMENT_REVIEW' THEN shl.id END) as pending_documents,
           COUNT(DISTINCT CASE WHEN st."enrollmentStatus" = 'REGISTERED' THEN shl.id END) as completed,
-          COUNT(DISTINCT CASE WHEN shl."docusealSignatureStatus" = 'PENDING' THEN shl.id END) as pending_signatures,
-          COUNT(DISTINCT CASE WHEN shl."docusealSignatureStatus" = 'SIGNED' THEN shl.id END) as signed_contracts,
-          COUNT(DISTINCT CASE WHEN shl."docusealSignatureStatus" = 'DECLINED' THEN shl.id END) as declined_signatures,
-          COUNT(DISTINCT CASE WHEN shl."docusealSignatureStatus" = 'EXPIRED' THEN shl.id END) as expired_signatures
+          COUNT(DISTINCT CASE WHEN shl."signatureStatus" = 'PENDING' THEN shl.id END) as pending_signatures,
+          COUNT(DISTINCT CASE WHEN shl."signatureStatus" = 'SIGNED' THEN shl.id END) as signed_contracts,
+          COUNT(DISTINCT CASE WHEN shl."signatureStatus" = 'DECLINED' THEN shl.id END) as declined_signatures,
+          COUNT(DISTINCT CASE WHEN shl."signatureStatus" = 'EXPIRED' THEN shl.id END) as expired_signatures
         FROM "StudentHasLevel" shl
         JOIN "AcademicPeriod" ap ON ap.id = shl."academicPeriodId"
         JOIN "Student" st ON shl."studentId" = st.id

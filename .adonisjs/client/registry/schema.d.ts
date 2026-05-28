@@ -835,18 +835,6 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_contrato_assinaturas_page_controller').default['handle']>>>
     }
   }
-  'web.escola.administrativo.contratos.docuseal': {
-    methods: ["GET","HEAD"]
-    pattern: '/escola/administrativo/contratos/:id/docuseal'
-    types: {
-      body: {}
-      paramsTuple: [ParamValue]
-      params: { id: ParamValue }
-      query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_contrato_docuseal_page_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/pages/escola/show_contrato_docuseal_page_controller').default['handle']>>>
-    }
-  }
   'web.escola.administrativo.contratos.financeiro': {
     methods: ["GET","HEAD"]
     pattern: '/escola/administrativo/contratos/:contractId/financeiro'
@@ -2491,6 +2479,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/get_enrollment_axes_controller').default['handle']>>>
     }
   }
+  'api.v1.responsavel.api.enrollment_signature_link': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/responsavel/matriculas/:matriculaId/signature-link'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { matriculaId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/responsavel/get_signature_link_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/get_signature_link_controller').default['handle']>>>
+    }
+  }
   'api.v1.responsavel.api.student_occurrences': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/responsavel/students/:studentId/occurrences'
@@ -2909,6 +2909,18 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/asaas/asaas_webhook_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/asaas/asaas_webhook_controller').default['handle']>>>
+    }
+  }
+  'api.v1.webhooks.autentique': {
+    methods: ["POST"]
+    pattern: '/api/v1/webhooks/autentique'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/webhooks/autentique_webhook_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/webhooks/autentique_webhook_controller').default['handle']>>>
     }
   }
   'api.v1.asaas.subaccounts.create': {
@@ -3643,40 +3655,40 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/contracts/get_signature_stats_controller').default['handle']>>>
     }
   }
-  'api.v1.contracts.get_docuseal_template': {
+  'api.v1.contracts.get_signature_template': {
     methods: ["GET","HEAD"]
-    pattern: '/api/v1/contracts/:contractId/docuseal-template'
+    pattern: '/api/v1/contracts/:contractId/signature-template'
     types: {
       body: {}
       paramsTuple: [ParamValue]
       params: { contractId: ParamValue }
       query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/contracts/get_docuseal_template_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/contracts/get_docuseal_template_controller').default['handle']>>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/contracts/get_signature_template_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/contracts/get_signature_template_controller').default['handle']>>>
     }
   }
-  'api.v1.contracts.upload_docuseal_template': {
+  'api.v1.contracts.upload_signature_template': {
     methods: ["POST"]
-    pattern: '/api/v1/contracts/:contractId/docuseal-template'
+    pattern: '/api/v1/contracts/:contractId/signature-template'
     types: {
-      body: ExtractBody<InferInput<(typeof import('#validators/contract_docuseal').uploadContractDocusealTemplateValidator)>>
+      body: ExtractBody<InferInput<(typeof import('#validators/contract_signature_template').uploadSignatureTemplateValidator)>>
       paramsTuple: [ParamValue]
       params: { contractId: ParamValue }
-      query: ExtractQuery<InferInput<(typeof import('#validators/contract_docuseal').uploadContractDocusealTemplateValidator)>>
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/contracts/upload_docuseal_template_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/contracts/upload_docuseal_template_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+      query: ExtractQuery<InferInput<(typeof import('#validators/contract_signature_template').uploadSignatureTemplateValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/contracts/upload_signature_template_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/contracts/upload_signature_template_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
-  'api.v1.contracts.delete_docuseal_template': {
+  'api.v1.contracts.delete_signature_template': {
     methods: ["DELETE"]
-    pattern: '/api/v1/contracts/:contractId/docuseal-template'
+    pattern: '/api/v1/contracts/:contractId/signature-template'
     types: {
       body: {}
       paramsTuple: [ParamValue]
       params: { contractId: ParamValue }
       query: {}
-      response: ExtractResponse<Awaited<ReturnType<import('#controllers/contracts/delete_docuseal_template_controller').default['handle']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/contracts/delete_docuseal_template_controller').default['handle']>>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/contracts/delete_signature_template_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/contracts/delete_signature_template_controller').default['handle']>>>
     }
   }
   'api.v1.contracts.payment_days.index': {
