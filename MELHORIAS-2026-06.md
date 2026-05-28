@@ -124,10 +124,10 @@ Documento de melhorias organizado por módulo funcional. Cada módulo tem três 
 - **Fix:** Régua configurável pela escola: D-3 (lembrete), D+0 (vencimento), D+7 (aviso amigável), D+15 (aviso formal), D+30 (proposta de acordo automática). Multi-canal: email + WhatsApp + push + in-app. A proposta de acordo (já implementada) entra como último passo da régua.
 - **Quem tem:** Agenda Edu ("régua de cobrança" com 85% de redução de inadimplência), Isaac, Sponte, ClassApp, Proesc.
 
-#### 2.5 Cálculo automático de juros e multa `P1` `[S]`
-- **Onde:** Models `ContractInterestConfig` existem mas não há job de aplicação.
-- **Problema:** Escola configura juros/multa no contrato mas o sistema não aplica automaticamente no valor da fatura.
-- **Fix:** Job diário que recalcula valor de faturas OVERDUE com juros pro-rata e multa fixa conforme config do contrato.
+#### 2.5 ~~Cálculo automático de juros e multa~~ `P1` `[S]` FALSO POSITIVO
+- [~] **Onde:** `app/services/payments/billing_reconciliation_service.ts`, `start/jobs/apply_invoice_interest.ts`, `start/jobs/payments/refresh_overdue_invoices_job.ts`
+- **Problema (não confirmado):** "Config existe mas não há job que aplica juros/multa na fatura."
+- **Por quê é falso positivo:** Já está implementado e **automático**. `ContractInterestConfig` (delayInterestPercentage + delayInterestPerDayDelayed) é aplicado pelo `billing_reconciliation_service` (`calculateOverdueCharges` → `fineAmount`/`interestAmount` somados no `totalAmount` da fatura). Roda diariamente às **05:00** via `RefreshOverdueInvoicesJob` (cron `0 5 * * *`): marca vencidas + recalcula encargos. O valor (com encargos embutidos) vai pro Asaas no `totalAmount`.
 
 #### 2.6 Comprovante de pagamento PDF `P2` `[S]`
 - **Onde:** `inertia/containers/responsavel/student-payments-container.tsx`
