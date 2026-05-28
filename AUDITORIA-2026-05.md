@@ -50,6 +50,13 @@ Lista de oportunidades pra trackear melhoria de fluxo (feature), negócio e UI/U
 - 18 propostas criadas em prod (12 escola teste + 1 Silva Gomes + 5 novas após fix StudentHasLevel fallback).
 - Aprendizado: transformer Collection tem maxDepth=1 por default — `.depth(6)` deve ir no Collection do pai, não no Item nested.
 
+**2026-05-28, sessão 5**
+- Concluídos: #30 (P3 — autorização eletrônica via Autentique, finalizada).
+- Arquivos editados: `send_parental_consent_reminders.ts` (tipo de notificação), `notification_service.ts` (WhatsApp default ON), `update_notification_preferences_controller.ts`, `notification-preferences.tsx` (toggle WhatsApp + bug email). Criado: migration `1788000000100`.
+- Achado: o job de lembrete já existia e rodava (handoff dizia "só falta o job"); o gap real era tipo de notificação errado + WhatsApp default OFF inconsistente com email/push.
+- ⚠️ **Working tree tinha ~12 arquivos com trabalho não commitado de sessão anterior** (feriados no calendário do responsável, disciplina/justificativa na frequência, validação de motivo na rejeição de acordo #7, null-safety em faturas). Handoff dizia "tree limpo" — estava errado. Não commitado nesta sessão, aguarda decisão.
+- Backend typecheck verde, migration aplicada (batch 1028).
+
 ---
 
 ## Sumário
@@ -270,9 +277,10 @@ Nada disso é estrutural. É puxada de qualidade em pontos específicos.
 - **Esforço:** 4h.
 - **Feito 2026-05-27:** Backend: `GetEnrollmentCertificateController` retorna dados + QR code base64 (lib `qrcode`). Rota pública `GET /api/v1/verify-enrollment/:token` verifica autenticidade (HMAC token → busca matrícula → checa axes complete). Frontend: botão "Comprovante de Matrícula" aparece no `MatriculaAxesContent` quando `isComplete`. Abre nova aba com HTML printable (escola, aluno, série, período, status, QR, URL de verificação). Typecheck verde.
 
-### 30. [feature] Autorização eletrônica via Docuseal (reuso)
-- [ ] `inertia/pages/responsavel/autorizacoes.tsx` plugando no Docuseal já usado em matrícula. Excursão, uso de imagem, medicação. Histórico por aluno.
+### 30. [feature] Autorização eletrônica via Autentique (reuso)
+- [x] `inertia/pages/responsavel/autorizacoes.tsx` plugando no provider de assinatura já usado em matrícula. Excursão, uso de imagem, medicação. Histórico por aluno.
 - **Esforço:** 1 sprint.
+- **Feito 2026-05-27/28 (sessões 4-5):** Implementado via Autentique (Docuseal foi removido, commit `drop_docuseal_references`), reusando o `signatureProvider` agnóstico. (a) 2 tiers por evento: **light** (click Aprovar/Negar) e **heavy** (PDF + assinatura digital Autentique). (b) Designer pdfme no step "Regras" do evento — `SignatureTemplateBuilder` aceita `entityKind: 'contract' | 'event'`. (c) Calendário do responsável com badge "Precisa autorizar" + ação contextual (botão Lista, card clicável Semana, bullet Mês). (d) Webhook Autentique estendido pra atualizar `EventParentalConsent` além de `StudentHasLevel`. (e) Notificação multi-canal ao publicar evento; `NotificationMessage` com sanitize-html + labels PT-BR no sino. (f) **Sessão 5 — finalização:** job de lembrete `SendParentalConsentRemindersJob` (diário 10h, janela D-3, throttle 24h) agora usa `type: 'PARENTAL_CONSENT_REMINDER'` (era `EVENT_REMINDER`) → rótulo "Autorização" no sino + preferência de canal correta. De quebra: WhatsApp virou default ON no `NotificationService` (alinhado a email/push; preferência subtrai), com migration `1788000000100`. Backend typecheck verde, migration aplicada.
 
 ### 31. [feature] Web Push + PWA instalável (responsável e aluno)
 - [x] Service worker + Web Push API. Notificações de pagamento vencendo, atividade nova, ocorrência. Preferências por tipo em `notificacoes/preferencias`.
@@ -338,4 +346,4 @@ Nada disso é estrutural. É puxada de qualidade em pontos específicos.
 3. Onde tem `[design]` confirmado por arquivo:linha, dá pra rodar `/impeccable polish <path>` direto.
 4. Onde tem `[feature]` ou `[negocio]`, vale `brainstorming` antes pra fechar escopo.
 
-Última atualização: 2026-05-28 (sessão 4: automação de inadimplência #7 completa + gamification backfill).
+Última atualização: 2026-05-28 (sessão 5: autorização eletrônica via Autentique #30 finalizada + WhatsApp default ON).
