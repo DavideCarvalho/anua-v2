@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Coins, Cpu, Building2, Users } from 'lucide-react'
+import { Coins, Cpu, Building2, Users, AlertTriangle } from 'lucide-react'
 import { AdminLayout } from '../../../components/layouts'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card'
 import { Badge } from '../../../components/ui/badge'
@@ -194,6 +194,59 @@ function SchoolUsageTable({
   )
 }
 
+function QuotaAlert({ rows }: { rows: SchoolRow[] }) {
+  const exceeded = rows.filter((r) => r.quotaStatus === 'exceeded')
+  const warning = rows.filter((r) => r.quotaStatus === 'warning')
+  const flagged = [...exceeded, ...warning]
+  if (flagged.length === 0) return null
+
+  const hasExceeded = exceeded.length > 0
+  return (
+    <Card
+      className={cn(
+        hasExceeded ? 'border-destructive/50 bg-destructive/5' : 'border-amber-500/50 bg-amber-500/5'
+      )}
+    >
+      <CardContent className="space-y-2 p-4">
+        <div
+          className={cn(
+            'flex items-center gap-2 text-sm font-semibold',
+            hasExceeded ? 'text-destructive' : 'text-amber-600'
+          )}
+        >
+          <AlertTriangle className="h-4 w-4" />
+          {exceeded.length > 0 && `${exceeded.length} escola(s) estouraram o limite mensal`}
+          {exceeded.length > 0 && warning.length > 0 && ' · '}
+          {warning.length > 0 && `${warning.length} escola(s) ≥ 80% do limite`}
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {flagged.map((r) => {
+            const pct =
+              r.monthlyLimit && r.monthlyLimit > 0
+                ? Math.round((r.monthlyUsed / r.monthlyLimit) * 100)
+                : null
+            return (
+              <span
+                key={r.key}
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs',
+                  r.quotaStatus === 'exceeded'
+                    ? 'bg-destructive/10 text-destructive'
+                    : 'bg-amber-500/10 text-amber-700'
+                )}
+                title={`${fmt(r.monthlyUsed)} de ${r.monthlyLimit ? fmt(r.monthlyLimit) : '∞'} tokens no mês`}
+              >
+                {r.label}
+                {pct !== null ? ` · ${pct}%` : ''}
+              </span>
+            )
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 function DailySparkline({ rows }: { rows: DailyRow[] }) {
   if (rows.length === 0) {
     return (
@@ -301,6 +354,8 @@ export default function AiTokensPage() {
           </div>
         ) : (
           <>
+            <QuotaAlert rows={bySchool} />
+
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
               <StatCard
                 icon={Coins}

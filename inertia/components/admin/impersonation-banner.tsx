@@ -1,6 +1,6 @@
 import { Link } from '@adonisjs/inertia/react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Eye, X, AlertTriangle, ExternalLink } from 'lucide-react'
+import { Eye, AlertTriangle, ExternalLink, ArrowLeft, Building2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import type { Route } from '@tuyau/core/types'
 
@@ -85,7 +85,10 @@ export function ImpersonationBanner() {
               {impersonatingUser.name} ({translateRole(impersonatingUser.role || '')})
             </strong>
             {impersonatingUser.school && (
-              <span className="ml-1 text-amber-900">• {impersonatingUser.school.name}</span>
+              <span className="ml-2 inline-flex items-center gap-1 rounded-md bg-amber-900/15 px-2 py-0.5 text-xs font-semibold text-amber-950">
+                <Building2 className="h-3 w-3" />
+                {impersonatingUser.school.name}
+              </span>
             )}
           </span>
         </div>
@@ -109,8 +112,8 @@ export function ImpersonationBanner() {
           disabled={clearImpersonationMutation.isPending}
           className="bg-white/80 text-amber-900 hover:bg-white"
         >
-          <X className="mr-2 h-4 w-4" />
-          {clearImpersonationMutation.isPending ? 'Saindo...' : 'Sair'}
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          {clearImpersonationMutation.isPending ? 'Saindo...' : 'Voltar ao Admin'}
         </Button>
       </div>
     </div>

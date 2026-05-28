@@ -1,9 +1,56 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import { DateTime } from 'luxon'
 import Student from '#models/student'
 import StudentAvatar from '#models/student_avatar'
 import StudentGamification from '#models/student_gamification'
 import StudentAchievement from '#models/student_achievement'
+import Calendar from '#models/calendar'
+import CalendarSlot from '#models/calendar_slot'
 import AppException from '#exceptions/app_exception'
+
+type TodayClass = {
+  id: string
+  startTime: string
+  endTime: string
+  subject: string | null
+  teacherName: string | null
+}
+
+async function getTodayClasses(student: Student): Promise<TodayClass[]> {
+  if (!student.classId) return []
+
+  // Calendário ativo é a fonte da verdade dos slots — buscamos direto por turma
+  // (sem resolver período antes, que pode ser ambíguo com períodos duplicados).
+  const calendar = await Calendar.query()
+    .where('classId', student.classId)
+    .where('isActive', true)
+    .where('isCanceled', false)
+    .first()
+  if (!calendar) return []
+
+  // CalendarSlot.classWeekDay usa convenção JS (0=domingo). Luxon weekday é 1=segunda..7=domingo.
+  const weekday = DateTime.now().weekday % 7
+
+  const slots = await CalendarSlot.query()
+    .where('calendarId', calendar.id)
+    .where('classWeekDay', weekday)
+    .where('isBreak', false)
+    .preload('teacherHasClass', (query) => {
+      query.preload('teacher', (tq) => tq.preload('user'))
+      query.preload('subject')
+    })
+    .orderBy('startTime')
+
+  return slots
+    .filter((slot) => slot.teacherHasClass)
+    .map((slot) => ({
+      id: slot.id,
+      startTime: slot.startTime,
+      endTime: slot.endTime,
+      subject: slot.teacherHasClass?.subject?.name ?? null,
+      teacherName: slot.teacherHasClass?.teacher?.user?.name ?? null,
+    }))
+}
 
 export default class ShowAlunoDashboardPageController {
   async handle({ inertia, auth, effectiveUser }: HttpContext) {
@@ -22,6 +69,8 @@ export default class ShowAlunoDashboardPageController {
     if (!student) {
       throw AppException.notFound('Aluno não encontrado')
     }
+
+    const todayClasses = await getTodayClasses(student)
 
     const birthDate = user.birthDate
     const isKids = birthDate ? Math.floor(Math.abs(birthDate.diffNow('years').years)) <= 14 : true
@@ -60,6 +109,7 @@ export default class ShowAlunoDashboardPageController {
         id: student.id,
         name: student.user?.name ?? 'Aluno',
       },
+      todayClasses,
       avatar: {
         id: avatar.id,
         skinTone: avatar.skinTone,

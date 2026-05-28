@@ -629,10 +629,10 @@ Documento de melhorias organizado por módulo funcional. Cada módulo tem três 
 - **Problema:** Chat de IA abre vazio. Coordenadora não sabe o que perguntar.
 - **Fix:** Sugestões dinâmicas baseadas no contexto: "Você tem 5 alunos com frequência < 75%", "3 famílias com pagamento > 30 dias de atraso". Chips clicáveis.
 
-#### 9.2 Token usage sem alerta de limite `P3` `[XS]`
-- **Onde:** `inertia/pages/admin/ai/tokens.tsx`
-- **Problema:** Admin vê consumo mas sem alerta quando escola atinge 80% do limite do plano.
-- **Fix:** Threshold configurável com notificação email/push pro admin.
+#### 9.2 ~~Token usage sem alerta de limite~~ `P3` `[XS]` FEITO (testado)
+- [x] **Onde:** `inertia/pages/admin/ai/tokens.tsx`
+- **Problema:** Admin via consumo mas sem alerta destacado quando escola atinge 80% do limite. (O badge `≥80%`/`Estourou` por escola já existia.)
+- **Feito:** Banner `QuotaAlert` no topo da página listando as escolas em warning (≥80%) e estouro, com chips coloridos (âmbar/vermelho) e o % mensal. Usa o `quotaStatus` que o controller já calcula (`maxMonthlyChatTokens`). Validado no browser (escola teste 3) com tetos temporários.
 
 ### Evolução
 
@@ -690,10 +690,10 @@ Documento de melhorias organizado por módulo funcional. Cada módulo tem três 
 - **Fix:** Wizard de 5 passos com checklist persistente. Marcar como concluído ao completar cada passo. Barra de progresso no dashboard da escola.
 - **Quem tem:** FACTS (custom onboarding experience for new families — adaptável pra escolas).
 
-#### 10.2 Impersonation sem indicador claro de qual escola `P2` `[XS]`
-- **Onde:** `ImpersonationBanner` existe mas pode ser mais informativo.
-- **Problema:** Admin impersonando pode esquecer qual escola está. Risco de editar dados errados.
-- **Fix:** Banner com nome da escola em destaque, cor diferenciada, e botão "Voltar ao Admin" sempre visível.
+#### 10.2 ~~Impersonation sem indicador claro de qual escola~~ `P2` `[XS]` FEITO (testado)
+- [x] **Onde:** `inertia/components/admin/impersonation-banner.tsx`
+- **Problema:** Admin impersonando podia esquecer qual escola está. Risco de editar dados errados.
+- **Feito:** Nome da escola agora em **chip destacado** (ícone + fundo) em vez de texto solto; botão de saída renomeado pra **"Voltar ao Admin"** (com ícone de volta) deixando o destino explícito. Validado no browser impersonando o Testerson (diretor da escola teste 3).
 
 ### Evolução
 
@@ -742,10 +742,11 @@ Documento de melhorias organizado por módulo funcional. Cada módulo tem três 
 
 ### Polish
 
-#### 11.1 Dashboard do aluno sem visualização de próximas aulas `P2` `[XS]`
-- **Onde:** `inertia/pages/aluno/dashboard.tsx`
-- **Problema:** Dashboard mostra infos gerais mas sem "Suas aulas hoje" com horários.
-- **Fix:** Card "Aulas de hoje" com disciplina, horário, professor. Dados do `ClassSchedule`.
+#### 11.1 ~~Dashboard do aluno sem visualização de próximas aulas~~ `P2` `[XS]` FEITO (testado)
+- [x] **Onde:** `app/controllers/pages/aluno/show_aluno_dashboard_page_controller.ts`, `inertia/pages/aluno/dashboard.tsx`
+- **Problema:** Dashboard do aluno (não-gamificado) mostrava só Loja/Pedidos, sem "aulas de hoje".
+- **Feito:** Controller puxa os slots do **calendário ativo da turma** no dia de hoje (`classWeekDay`) com disciplina + professor; card "Aulas de hoje" no topo do dashboard com horário (HH:mm via date-fns), disciplina e professor, e empty state. Validado no browser (escola teste 3) — populado e vazio.
+- **Nota:** busca o calendário ativo direto por `classId` (não resolve período antes, que é ambíguo com períodos duplicados no seed).
 
 #### 11.2 Portal sem acesso direto a notas `P2` `[S]`
 - **Onde:** `inertia/pages/aluno/`

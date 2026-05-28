@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion'
+import { format, parse } from 'date-fns'
 import { Head, usePage } from '@inertiajs/react'
 import { Link } from '@adonisjs/inertia/react'
 import type React from 'react'
 import { AlunoLayout } from '../../components/layouts/aluno-layout'
-import { Card, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
-import { ShoppingBag, UtensilsCrossed, Trophy } from 'lucide-react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
+import { ShoppingBag, UtensilsCrossed, Trophy, Clock } from 'lucide-react'
 
 import { RpgCanvas } from '../../components/rpg/rpg-canvas'
 import { staggerContainer, fadeUp } from '../../lib/gamified-animations'
@@ -19,9 +20,18 @@ interface Achievement {
   unlockedAt: string
 }
 
+interface TodayClass {
+  id: string
+  startTime: string
+  endTime: string
+  subject: string | null
+  teacherName: string | null
+}
+
 interface DashboardProps {
   gamified?: boolean
   student: { id: string; name: string }
+  todayClasses?: TodayClass[]
   recentAchievements?: Achievement[]
   avatar: {
     id: string
@@ -46,12 +56,17 @@ const rarityGlow: Record<string, string> = {
   legendary: 'border-gf-gold-dark shadow-[0_0_8px_rgba(245,158,11,0.3)]',
 }
 
+function formatTime(time: string): string {
+  return format(parse(time, 'HH:mm:ss', new Date()), 'HH:mm')
+}
+
 const AlunoDashboardPage: React.FC<DashboardProps> = ({
   gamified: gamifiedProp,
   student,
   avatar,
   gamification,
   recentAchievements = [],
+  todayClasses = [],
 }) => {
   const { props } = usePage<SharedProps>()
   const gamified = gamifiedProp ?? props.gamified ?? false
@@ -108,6 +123,38 @@ const AlunoDashboardPage: React.FC<DashboardProps> = ({
           </motion.div>
         ) : (
           <>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Clock className="h-5 w-5" />
+                  Aulas de hoje
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {todayClasses.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    Nenhuma aula programada para hoje.
+                  </p>
+                ) : (
+                  <div className="divide-y">
+                    {todayClasses.map((c) => (
+                      <div key={c.id} className="flex items-center gap-3 py-2 first:pt-0 last:pb-0">
+                        <span className="w-24 shrink-0 text-sm font-medium tabular-nums text-muted-foreground">
+                          {formatTime(c.startTime)}–{formatTime(c.endTime)}
+                        </span>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium">{c.subject ?? 'Aula'}</p>
+                          {c.teacherName ? (
+                            <p className="truncate text-xs text-muted-foreground">{c.teacherName}</p>
+                          ) : null}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             <div className="grid gap-4 md:grid-cols-2">
               <Link href="/aluno/loja">
                 <Card className="transition-colors hover:bg-accent/50">
