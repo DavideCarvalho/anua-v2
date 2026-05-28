@@ -45,6 +45,8 @@ export type NotificationType =
   | 'AGREEMENT_PROPOSAL'
   | 'AGREEMENT_PROPOSAL_ACCEPTED'
   | 'AGREEMENT_PROPOSAL_REJECTED'
+  | 'PARENTAL_CONSENT_REQUESTED'
+  | 'PARENTAL_CONSENT_REMINDER'
 
 export default class Notification extends BaseModel {
   static table = 'Notification'

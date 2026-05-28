@@ -25,6 +25,8 @@ const notificationTypes = [
   'SCHEDULE_CHANGED',
   'SYSTEM_ANNOUNCEMENT',
   'MAINTENANCE_SCHEDULED',
+  'PARENTAL_CONSENT_REQUESTED',
+  'PARENTAL_CONSENT_REMINDER',
 ] as const
 
 const notificationChannels = ['IN_APP', 'EMAIL', 'PUSH', 'SMS', 'WHATSAPP'] as const

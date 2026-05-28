@@ -1,5 +1,9 @@
 import { Link } from '@adonisjs/inertia/react'
+import { useQuery } from '@tanstack/react-query'
+import { FileSignature, ShieldCheck } from 'lucide-react'
 
+import { api } from '~/lib/api'
+import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import {
   Dialog,
@@ -31,6 +35,37 @@ interface EventDetailsModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   event: EventDetails | null
+}
+
+function ConsentSummary({ eventId }: { eventId: string }) {
+  const { data } = useQuery({
+    ...api.api.v1.events.getSignatureTemplate.queryOptions({ params: { eventId } }),
+    staleTime: 60 * 1000,
+  })
+  const hasTemplate = !!data?.template
+
+  return (
+    <div className="rounded-md border bg-muted/40 p-3 text-sm space-y-2">
+      <div className="flex items-center gap-2">
+        {hasTemplate ? (
+          <Badge variant="outline" className="border-primary text-primary">
+            <FileSignature className="mr-1 h-3 w-3" />
+            Termo assinado em PDF
+          </Badge>
+        ) : (
+          <Badge variant="outline">
+            <ShieldCheck className="mr-1 h-3 w-3" />
+            Aprovação simples
+          </Badge>
+        )}
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {hasTemplate
+          ? 'Responsáveis assinam o PDF via Autentique. Status individual aparece em "Ver autorizações".'
+          : 'Responsáveis clicam Aprovar/Negar com observação. Sem PDF assinado.'}
+      </p>
+    </div>
+  )
 }
 
 export function EventDetailsModal({ open, onOpenChange, event }: EventDetailsModalProps) {
@@ -74,6 +109,7 @@ export function EventDetailsModal({ open, onOpenChange, event }: EventDetailsMod
           <p>
             <strong>Autorização:</strong> {event.requiresParentalConsent ? 'Sim' : 'Não'}
           </p>
+          {event.requiresParentalConsent && <ConsentSummary eventId={event.id} />}
           <p>
             <strong>Evento pago:</strong>{' '}
             {event.hasAdditionalCosts
@@ -91,6 +127,13 @@ export function EventDetailsModal({ open, onOpenChange, event }: EventDetailsMod
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Fechar
           </Button>
+          {event.requiresParentalConsent && (
+            <Button asChild variant="secondary">
+              <Link route="web.escola.eventos.autorizacoes" routeParams={{ eventId: event.id }}>
+                Ver autorizações
+              </Link>
+            </Button>
+          )}
           <Button asChild>
             <Link route="web.escola.eventos.editar" routeParams={{ eventId: event.id }}>
               Editar evento

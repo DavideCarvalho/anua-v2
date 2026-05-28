@@ -46,6 +46,8 @@ export default class ListEventConsentsController {
       denialReason: consent.denialReason,
       respondedAt: consent.respondedAt?.toISO(),
       expiresAt: consent.expiresAt?.toISO(),
+      signatureSubmissionId: consent.signatureSubmissionId,
+      signedDocumentUrl: consent.signedDocumentUrl,
       student: {
         id: consent.student.id,
         name: consent.student.user.name,

@@ -294,6 +294,7 @@ export interface ApiDefinition {
           uploadStudentDocument: typeof routes['api.v1.responsavel.api.upload_student_document']
           enrollmentAxes: typeof routes['api.v1.responsavel.api.enrollment_axes']
           enrollmentSignatureLink: typeof routes['api.v1.responsavel.api.enrollment_signature_link']
+          consentSignatureLink: typeof routes['api.v1.responsavel.api.consent_signature_link']
           studentOccurrences: typeof routes['api.v1.responsavel.api.student_occurrences']
           acknowledgeOccurrence: typeof routes['api.v1.responsavel.api.acknowledge_occurrence']
           studentOverview: typeof routes['api.v1.responsavel.api.student_overview']
@@ -604,6 +605,9 @@ export interface ApiDefinition {
           cancel: typeof routes['api.v1.events.participants.cancel']
           confirmAttendance: typeof routes['api.v1.events.participants.confirm_attendance']
         }
+        getSignatureTemplate: typeof routes['api.v1.events.get_signature_template']
+        uploadSignatureTemplate: typeof routes['api.v1.events.upload_signature_template']
+        deleteSignatureTemplate: typeof routes['api.v1.events.delete_signature_template']
         consents: {
           index: typeof routes['api.v1.events.consents.index']
           request: typeof routes['api.v1.events.consents.request']

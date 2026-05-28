@@ -85,6 +85,11 @@ export function registerResponsavelApiRoutes() {
         ])
         .as('enrollment_signature_link')
       router
+        .get('/consents/:consentId/signature-link', [
+          controllers.responsavel.GetConsentSignatureLink,
+        ])
+        .as('consent_signature_link')
+      router
         .get('/students/:studentId/occurrences', [controllers.responsavel.GetStudentOccurrences])
         .as('student_occurrences')
       router

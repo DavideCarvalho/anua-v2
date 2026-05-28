@@ -4,6 +4,7 @@ import { DateTime } from 'luxon'
 import AppException from '#exceptions/app_exception'
 import Assignment from '#models/assignment'
 import Event from '#models/event'
+import EventParentalConsent from '#models/event_parental_consent'
 import Exam from '#models/exam'
 import Student from '#models/student'
 import StudentHasResponsible from '#models/student_has_responsible'
@@ -175,6 +176,28 @@ export default class GetStudentCalendarController {
         }
       })
 
+    // Carrega consents do responsável logado pra esses eventos.
+    // Mapeia por eventId → { id, status, hasTemplate }.
+    const eventIds = events.map((e) => e.id)
+    const consents =
+      eventIds.length > 0
+        ? await EventParentalConsent.query()
+            .where('responsibleId', effectiveUser.id)
+            .where('studentId', studentId)
+            .whereIn('eventId', eventIds)
+        : []
+
+    const consentByEventId = new Map(
+      consents.map((c) => [
+        c.eventId,
+        {
+          id: c.id,
+          status: c.status,
+          hasSignatureSubmission: !!c.signatureSubmissionId,
+        },
+      ])
+    )
+
     const items = [
       ...assignments.map((assignment) => ({
         id: `assignment:${assignment.id}`,
@@ -217,6 +240,7 @@ export default class GetStudentCalendarController {
         subjectName: null,
         status: event.status,
         colorToken: 'event',
+        consent: consentByEventId.get(event.id) ?? null,
       })),
     ].sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime())
 

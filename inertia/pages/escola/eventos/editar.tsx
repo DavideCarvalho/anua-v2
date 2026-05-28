@@ -36,6 +36,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '~/lib/api'
 import { getEducationType, type AcademicPeriodSegment } from '../../../lib/formatters'
+import { SignatureTemplateBuilder } from '../../../containers/contracts/signature-template-builder'
 
 const EventType = {
   ACADEMIC_EVENT: 'ACADEMIC_EVENT',
@@ -849,6 +850,16 @@ export default function EditarEventoPage({ eventId }: Props) {
                     )}
                   </CardContent>
                 </Card>
+              )}
+
+              {currentStep === 2 && values.requiresParentalConsent && (
+                <SignatureTemplateBuilder
+                  entityKind="event"
+                  entityId={event.id}
+                  notSavedYetMessage="Salve o evento primeiro pra liberar o termo de autorização."
+                  emptyCardTitle="Termo de autorização (opcional)"
+                  emptyCardDescription="Para autorizações que exigem assinatura formal (excursão, uso de imagem, medicação), suba o PDF do termo. Caso contrário, o responsável só clica em 'Aprovar' no portal."
+                />
               )}
 
               {currentStep === 3 && (

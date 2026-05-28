@@ -60,6 +60,12 @@ export default class EventParentalConsent extends BaseModel {
   @column({ columnName: 'reminderCount' })
   declare reminderCount: number
 
+  @column({ columnName: 'signatureSubmissionId' })
+  declare signatureSubmissionId: string | null
+
+  @column({ columnName: 'signedDocumentUrl' })
+  declare signedDocumentUrl: string | null
+
   @column()
   declare metadata: Record<string, unknown> | null
 

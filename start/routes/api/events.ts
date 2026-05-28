@@ -36,6 +36,17 @@ export function registerEventApiRoutes() {
           controllers.eventParticipants.ConfirmAttendance,
         ])
         .as('events.participants.confirm_attendance')
+
+      // Signature template (PDF + posições)
+      router
+        .get('/:eventId/signature-template', [controllers.events.GetEventSignatureTemplate])
+        .as('events.get_signature_template')
+      router
+        .post('/:eventId/signature-template', [controllers.events.UploadEventSignatureTemplate])
+        .as('events.upload_signature_template')
+      router
+        .delete('/:eventId/signature-template', [controllers.events.DeleteEventSignatureTemplate])
+        .as('events.delete_signature_template')
     })
     .prefix('/events')
     .use([middleware.auth(), middleware.impersonation()])

@@ -10,6 +10,7 @@ import { Button } from '../ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 import { ScrollArea } from '../ui/scroll-area'
 import { api } from '~/lib/api'
+import { NotificationMessage } from './notification-message'
 
 interface NotificationBellProps {
   allNotificationsRoute: 'web.escola.notificacoes' | 'web.responsavel.comunicados'
@@ -163,9 +164,10 @@ export function NotificationBell({ allNotificationsRoute }: NotificationBellProp
                         )}
                       </div>
 
-                      <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
-                        {notification.message}
-                      </p>
+                      <NotificationMessage
+                        message={notification.message}
+                        className="mt-1 line-clamp-2 text-xs text-muted-foreground"
+                      />
                       <div className="mt-2 flex items-center justify-between">
                         <Badge variant="outline" className="text-[10px] font-normal">
                           {getNotificationTypeLabel(notification.type)}
@@ -199,15 +201,47 @@ export function NotificationBell({ allNotificationsRoute }: NotificationBellProp
 function getNotificationTypeLabel(type: string): string {
   const labels: Record<string, string> = {
     ASSIGNMENT_CREATED: 'Atividade',
+    ASSIGNMENT_SUBMITTED: 'Atividade',
     ASSIGNMENT_GRADED: 'Atividade',
-    ATTENDANCE_MARKED: 'Frequencia',
+    EXAM_SCHEDULED: 'Prova',
+    EXAM_GRADE_AVAILABLE: 'Prova',
+    ATTENDANCE_MARKED: 'Frequência',
+    ABSENCE_REPORTED: 'Frequência',
+    SCHEDULE_CHANGED: 'Horário',
     PAYMENT_DUE: 'Financeiro',
     PAYMENT_RECEIVED: 'Financeiro',
-    LEVEL_UP: 'Gamificacao',
-    ACHIEVEMENT_UNLOCKED: 'Gamificacao',
-    STREAK_MILESTONE: 'Gamificacao',
+    PAYMENT_OVERDUE: 'Financeiro',
+    AGREEMENT_PROPOSAL: 'Acordo',
+    AGREEMENT_PROPOSAL_ACCEPTED: 'Acordo',
+    AGREEMENT_PROPOSAL_REJECTED: 'Acordo',
+    EVENT_CREATED: 'Evento',
+    EVENT_REMINDER: 'Evento',
+    PARENTAL_CONSENT_REQUESTED: 'Autorização',
+    PARENTAL_CONSENT_REMINDER: 'Autorização',
+    POST_LIKED: 'Social',
+    POST_COMMENTED: 'Social',
+    COMMENT_REPLIED: 'Social',
+    POINTS_EARNED: 'Gamificação',
+    LEVEL_UP: 'Gamificação',
+    ACHIEVEMENT_UNLOCKED: 'Gamificação',
+    STREAK_MILESTONE: 'Gamificação',
+    STORE_ORDER_STATUS: 'Loja',
     SYSTEM_ANNOUNCEMENT: 'Sistema',
-    GENERAL_ANNOUNCEMENT: 'Sistema',
+    MAINTENANCE_SCHEDULED: 'Sistema',
+    INQUIRY_CREATED: 'Atendimento',
+    INQUIRY_MESSAGE: 'Atendimento',
+    INQUIRY_RESOLVED: 'Atendimento',
+    ENROLLMENT_STARTED: 'Matrícula',
+    ENROLLMENT_DOCUMENT_REJECTED: 'Matrícula',
+    ENROLLMENT_DOCUMENT_APPROVED: 'Matrícula',
+    ENROLLMENT_ALL_DOCUMENTS_APPROVED: 'Matrícula',
+    ENROLLMENT_SIGNATURE_PENDING: 'Matrícula',
+    ENROLLMENT_PAYMENT_RECEIVED: 'Matrícula',
+    ENROLLMENT_REMINDER: 'Matrícula',
+    ENROLLMENT_COMPLETED: 'Matrícula',
+    ACADEMIC_DIGEST_DAILY: 'Resumo',
+    ACADEMIC_DIGEST_WEEKLY: 'Resumo',
+    EXPORT_READY: 'Exportação',
   }
 
   return labels[type] || 'Sistema'

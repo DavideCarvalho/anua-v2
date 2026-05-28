@@ -211,6 +211,7 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.upload_student_document': { paramsTuple: [ParamValue,ParamValue]; params: {'studentId': ParamValue,'submissionId': ParamValue} }
     'api.v1.responsavel.api.enrollment_axes': { paramsTuple: [ParamValue]; params: {'matriculaId': ParamValue} }
     'api.v1.responsavel.api.enrollment_signature_link': { paramsTuple: [ParamValue]; params: {'matriculaId': ParamValue} }
+    'api.v1.responsavel.api.consent_signature_link': { paramsTuple: [ParamValue]; params: {'consentId': ParamValue} }
     'api.v1.responsavel.api.student_occurrences': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.acknowledge_occurrence': { paramsTuple: [ParamValue,ParamValue]; params: {'studentId': ParamValue,'occurrenceId': ParamValue} }
     'api.v1.responsavel.api.student_overview': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
@@ -421,6 +422,9 @@ export type ScannedRoutes = {
     'api.v1.events.participants.update_status': { paramsTuple: [ParamValue,ParamValue]; params: {'eventId': ParamValue,'participantId': ParamValue} }
     'api.v1.events.participants.cancel': { paramsTuple: [ParamValue,ParamValue]; params: {'eventId': ParamValue,'participantId': ParamValue} }
     'api.v1.events.participants.confirm_attendance': { paramsTuple: [ParamValue,ParamValue]; params: {'eventId': ParamValue,'participantId': ParamValue} }
+    'api.v1.events.get_signature_template': { paramsTuple: [ParamValue]; params: {'eventId': ParamValue} }
+    'api.v1.events.upload_signature_template': { paramsTuple: [ParamValue]; params: {'eventId': ParamValue} }
+    'api.v1.events.delete_signature_template': { paramsTuple: [ParamValue]; params: {'eventId': ParamValue} }
     'api.v1.consents.pending': { paramsTuple?: []; params?: {} }
     'api.v1.consents.history': { paramsTuple?: []; params?: {} }
     'api.v1.events.consents.index': { paramsTuple: [ParamValue]; params: {'eventId': ParamValue} }
@@ -963,6 +967,7 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.student_documents': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.enrollment_axes': { paramsTuple: [ParamValue]; params: {'matriculaId': ParamValue} }
     'api.v1.responsavel.api.enrollment_signature_link': { paramsTuple: [ParamValue]; params: {'matriculaId': ParamValue} }
+    'api.v1.responsavel.api.consent_signature_link': { paramsTuple: [ParamValue]; params: {'consentId': ParamValue} }
     'api.v1.responsavel.api.student_occurrences': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_overview': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_gamification': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
@@ -1073,6 +1078,7 @@ export type ScannedRoutes = {
     'api.v1.events.index': { paramsTuple?: []; params?: {} }
     'api.v1.events.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.events.participants.index': { paramsTuple: [ParamValue]; params: {'eventId': ParamValue} }
+    'api.v1.events.get_signature_template': { paramsTuple: [ParamValue]; params: {'eventId': ParamValue} }
     'api.v1.consents.pending': { paramsTuple?: []; params?: {} }
     'api.v1.consents.history': { paramsTuple?: []; params?: {} }
     'api.v1.events.consents.index': { paramsTuple: [ParamValue]; params: {'eventId': ParamValue} }
@@ -1422,6 +1428,7 @@ export type ScannedRoutes = {
     'api.v1.responsavel.api.student_documents': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.enrollment_axes': { paramsTuple: [ParamValue]; params: {'matriculaId': ParamValue} }
     'api.v1.responsavel.api.enrollment_signature_link': { paramsTuple: [ParamValue]; params: {'matriculaId': ParamValue} }
+    'api.v1.responsavel.api.consent_signature_link': { paramsTuple: [ParamValue]; params: {'consentId': ParamValue} }
     'api.v1.responsavel.api.student_occurrences': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_overview': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
     'api.v1.responsavel.api.student_gamification': { paramsTuple: [ParamValue]; params: {'studentId': ParamValue} }
@@ -1532,6 +1539,7 @@ export type ScannedRoutes = {
     'api.v1.events.index': { paramsTuple?: []; params?: {} }
     'api.v1.events.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.events.participants.index': { paramsTuple: [ParamValue]; params: {'eventId': ParamValue} }
+    'api.v1.events.get_signature_template': { paramsTuple: [ParamValue]; params: {'eventId': ParamValue} }
     'api.v1.consents.pending': { paramsTuple?: []; params?: {} }
     'api.v1.consents.history': { paramsTuple?: []; params?: {} }
     'api.v1.events.consents.index': { paramsTuple: [ParamValue]; params: {'eventId': ParamValue} }
@@ -1708,6 +1716,7 @@ export type ScannedRoutes = {
     'api.v1.exams.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.events.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.events.participants.cancel': { paramsTuple: [ParamValue,ParamValue]; params: {'eventId': ParamValue,'participantId': ParamValue} }
+    'api.v1.events.delete_signature_template': { paramsTuple: [ParamValue]; params: {'eventId': ParamValue} }
     'api.v1.notifications.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.school_announcements.delete_draft': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.announcement_templates.delete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -1800,6 +1809,7 @@ export type ScannedRoutes = {
     'api.v1.events.complete': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.events.participants.register': { paramsTuple: [ParamValue]; params: {'eventId': ParamValue} }
     'api.v1.events.participants.confirm_attendance': { paramsTuple: [ParamValue,ParamValue]; params: {'eventId': ParamValue,'participantId': ParamValue} }
+    'api.v1.events.upload_signature_template': { paramsTuple: [ParamValue]; params: {'eventId': ParamValue} }
     'api.v1.events.consents.request': { paramsTuple?: []; params?: {} }
     'api.v1.consents.respond': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'api.v1.enrollment.check_existing': { paramsTuple?: []; params?: {} }

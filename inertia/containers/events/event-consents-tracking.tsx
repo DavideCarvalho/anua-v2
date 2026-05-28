@@ -1,5 +1,5 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { CheckCircle2, XCircle, Clock, AlertCircle, Users } from 'lucide-react'
+import { CheckCircle2, XCircle, Clock, AlertCircle, Users, FileSignature, MousePointerClick } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useState } from 'react'
@@ -177,6 +177,7 @@ export function EventConsentsTracking({ eventId }: EventConsentsTrackingProps) {
                 <TableRow>
                   <TableHead>Aluno</TableHead>
                   <TableHead>Responsável</TableHead>
+                  <TableHead>Tipo</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Data de resposta</TableHead>
                   <TableHead>Observações</TableHead>
@@ -196,6 +197,19 @@ export function EventConsentsTracking({ eventId }: EventConsentsTrackingProps) {
                         <p className="font-medium">{consent.responsible.name}</p>
                         <p className="text-xs text-muted-foreground">{consent.responsible.email}</p>
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      {consent.signatureSubmissionId ? (
+                        <Badge variant="outline" className="border-primary text-primary">
+                          <FileSignature className="mr-1 h-3 w-3" />
+                          PDF
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline">
+                          <MousePointerClick className="mr-1 h-3 w-3" />
+                          Clique
+                        </Badge>
+                      )}
                     </TableCell>
                     <TableCell>{getStatusBadge(consent.status)}</TableCell>
                     <TableCell>

@@ -14,6 +14,7 @@ export default class ParentalConsentTransformer extends BaseTransformer<EventPar
         'status',
         'createdAt',
         'expiresAt',
+        'signatureSubmissionId',
       ]),
       event: {
         id: event?.id ?? '',

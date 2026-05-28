@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import logger from '@adonisjs/core/services/logger'
 import WebhookEvent from '#models/webhook_event'
 import { applySignatureWebhook } from '#services/signature/enrollment_signature_service'
+import { applyConsentSignatureWebhook } from '#services/signature/event_consent_signature_service'
 
 type AutentiqueEventType =
   | 'document.signed'
@@ -78,14 +79,28 @@ export default class AutentiqueWebhookController {
     }
 
     try {
-      const result = await applySignatureWebhook(documentId, status)
+      // Tenta atualizar matrícula (StudentHasLevel) primeiro; se não achou,
+      // tenta consent (EventParentalConsent). O submissionId é único por documento
+      // no Autentique, então só uma das chamadas atualiza algo.
+      const enrollmentResult = await applySignatureWebhook(documentId, status)
+      const consentResult = enrollmentResult.updated
+        ? { updated: false, consentId: null }
+        : await applyConsentSignatureWebhook(documentId, status)
+
       webhookEvent.status = 'COMPLETED'
       await webhookEvent.save()
 
       logger.info(
-        { documentId, status, ...result },
+        { documentId, status, enrollmentResult, consentResult },
         '[autentique-webhook] processado com sucesso'
       )
+
+      if (!enrollmentResult.updated && !consentResult.updated) {
+        logger.warn(
+          { documentId },
+          '[autentique-webhook] submissionId não encontrado em StudentHasLevel nem EventParentalConsent'
+        )
+      }
     } catch (error) {
       webhookEvent.status = 'FAILED'
       webhookEvent.error = error instanceof Error ? error.message : 'erro desconhecido'

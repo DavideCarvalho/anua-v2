@@ -8,6 +8,9 @@ import EventParticipant from './event_participant.js'
 import EventParentalConsent from './event_parental_consent.js'
 import EventStudentPayment from './event_student_payment.js'
 import EventAudience from './event_audience.js'
+import type { SignatureTemplateSchemas } from './contract.js'
+
+export type { SignatureTemplateSchemas } from './contract.js'
 
 export type EventType =
   | 'ACADEMIC_EVENT'
@@ -124,6 +127,21 @@ export default class Event extends BaseModel {
 
   @column({ columnName: 'requiresParentalConsent' })
   declare requiresParentalConsent: boolean
+
+  @column({ columnName: 'signatureTemplatePdfKey' })
+  declare signatureTemplatePdfKey: string | null
+
+  @column({
+    columnName: 'signatureTemplateSchemas',
+    prepare: (value: SignatureTemplateSchemas | null) =>
+      value ? JSON.stringify(value) : null,
+    consume: (value: string | SignatureTemplateSchemas | null): SignatureTemplateSchemas | null => {
+      if (!value) return null
+      if (typeof value === 'string') return JSON.parse(value) as SignatureTemplateSchemas
+      return value
+    },
+  })
+  declare signatureTemplateSchemas: SignatureTemplateSchemas | null
 
   @column({ columnName: 'has_additional_costs' })
   declare hasAdditionalCosts: boolean

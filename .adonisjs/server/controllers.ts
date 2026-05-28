@@ -307,6 +307,9 @@ export const controllers = {
     PublishEvent: () => import('#controllers/events/publish_event_controller'),
     ShowEvent: () => import('#controllers/events/show_event_controller'),
     UpdateEvent: () => import('#controllers/events/update_event_controller'),
+    UploadEventSignatureTemplate: () => import('#controllers/events/upload_event_signature_template_controller'),
+    GetEventSignatureTemplate: () => import('#controllers/events/get_event_signature_template_controller'),
+    DeleteEventSignatureTemplate: () => import('#controllers/events/delete_event_signature_template_controller'),
   },
   exams: {
     BatchSaveExamGrades: () => import('#controllers/exams/batch_save_exam_grades_controller'),
@@ -642,6 +645,7 @@ export const controllers = {
     UpdateStudentMealRecurrence: () => import('#controllers/responsavel/update_student_meal_recurrence_controller'),
     UploadStudentDocument: () => import('#controllers/responsavel/upload_student_document_controller'),
     GetSignatureLink: () => import('#controllers/responsavel/get_signature_link_controller'),
+    GetConsentSignatureLink: () => import('#controllers/responsavel/get_consent_signature_link_controller'),
   },
   responsibleAddresses: {
     CreateResponsibleAddress: () => import('#controllers/responsible-addresses/create_responsible_address_controller'),

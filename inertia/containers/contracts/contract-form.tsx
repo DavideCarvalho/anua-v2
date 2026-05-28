@@ -931,7 +931,13 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                       Faça upload do PDF do contrato e posicione os campos de assinatura. Opcional — pule se ainda não tem o documento pronto.
                     </p>
                   </div>
-                  <SignatureTemplateBuilder contractId={initialData?.id ?? 'new'} />
+                  <SignatureTemplateBuilder
+                    entityKind="contract"
+                    entityId={initialData?.id ?? 'new'}
+                    notSavedYetMessage="Salve as informações básicas do contrato primeiro pra liberar o template de assinatura."
+                    emptyCardTitle="Contrato de Assinatura Digital"
+                    emptyCardDescription="Faça upload do PDF do contrato e posicione os campos de assinatura visualmente."
+                  />
                 </div>
               )}
 

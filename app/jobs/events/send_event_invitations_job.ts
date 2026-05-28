@@ -5,6 +5,7 @@ import type EventModel from '#models/event'
 import EventParentalConsent from '#models/event_parental_consent'
 import Student from '#models/student'
 import { resolveEventAudienceConfig } from '#services/events/event_audience_service'
+import { notificationService } from '#services/notification_service'
 
 interface SendEventInvitationsPayload {
   eventId: string
@@ -60,7 +61,7 @@ export default class SendEventInvitationsJob extends Job<SendEventInvitationsPay
 
       for (const responsibleId of responsibleIds) {
         try {
-          const wasCreated = await this.createConsentIfMissing({
+          const createdConsentId = await this.createConsentIfMissing({
             eventId: event.id,
             studentId: student.id,
             responsibleId,
@@ -68,12 +69,57 @@ export default class SendEventInvitationsJob extends Job<SendEventInvitationsPay
             source,
           })
 
-          if (!wasCreated) {
+          if (!createdConsentId) {
             skipped += 1
             continue
           }
 
           created += 1
+
+          // Notifica o responsável (in-app + email + push) sobre a solicitação.
+          // Fire-and-forget. Email vai mesmo no tier "heavy" — Autentique manda o
+          // próprio email com o link de assinatura, e a nossa notificação serve
+          // como reforço in-app + push. Preferências do usuário controlam.
+          notificationService
+            .send({
+              userId: responsibleId,
+              type: 'PARENTAL_CONSENT_REQUESTED',
+              title: 'Nova autorização parental',
+              message: `O evento "${event.title}" precisa da sua autorização. Acesse pra revisar e responder.`,
+              actionUrl: '/responsavel/autorizacoes',
+              data: {
+                eventId: event.id,
+                consentId: createdConsentId,
+                studentId: student.id,
+                hasSignatureTemplate: !!event.signatureTemplatePdfKey,
+              },
+            })
+            .catch((err) => {
+              console.error(
+                `[EVENT_INVITES] notification failed for consent=${createdConsentId}`,
+                err
+              )
+            })
+
+          // Se evento tem template de assinatura, dispara fluxo no Autentique.
+          // Fire-and-forget — erro não impede outras consents nem o job.
+          if (event.signatureTemplatePdfKey && event.signatureTemplateSchemas) {
+            const { startConsentSignature } = await import(
+              '#services/signature/event_consent_signature_service'
+            )
+            startConsentSignature(createdConsentId)
+              .then((outcome) => {
+                console.info(
+                  `[EVENT_INVITES] consent=${createdConsentId} signature outcome=${JSON.stringify(outcome)}`
+                )
+              })
+              .catch((err) => {
+                console.error(
+                  `[EVENT_INVITES] consent=${createdConsentId} signature crashed`,
+                  err
+                )
+              })
+          }
         } catch (error) {
           failed += 1
           console.error(
@@ -162,10 +208,10 @@ export default class SendEventInvitationsJob extends Job<SendEventInvitationsPay
         .first()
 
       if (existing) {
-        return false
+        return null
       }
 
-      await EventParentalConsent.create(
+      const consent = await EventParentalConsent.create(
         {
           eventId,
           studentId,
@@ -180,7 +226,7 @@ export default class SendEventInvitationsJob extends Job<SendEventInvitationsPay
         { client: trx }
       )
 
-      return true
+      return consent.id
     })
   }
 }

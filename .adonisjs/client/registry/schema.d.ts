@@ -2491,6 +2491,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/get_signature_link_controller').default['handle']>>>
     }
   }
+  'api.v1.responsavel.api.consent_signature_link': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/responsavel/consents/:consentId/signature-link'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { consentId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/responsavel/get_consent_signature_link_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/responsavel/get_consent_signature_link_controller').default['handle']>>>
+    }
+  }
   'api.v1.responsavel.api.student_occurrences': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/responsavel/students/:studentId/occurrences'
@@ -5009,6 +5021,42 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/event_participants/confirm_attendance_controller').default['handle']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/event_participants/confirm_attendance_controller').default['handle']>>>
+    }
+  }
+  'api.v1.events.get_signature_template': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/events/:eventId/signature-template'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { eventId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/events/get_event_signature_template_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/events/get_event_signature_template_controller').default['handle']>>>
+    }
+  }
+  'api.v1.events.upload_signature_template': {
+    methods: ["POST"]
+    pattern: '/api/v1/events/:eventId/signature-template'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/contract_signature_template').uploadSignatureTemplateValidator)>>
+      paramsTuple: [ParamValue]
+      params: { eventId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/contract_signature_template').uploadSignatureTemplateValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/events/upload_event_signature_template_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/events/upload_event_signature_template_controller').default['handle']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'api.v1.events.delete_signature_template': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/events/:eventId/signature-template'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { eventId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/events/delete_event_signature_template_controller').default['handle']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/events/delete_event_signature_template_controller').default['handle']>>>
     }
   }
   'api.v1.consents.pending': {

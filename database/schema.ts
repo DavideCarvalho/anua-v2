@@ -1050,7 +1050,7 @@ export class EmployeeTimesheetSchema extends BaseModel {
 }
 
 export class EventSchema extends BaseModel {
-  static $columns = ['additionalCostAmount', 'additionalCostDescription', 'additionalCostInstallments', 'allowComments', 'attachments', 'bannerUrl', 'createdAt', 'createdBy', 'currentParticipants', 'description', 'endDate', 'endTime', 'hasAdditionalCosts', 'id', 'isAllDay', 'isExternal', 'isOnline', 'isRecurring', 'location', 'locationDetails', 'maxParticipants', 'metadata', 'onlineUrl', 'organizerId', 'priority', 'recurringPattern', 'registrationDeadline', 'requiresParentalConsent', 'requiresRegistration', 'schoolId', 'sendNotifications', 'shortDescription', 'startDate', 'startTime', 'status', 'tags', 'title', 'type', 'updatedAt', 'visibility'] as const
+  static $columns = ['additionalCostAmount', 'additionalCostDescription', 'additionalCostInstallments', 'allowComments', 'attachments', 'bannerUrl', 'createdAt', 'createdBy', 'currentParticipants', 'description', 'endDate', 'endTime', 'hasAdditionalCosts', 'id', 'isAllDay', 'isExternal', 'isOnline', 'isRecurring', 'location', 'locationDetails', 'maxParticipants', 'metadata', 'onlineUrl', 'organizerId', 'priority', 'recurringPattern', 'registrationDeadline', 'requiresParentalConsent', 'requiresRegistration', 'schoolId', 'sendNotifications', 'shortDescription', 'signatureTemplatePdfKey', 'signatureTemplateSchemas', 'startDate', 'startTime', 'status', 'tags', 'title', 'type', 'updatedAt', 'visibility'] as const
   $columns = EventSchema.$columns
   @column()
   declare additionalCostAmount: number | null
@@ -1116,6 +1116,10 @@ export class EventSchema extends BaseModel {
   declare sendNotifications: boolean
   @column()
   declare shortDescription: string | null
+  @column()
+  declare signatureTemplatePdfKey: string | null
+  @column()
+  declare signatureTemplateSchemas: any | null
   @column.dateTime()
   declare startDate: DateTime
   @column()
@@ -1247,7 +1251,7 @@ export class EventNotificationSchema extends BaseModel {
 }
 
 export class EventParentalConsentSchema extends BaseModel {
-  static $columns = ['approvalNotes', 'createdAt', 'denialReason', 'emailSentAt', 'eventId', 'expiresAt', 'id', 'ipAddress', 'metadata', 'reminderCount', 'reminderSentAt', 'respondedAt', 'responsibleId', 'signature', 'status', 'studentId', 'updatedAt'] as const
+  static $columns = ['approvalNotes', 'createdAt', 'denialReason', 'emailSentAt', 'eventId', 'expiresAt', 'id', 'ipAddress', 'metadata', 'reminderCount', 'reminderSentAt', 'respondedAt', 'responsibleId', 'signature', 'signatureSubmissionId', 'signedDocumentUrl', 'status', 'studentId', 'updatedAt'] as const
   $columns = EventParentalConsentSchema.$columns
   @column()
   declare approvalNotes: string | null
@@ -1277,6 +1281,10 @@ export class EventParentalConsentSchema extends BaseModel {
   declare responsibleId: string
   @column()
   declare signature: string | null
+  @column()
+  declare signatureSubmissionId: string | null
+  @column()
+  declare signedDocumentUrl: string | null
   @column()
   declare status: any
   @column()

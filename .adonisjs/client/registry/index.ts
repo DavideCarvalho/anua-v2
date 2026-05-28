@@ -1248,6 +1248,12 @@ const routes = {
     tokens: [{"old":"/api/v1/responsavel/matriculas/:matriculaId/signature-link","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId/signature-link","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId/signature-link","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId/signature-link","type":0,"val":"matriculas","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId/signature-link","type":1,"val":"matriculaId","end":""},{"old":"/api/v1/responsavel/matriculas/:matriculaId/signature-link","type":0,"val":"signature-link","end":""}],
     types: placeholder as Registry['api.v1.responsavel.api.enrollment_signature_link']['types'],
   },
+  'api.v1.responsavel.api.consent_signature_link': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/responsavel/consents/:consentId/signature-link',
+    tokens: [{"old":"/api/v1/responsavel/consents/:consentId/signature-link","type":0,"val":"api","end":""},{"old":"/api/v1/responsavel/consents/:consentId/signature-link","type":0,"val":"v1","end":""},{"old":"/api/v1/responsavel/consents/:consentId/signature-link","type":0,"val":"responsavel","end":""},{"old":"/api/v1/responsavel/consents/:consentId/signature-link","type":0,"val":"consents","end":""},{"old":"/api/v1/responsavel/consents/:consentId/signature-link","type":1,"val":"consentId","end":""},{"old":"/api/v1/responsavel/consents/:consentId/signature-link","type":0,"val":"signature-link","end":""}],
+    types: placeholder as Registry['api.v1.responsavel.api.consent_signature_link']['types'],
+  },
   'api.v1.responsavel.api.student_occurrences': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/responsavel/students/:studentId/occurrences',
@@ -2507,6 +2513,24 @@ const routes = {
     pattern: '/api/v1/events/:eventId/participants/:participantId/confirm',
     tokens: [{"old":"/api/v1/events/:eventId/participants/:participantId/confirm","type":0,"val":"api","end":""},{"old":"/api/v1/events/:eventId/participants/:participantId/confirm","type":0,"val":"v1","end":""},{"old":"/api/v1/events/:eventId/participants/:participantId/confirm","type":0,"val":"events","end":""},{"old":"/api/v1/events/:eventId/participants/:participantId/confirm","type":1,"val":"eventId","end":""},{"old":"/api/v1/events/:eventId/participants/:participantId/confirm","type":0,"val":"participants","end":""},{"old":"/api/v1/events/:eventId/participants/:participantId/confirm","type":1,"val":"participantId","end":""},{"old":"/api/v1/events/:eventId/participants/:participantId/confirm","type":0,"val":"confirm","end":""}],
     types: placeholder as Registry['api.v1.events.participants.confirm_attendance']['types'],
+  },
+  'api.v1.events.get_signature_template': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/events/:eventId/signature-template',
+    tokens: [{"old":"/api/v1/events/:eventId/signature-template","type":0,"val":"api","end":""},{"old":"/api/v1/events/:eventId/signature-template","type":0,"val":"v1","end":""},{"old":"/api/v1/events/:eventId/signature-template","type":0,"val":"events","end":""},{"old":"/api/v1/events/:eventId/signature-template","type":1,"val":"eventId","end":""},{"old":"/api/v1/events/:eventId/signature-template","type":0,"val":"signature-template","end":""}],
+    types: placeholder as Registry['api.v1.events.get_signature_template']['types'],
+  },
+  'api.v1.events.upload_signature_template': {
+    methods: ["POST"],
+    pattern: '/api/v1/events/:eventId/signature-template',
+    tokens: [{"old":"/api/v1/events/:eventId/signature-template","type":0,"val":"api","end":""},{"old":"/api/v1/events/:eventId/signature-template","type":0,"val":"v1","end":""},{"old":"/api/v1/events/:eventId/signature-template","type":0,"val":"events","end":""},{"old":"/api/v1/events/:eventId/signature-template","type":1,"val":"eventId","end":""},{"old":"/api/v1/events/:eventId/signature-template","type":0,"val":"signature-template","end":""}],
+    types: placeholder as Registry['api.v1.events.upload_signature_template']['types'],
+  },
+  'api.v1.events.delete_signature_template': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/events/:eventId/signature-template',
+    tokens: [{"old":"/api/v1/events/:eventId/signature-template","type":0,"val":"api","end":""},{"old":"/api/v1/events/:eventId/signature-template","type":0,"val":"v1","end":""},{"old":"/api/v1/events/:eventId/signature-template","type":0,"val":"events","end":""},{"old":"/api/v1/events/:eventId/signature-template","type":1,"val":"eventId","end":""},{"old":"/api/v1/events/:eventId/signature-template","type":0,"val":"signature-template","end":""}],
+    types: placeholder as Registry['api.v1.events.delete_signature_template']['types'],
   },
   'api.v1.consents.pending': {
     methods: ["GET","HEAD"],

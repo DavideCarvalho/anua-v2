@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from '@adonisjs/inertia/react'
 import { useQuery } from '@tanstack/react-query'
 import {
   addDays,
@@ -14,7 +15,19 @@ import {
   startOfWeek,
 } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { CalendarDays, ChevronLeft, ChevronRight, FileText, List, NotebookPen } from 'lucide-react'
+import {
+  CalendarDays,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  ExternalLink,
+  FileSignature,
+  FileText,
+  List,
+  Loader2,
+  NotebookPen,
+  XCircle,
+} from 'lucide-react'
 import type { Route } from '@tuyau/core/types'
 
 import { api } from '~/lib/api'
@@ -60,26 +73,145 @@ function dayKey(date: Date) {
   return format(date, 'yyyy-MM-dd')
 }
 
-function ItemCard({ item }: { item: CalendarItem }) {
+function ItemCard({ item, compact = false }: { item: CalendarItem; compact?: boolean }) {
   // Prova e atividade não capturam hora no form do professor — não exibir
   // "00:00" enganoso. Evento real (sourceType='event') mantém o horário.
   const showTime = item.sourceType === 'event' && !item.allDay
-  return (
-    <div className="rounded-lg border bg-card p-3 transition-colors hover:bg-muted/30">
-      <div className="mb-2 flex items-center gap-2">
+  const consent = item.sourceType === 'event' ? item.consent : null
+  const isClickablePending = compact && consent && consent.status === 'PENDING'
+
+  const content = (
+    <>
+      <div className="mb-2 flex flex-wrap items-center gap-1.5">
         <span className={cn('h-2 w-2 rounded-full', getTypeDotClass(item.sourceType))} />
-        <Badge variant={getTypeVariant(item.sourceType)}>{getTypeLabel(item.sourceType)}</Badge>
+        <Badge variant={getTypeVariant(item.sourceType)} className="text-[10px]">
+          {getTypeLabel(item.sourceType)}
+        </Badge>
         {showTime ? (
           <span className="text-xs text-muted-foreground">{format(itemDate(item), 'HH:mm')}</span>
         ) : null}
+        {consent ? <ConsentBadge consent={consent} compact={compact} /> : null}
       </div>
-      <p className="text-sm font-medium">{item.title}</p>
+      <p className="text-sm font-medium leading-tight">{item.title}</p>
       {item.subjectName ? (
         <p className="text-xs text-muted-foreground">{item.subjectName}</p>
       ) : null}
-      {item.description ? (
+      {!compact && item.description ? (
         <p className="mt-1 text-xs text-muted-foreground">{item.description}</p>
       ) : null}
+      {!compact && consent && consent.status === 'PENDING' ? (
+        <ConsentActions consent={consent} />
+      ) : null}
+    </>
+  )
+
+  if (isClickablePending) {
+    return (
+      <Link
+        route="web.responsavel.autorizacoes"
+        className={cn(
+          'block rounded-lg border bg-card p-3 transition-colors',
+          'border-amber-500/40 hover:bg-amber-50/40'
+        )}
+      >
+        {content}
+      </Link>
+    )
+  }
+
+  return (
+    <div className="rounded-lg border bg-card p-3 transition-colors hover:bg-muted/30">
+      {content}
+    </div>
+  )
+}
+
+type ConsentInfo = NonNullable<
+  Extract<CalendarItem, { sourceType: 'event' }>['consent']
+>
+
+function ConsentBadge({ consent, compact = false }: { consent: ConsentInfo; compact?: boolean }) {
+  const className = 'text-[10px] py-0 px-1.5'
+  if (consent.status === 'APPROVED') {
+    return (
+      <Badge variant="outline" className={cn('border-emerald-500 text-emerald-600', className)}>
+        <CheckCircle2 className="mr-1 h-3 w-3" />
+        {compact ? 'OK' : 'Autorizado'}
+      </Badge>
+    )
+  }
+  if (consent.status === 'DENIED') {
+    return (
+      <Badge variant="outline" className={cn('border-destructive text-destructive', className)}>
+        <XCircle className="mr-1 h-3 w-3" />
+        Negado
+      </Badge>
+    )
+  }
+  if (consent.status === 'EXPIRED') {
+    return (
+      <Badge variant="outline" className={cn('border-muted-foreground text-muted-foreground', className)}>
+        Expirado
+      </Badge>
+    )
+  }
+  return (
+    <Badge variant="outline" className={cn('border-amber-500 text-amber-600', className)}>
+      {compact ? 'Autorizar' : 'Precisa autorizar'}
+    </Badge>
+  )
+}
+
+function ConsentActions({ consent }: { consent: ConsentInfo }) {
+  if (consent.hasSignatureSubmission) {
+    return <ConsentSignButton consentId={consent.id} />
+  }
+  // Tier "light" — sem PDF, responsável aprova/nega na página de autorizações
+  // (mantemos um link curto pra não duplicar o dialog aqui).
+  return (
+    <div className="mt-3 flex gap-2">
+      <Button asChild size="sm" variant="default">
+        <a href="/responsavel/autorizacoes">Responder</a>
+      </Button>
+    </div>
+  )
+}
+
+function ConsentSignButton({ consentId }: { consentId: string }) {
+  const { data, isLoading, isError } = useQuery({
+    ...api.api.v1.responsavel.api.consentSignatureLink.queryOptions({
+      params: { consentId },
+    }),
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  })
+
+  if (isLoading) {
+    return (
+      <p className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+        <Loader2 className="h-3 w-3 animate-spin" />
+        Buscando link de assinatura...
+      </p>
+    )
+  }
+
+  if (isError || !data?.signatureLink) {
+    return (
+      <p className="mt-3 text-xs text-muted-foreground">
+        O termo está em preparação. Recarregue em alguns segundos.
+      </p>
+    )
+  }
+
+  return (
+    <div className="mt-3">
+      <Button asChild size="sm" className="gap-2">
+        <a href={data.signatureLink} target="_blank" rel="noopener noreferrer">
+          <FileSignature className="h-3.5 w-3.5" />
+          Assinar termo
+          <ExternalLink className="h-3 w-3" />
+        </a>
+      </Button>
     </div>
   )
 }
@@ -154,7 +286,7 @@ function WeekView({ items, weekStart }: { items: CalendarItem[]; weekStart: Date
             </p>
             <div className="space-y-2">
               {dayItems.length > 0 ? (
-                dayItems.map((item) => <ItemCard key={item.id} item={item} />)
+                dayItems.map((item) => <ItemCard key={item.id} item={item} compact />)
               ) : (
                 <p className="text-xs text-muted-foreground">Sem itens</p>
               )}
@@ -210,17 +342,48 @@ function MonthView({ items, monthDate }: { items: CalendarItem[]; monthDate: Dat
                 {format(day, 'dd')}
               </p>
               <div className="space-y-1">
-                {dayItems.slice(0, 3).map((item) => (
-                  <div key={item.id} className="truncate rounded bg-muted px-1 py-0.5 text-[10px]">
-                    <span
-                      className={cn(
-                        'mr-1 inline-block h-1.5 w-1.5 rounded-full',
-                        getTypeDotClass(item.sourceType)
-                      )}
-                    />
-                    {item.title}
-                  </div>
-                ))}
+                {dayItems.slice(0, 3).map((item) => {
+                  const itemConsent = item.sourceType === 'event' ? item.consent : null
+                  const needsAction = itemConsent?.status === 'PENDING'
+                  const baseClasses = 'flex items-center gap-1 truncate rounded px-1 py-0.5 text-[10px]'
+
+                  const inner = (
+                    <>
+                      <span
+                        className={cn(
+                          'inline-block h-1.5 w-1.5 shrink-0 rounded-full',
+                          getTypeDotClass(item.sourceType)
+                        )}
+                      />
+                      <span className="truncate">{item.title}</span>
+                      {needsAction ? (
+                        <FileSignature className="ml-auto h-3 w-3 shrink-0 text-amber-600" />
+                      ) : null}
+                    </>
+                  )
+
+                  if (needsAction) {
+                    return (
+                      <Link
+                        key={item.id}
+                        route="web.responsavel.autorizacoes"
+                        className={cn(
+                          baseClasses,
+                          'border border-amber-500/40 bg-amber-50/50 hover:bg-amber-100/60'
+                        )}
+                        title="Precisa autorizar"
+                      >
+                        {inner}
+                      </Link>
+                    )
+                  }
+
+                  return (
+                    <div key={item.id} className={cn(baseClasses, 'bg-muted')}>
+                      {inner}
+                    </div>
+                  )
+                })}
                 {dayItems.length > 3 ? (
                   <p className="text-[10px] text-muted-foreground">+{dayItems.length - 3} itens</p>
                 ) : null}

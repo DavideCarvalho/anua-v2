@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { CheckCircle2, XCircle, Calendar, Clock, MapPin, Users } from 'lucide-react'
+import { CheckCircle2, XCircle, Calendar, Clock, MapPin, Users, FileSignature, ExternalLink, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useState } from 'react'
@@ -143,24 +143,28 @@ function PendingConsentsContent() {
                 <p className="text-sm text-muted-foreground">{consent.event.description}</p>
               )}
 
-              <div className="flex gap-2 pt-2">
-                <Button
-                  variant="default"
-                  className="flex-1 bg-green-600 hover:bg-green-700"
-                  onClick={() => openDialog(consent, 'approve')}
-                >
-                  <CheckCircle2 className="h-4 w-4 mr-2" />
-                  Autorizar
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1 text-destructive hover:bg-destructive/10"
-                  onClick={() => openDialog(consent, 'deny')}
-                >
-                  <XCircle className="h-4 w-4 mr-2" />
-                  Negar
-                </Button>
-              </div>
+              {consent.signatureSubmissionId ? (
+                <ConsentSignatureActions consentId={consent.id} />
+              ) : (
+                <div className="flex gap-2 pt-2">
+                  <Button
+                    variant="default"
+                    className="flex-1 bg-green-600 hover:bg-green-700"
+                    onClick={() => openDialog(consent, 'approve')}
+                  >
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    Autorizar
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1 text-destructive hover:bg-destructive/10"
+                    onClick={() => openDialog(consent, 'deny')}
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Negar
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}
@@ -230,6 +234,45 @@ function PendingConsentsContent() {
         </DialogContent>
       </Dialog>
     </>
+  )
+}
+
+function ConsentSignatureActions({ consentId }: { consentId: string }) {
+  const { data, isLoading, isError } = useQuery({
+    ...api.api.v1.responsavel.api.consentSignatureLink.queryOptions({
+      params: { consentId },
+    }),
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  })
+
+  if (isLoading) {
+    return (
+      <p className="flex items-center gap-2 pt-2 text-sm text-muted-foreground">
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        Buscando link de assinatura...
+      </p>
+    )
+  }
+
+  if (isError || !data?.signatureLink) {
+    return (
+      <p className="pt-2 text-sm text-muted-foreground">
+        O termo está em preparação. Recarregue em alguns segundos.
+      </p>
+    )
+  }
+
+  return (
+    <div className="pt-2">
+      <Button asChild className="w-full gap-2">
+        <a href={data.signatureLink} target="_blank" rel="noopener noreferrer">
+          <FileSignature className="h-4 w-4" />
+          Assinar termo
+          <ExternalLink className="h-3.5 w-3.5" />
+        </a>
+      </Button>
+    </div>
   )
 }
 
