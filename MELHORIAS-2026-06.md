@@ -580,10 +580,11 @@ Documento de melhorias organizado por módulo funcional. Cada módulo tem três 
     - `SendParentalConsentRemindersJob` 10h diário — lembrete D-3 pra `EventParentalConsent` com `status='PENDING'`, throttle 24h via `reminderSentAt`.
 - **Validado 2026-05-28:** Typecheck verde. Todos respeitam `NotificationPreference` (4 canais via `notificationService`).
 
-#### 8.2 Calendário sem visualização de feriados `P3` `[XS]`
-- **Onde:** `inertia/pages/responsavel/calendario.tsx`
-- **Problema:** Feriados nacionais/estaduais/municipais não aparecem no calendário.
-- **Fix:** Carregar feriados BR por estado/município e exibir como eventos recorrentes. API pública ou lista hardcoded atualizável.
+#### 8.2 ~~Calendário sem visualização de feriados~~ `P3` `[XS]` FEITO (testado)
+- [x] **Onde:** `app/controllers/responsavel/get_student_calendar_controller.ts`, `inertia/containers/responsavel/student-calendar-container.tsx`
+- **Problema:** O model `AcademicPeriodHoliday` já existia (feriados/recessos do período letivo) mas não era usado no calendário do responsável.
+- **Feito:** Controller puxa os feriados pelos períodos letivos do aluno no range visível e adiciona como item `sourceType: 'holiday'`; frontend renderiza com label/badge "Feriado", dot verde e entrada na legenda. Data emitida como local flutuante (sem offset) pra não deslocar de dia no fuso do browser. Validado no browser (escola teste 3) nas visões Lista e Mês.
+- **Nota:** Escopo de "feriados nacionais/estaduais/municipais via API pública" fica como evolução futura — aqui usamos os feriados já cadastrados no período letivo.
 
 ### Evolução
 
