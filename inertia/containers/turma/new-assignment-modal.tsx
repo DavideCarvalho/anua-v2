@@ -5,13 +5,7 @@ import { z } from 'zod'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '~/components/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form'
 
 import {
   Dialog,
@@ -141,7 +135,8 @@ export function NewAssignmentModal({
   const usesSubPeriods =
     schoolData && (schoolData as any).periodStructure && (schoolData as any).periodStructure !== ''
 
-  const effectiveAcademicPeriodId = _academicPeriodId || resolvedContext?.academicPeriodId || assignmentData?.academicPeriodId || ''
+  const effectiveAcademicPeriodId =
+    _academicPeriodId || resolvedContext?.academicPeriodId || assignmentData?.academicPeriodId || ''
 
   const { data: subPeriodsData, isLoading: isLoadingSubPeriods } = useQuery({
     ...api.api.v1.academicSubPeriods.index.queryOptions({
@@ -218,10 +213,12 @@ export function NewAssignmentModal({
         : (defaultDate ?? new Date()),
       noGrade: false,
       grade: assignmentData?.grade ?? undefined,
-      subjectId:
-        assignmentData?.subject?.id ?? assignmentData?.teacherHasClass?.subject?.id ?? '',
+      subjectId: assignmentData?.subject?.id ?? assignmentData?.teacherHasClass?.subject?.id ?? '',
       description: assignmentData?.description ?? '',
-      subPeriodId: assignmentData && 'subPeriodId' in assignmentData ? assignmentData.subPeriodId : getCurrentSubPeriodId(),
+      subPeriodId:
+        assignmentData && 'subPeriodId' in assignmentData
+          ? assignmentData.subPeriodId
+          : getCurrentSubPeriodId(),
     })
   }, [open, assignmentData])
 
@@ -284,8 +281,7 @@ export function NewAssignmentModal({
       queryClient.invalidateQueries({ queryKey: api.api.v1.assignments.index.pathKey() })
       if (assignmentId) {
         queryClient.invalidateQueries({
-          queryKey: api.api.v1.assignments.show
-            .queryOptions({ params: { id: assignmentId } })
+          queryKey: api.api.v1.assignments.show.queryOptions({ params: { id: assignmentId } })
             .queryKey,
         })
       }
@@ -306,199 +302,203 @@ export function NewAssignmentModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <FormProvider {...form}>
-        <form onSubmit={onSubmit}>
-          <DialogHeader>
-            <DialogTitle>{isEditMode ? 'Editar atividade' : 'Criar nova atividade'}</DialogTitle>
-          </DialogHeader>
+          <form onSubmit={onSubmit}>
+            <DialogHeader>
+              <DialogTitle>{isEditMode ? 'Editar atividade' : 'Criar nova atividade'}</DialogTitle>
+            </DialogHeader>
 
-          {wizardStep === 'context' ? (
-            <div className="py-4">
-              <PedagogicalContextStep
-                value={contextValue}
-                onChange={setContextValue}
-                onResolved={setResolvedContext}
-              />
-            </div>
-          ) : null}
-
-          {wizardStep === 'form' ? (
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome da atividade *</Label>
-                <Input id="name" {...form.register('name')} placeholder="Ex: Trabalho sobre..." />
-                {form.formState.errors.name && (
-                  <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>
-                )}
+            {wizardStep === 'context' ? (
+              <div className="py-4">
+                <PedagogicalContextStep
+                  value={contextValue}
+                  onChange={setContextValue}
+                  onResolved={setResolvedContext}
+                />
               </div>
+            ) : null}
 
-              {!requiresContextStep && !isEditMode ? (
+            {wizardStep === 'form' ? (
+              <div className="grid gap-4 py-4">
                 <div className="space-y-2">
-                  <Label>Pra qual matéria? *</Label>
-                  {isLoadingSubjects ? (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Carregando matérias...
-                    </div>
-                  ) : (
-                    <Select
-                      value={form.watch('subjectId')}
-                      onValueChange={(value, _event) =>
-                        value !== null && form.setValue('subjectId', value)
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione a matéria">
-                          {subjects?.find((s) => s.id === form.watch('subjectId'))?.name ??
-                            (form.watch('subjectId') ? 'Carregando...' : 'Selecione a matéria')}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {subjects?.map((subject) => (
-                          <SelectItem key={subject.id} value={subject.id}>
-                            {subject.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <Label htmlFor="name">Nome da atividade *</Label>
+                  <Input id="name" {...form.register('name')} placeholder="Ex: Trabalho sobre..." />
+                  {form.formState.errors.name && (
+                    <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>
                   )}
-                  {form.formState.errors.subjectId && (
+                </div>
+
+                {!requiresContextStep && !isEditMode ? (
+                  <div className="space-y-2">
+                    <Label>Pra qual matéria? *</Label>
+                    {isLoadingSubjects ? (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Carregando matérias...
+                      </div>
+                    ) : (
+                      <Select
+                        value={form.watch('subjectId')}
+                        onValueChange={(value, _event) =>
+                          value !== null && form.setValue('subjectId', value)
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a matéria">
+                            {subjects?.find((s) => s.id === form.watch('subjectId'))?.name ??
+                              (form.watch('subjectId') ? 'Carregando...' : 'Selecione a matéria')}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {subjects?.map((subject) => (
+                            <SelectItem key={subject.id} value={subject.id}>
+                              {subject.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {form.formState.errors.subjectId && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.subjectId.message}
+                      </p>
+                    )}
+                  </div>
+                ) : null}
+
+                {usesSubPeriods ? (
+                  <div className="space-y-2">
+                    <Label>Sub-Periodo (opcional)</Label>
+                    {isLoadingSubPeriods ? (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Carregando sub-períodos...
+                      </div>
+                    ) : subPeriods.length > 0 ? (
+                      <Select
+                        value={form.watch('subPeriodId') ?? ''}
+                        onValueChange={(value, _event) =>
+                          form.setValue('subPeriodId', value || null)
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o subperíodo">
+                            {subPeriods.find((sp) => sp.id === form.watch('subPeriodId'))?.name ??
+                              'Selecione o subperíodo'}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">Nenhum</SelectItem>
+                          {subPeriods
+                            .sort((a, b) => a.order - b.order)
+                            .map((sp) => (
+                              <SelectItem key={sp.id} value={sp.id}>
+                                {sp.name}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="text-sm text-muted-foreground">
+                        Nenhum sub-período disponível
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="grade">Quanto vale?</Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="noGrade"
+                        {...form.register('noGrade')}
+                        onChange={(e) => {
+                          form.setValue('noGrade', e.target.checked)
+                          if (e.target.checked) {
+                            form.setValue('grade', undefined)
+                          }
+                        }}
+                        className="h-4 w-4 rounded border-gray-300"
+                      />
+                      <Label htmlFor="noGrade" className="text-sm font-normal cursor-pointer">
+                        Sem nota
+                      </Label>
+                    </div>
+                  </div>
+                  <Input
+                    id="grade"
+                    type="number"
+                    min={0}
+                    step={0.1}
+                    disabled={form.watch('noGrade')}
+                    {...form.register('grade', { valueAsNumber: true })}
+                  />
+                  {form.formState.errors.grade && (
                     <p className="text-sm text-destructive">
-                      {form.formState.errors.subjectId.message}
+                      {form.formState.errors.grade.message}
                     </p>
                   )}
                 </div>
-              ) : null}
 
-              {usesSubPeriods ? (
-                <div className="space-y-2">
-                  <Label>Sub-Periodo (opcional)</Label>
-                  {isLoadingSubPeriods ? (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Carregando sub-períodos...
-                    </div>
-                  ) : subPeriods.length > 0 ? (
-                    <Select
-                      value={form.watch('subPeriodId') ?? ''}
-                      onValueChange={(value, _event) => form.setValue('subPeriodId', value || null)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o subperíodo">
-                          {subPeriods.find((sp) => sp.id === form.watch('subPeriodId'))?.name ??
-                            'Selecione o subperíodo'}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Nenhum</SelectItem>
-                        {subPeriods
-                          .sort((a, b) => a.order - b.order)
-                          .map((sp) => (
-                            <SelectItem key={sp.id} value={sp.id}>
-                              {sp.name}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <div className="text-sm text-muted-foreground">
-                      Nenhum sub-período disponível
-                    </div>
+                <FormField
+                  control={form.control}
+                  name="dueDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Quando é a entrega? *</FormLabel>
+                      <FormControl>
+                        <DatePicker
+                          date={field.value}
+                          onChange={field.onChange}
+                          placeholder="dd/mm/aaaa"
+                          fromDate={isEditMode ? undefined : new Date()}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </div>
-              ) : null}
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="grade">Quanto vale?</Label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="noGrade"
-                      {...form.register('noGrade')}
-                      onChange={(e) => {
-                        form.setValue('noGrade', e.target.checked)
-                        if (e.target.checked) {
-                          form.setValue('grade', undefined)
-                        }
-                      }}
-                      className="h-4 w-4 rounded border-gray-300"
-                    />
-                    <Label htmlFor="noGrade" className="text-sm font-normal cursor-pointer">
-                      Sem nota
-                    </Label>
-                  </div>
-                </div>
-                <Input
-                  id="grade"
-                  type="number"
-                  min={0}
-                  step={0.1}
-                  disabled={form.watch('noGrade')}
-                  {...form.register('grade', { valueAsNumber: true })}
                 />
-                {form.formState.errors.grade && (
-                  <p className="text-sm text-destructive">{form.formState.errors.grade.message}</p>
-                )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="description">Descrição (opcional)</Label>
+                  <Textarea
+                    id="description"
+                    rows={3}
+                    placeholder="A atividade é sobre..."
+                    {...form.register('description')}
+                  />
+                </div>
               </div>
-
-              <FormField
-                control={form.control}
-                name="dueDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Quando é a entrega? *</FormLabel>
-                    <FormControl>
-                      <DatePicker
-                        date={field.value}
-                        onChange={field.onChange}
-                        placeholder="dd/mm/aaaa"
-                        fromDate={isEditMode ? undefined : new Date()}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Descrição (opcional)</Label>
-                <Textarea
-                  id="description"
-                  rows={3}
-                  placeholder="A atividade é sobre..."
-                  {...form.register('description')}
-                />
-              </div>
-            </div>
-          ) : null}
-
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
-            </Button>
-            {wizardStep === 'context' ? (
-              <Button
-                type="button"
-                disabled={!resolvedContext}
-                onClick={() => setWizardStep('form')}
-              >
-                Proximo
-              </Button>
             ) : null}
-            <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-              {createMutation.isPending || updateMutation.isPending ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {isEditMode ? 'Salvando...' : 'Criando...'}
-                </>
-              ) : isEditMode ? (
-                'Salvar alterações'
-              ) : (
-                'Salvar'
-              )}
-            </Button>
-          </DialogFooter>
-        </form>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Cancelar
+              </Button>
+              {wizardStep === 'context' ? (
+                <Button
+                  type="button"
+                  disabled={!resolvedContext}
+                  onClick={() => setWizardStep('form')}
+                >
+                  Proximo
+                </Button>
+              ) : null}
+              <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+                {createMutation.isPending || updateMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {isEditMode ? 'Salvando...' : 'Criando...'}
+                  </>
+                ) : isEditMode ? (
+                  'Salvar alterações'
+                ) : (
+                  'Salvar'
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
         </FormProvider>
       </DialogContent>
     </Dialog>

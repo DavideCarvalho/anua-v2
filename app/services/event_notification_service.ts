@@ -1,6 +1,6 @@
 import logger from '@adonisjs/core/services/logger'
 
-import Event from '#models/event'
+import type Event from '#models/event'
 import Student from '#models/student'
 import StudentHasResponsible from '#models/student_has_responsible'
 import { notificationService } from '#services/notification_service'

@@ -1,13 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowLeft, Sprout, Star, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from '../../ui/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '../../ui/sheet'
 import { ISLAND_MAP, TILE, MAP_W, MAP_H, isWalkable } from './island_map'
 import { CropSprite } from './crop-sprite'
 import type { Plot } from './types'
@@ -83,7 +77,11 @@ export function IslandScene(props: IslandSceneProps) {
     function down(e: KeyboardEvent) {
       const k = e.key.toLowerCase()
       if (openSheet) return // ignore movement while sheet is open
-      if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'w', 'a', 's', 'd', 'e', ' '].includes(k)) {
+      if (
+        ['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'w', 'a', 's', 'd', 'e', ' '].includes(
+          k
+        )
+      ) {
         e.preventDefault()
       }
       keys.current[k] = true
@@ -159,10 +157,7 @@ export function IslandScene(props: IslandSceneProps) {
   }, [openSheet, walking])
 
   // Detect nearest interactable -----------------------------------------
-  const nearest = useMemo(
-    () => findNearestInteractable(pos, props.plots),
-    [pos, props.plots]
-  )
+  const nearest = useMemo(() => findNearestInteractable(pos, props.plots), [pos, props.plots])
 
   function tryInteract() {
     if (!nearest) return
@@ -185,8 +180,7 @@ export function IslandScene(props: IslandSceneProps) {
   // Camera: clamp & center on player ------------------------------------
   const [viewport, setViewport] = useState({ w: 1280, h: 720 })
   useEffect(() => {
-    const update = () =>
-      setViewport({ w: window.innerWidth, h: window.innerHeight })
+    const update = () => setViewport({ w: window.innerWidth, h: window.innerHeight })
     update()
     window.addEventListener('resize', update)
     return () => window.removeEventListener('resize', update)
@@ -351,8 +345,18 @@ export function IslandScene(props: IslandSceneProps) {
         </button>
 
         <div className="flex gap-2">
-          <HudPill icon={<Star className="h-4 w-4" />} label="Pontos" value={props.totalPoints} tone="gold" />
-          <HudPill icon={<Sprout className="h-4 w-4" />} label="Sementes" value={props.seeds} tone="primary" />
+          <HudPill
+            icon={<Star className="h-4 w-4" />}
+            label="Pontos"
+            value={props.totalPoints}
+            tone="gold"
+          />
+          <HudPill
+            icon={<Sprout className="h-4 w-4" />}
+            label="Sementes"
+            value={props.seeds}
+            tone="primary"
+          />
           <HudPill
             icon={<Sparkles className="h-4 w-4" />}
             label="Hoje"
@@ -644,8 +648,7 @@ function TileLayer() {
           backgroundSize: `16px 16px, 24px 24px, 20px 20px, 28px 28px, 18px 18px, 48px 48px, ${DISPLAY_TILE}px ${DISPLAY_TILE}px`,
           backgroundRepeat: 'repeat',
           imageRendering: 'pixelated',
-          boxShadow:
-            'inset 0 0 0 3px rgba(60, 100, 40, 0.25), 0 2px 0 0 rgba(60, 100, 40, 0.3)',
+          boxShadow: 'inset 0 0 0 3px rgba(60, 100, 40, 0.25), 0 2px 0 0 rgba(60, 100, 40, 0.3)',
         }}
       />
       {/* Subtle patches of slightly different green for organic feel */}
@@ -657,8 +660,7 @@ function TileLayer() {
           width: DISPLAY_TILE * (MAP_W - 3),
           height: DISPLAY_TILE * (MAP_H - 3),
           borderRadius: '44% 48% 50% 46% / 48% 50% 46% 52%',
-          backgroundImage:
-            `radial-gradient(ellipse 80px 60px at 20% 25%, rgba(120, 200, 130, 0.45), transparent 70%),
+          backgroundImage: `radial-gradient(ellipse 80px 60px at 20% 25%, rgba(120, 200, 130, 0.45), transparent 70%),
              radial-gradient(ellipse 100px 80px at 70% 40%, rgba(60, 130, 70, 0.35), transparent 70%),
              radial-gradient(ellipse 90px 70px at 35% 75%, rgba(140, 220, 150, 0.4), transparent 70%),
              radial-gradient(ellipse 80px 70px at 85% 80%, rgba(80, 150, 90, 0.35), transparent 70%),
@@ -875,14 +877,46 @@ type TreeKind = 'fruit' | 'oak' | 'small'
 
 const TREE_CFG: Record<
   TreeKind,
-  { src: string; sheetW: number; sheetH: number; frameX: number; frameY: number; w: number; h: number }
+  {
+    src: string
+    sheetW: number
+    sheetH: number
+    frameX: number
+    frameY: number
+    w: number
+    h: number
+  }
 > = {
   // Medium_Fruit_Tree.png is 96x64 — rightmost 32x64 frame is the full tree
-  fruit: { src: '/images/farm/tree_fruit.png', sheetW: 96, sheetH: 64, frameX: 32, frameY: 0, w: 32, h: 64 },
+  fruit: {
+    src: '/images/farm/tree_fruit.png',
+    sheetW: 96,
+    sheetH: 64,
+    frameX: 32,
+    frameY: 0,
+    w: 32,
+    h: 64,
+  },
   // Medium_Oak_Tree.png 96x48 — use rightmost 32x48
-  oak: { src: '/images/farm/tree_oak.png', sheetW: 96, sheetH: 48, frameX: 32, frameY: 0, w: 32, h: 48 },
+  oak: {
+    src: '/images/farm/tree_oak.png',
+    sheetW: 96,
+    sheetH: 48,
+    frameX: 32,
+    frameY: 0,
+    w: 32,
+    h: 48,
+  },
   // Small_Fruit_Tree.png 96x64 — use rightmost 32x64
-  small: { src: '/images/farm/tree_small.png', sheetW: 96, sheetH: 64, frameX: 32, frameY: 0, w: 32, h: 64 },
+  small: {
+    src: '/images/farm/tree_small.png',
+    sheetW: 96,
+    sheetH: 64,
+    frameX: 32,
+    frameY: 0,
+    w: 32,
+    h: 64,
+  },
 }
 
 function Tree({ tx, ty, kind = 'fruit' }: { tx: number; ty: number; kind?: TreeKind }) {
@@ -1068,8 +1102,7 @@ function FarmPlot({
         top: ty * DISPLAY_TILE,
         width: SIZE,
         height: SIZE,
-        background:
-          'linear-gradient(180deg, #a36138 0%, #8b5128 60%, #6e3f1f 100%)',
+        background: 'linear-gradient(180deg, #a36138 0%, #8b5128 60%, #6e3f1f 100%)',
         boxShadow:
           'inset 0 2px 0 0 #c98456, inset 0 -3px 0 0 #5c3219, inset 3px 0 0 0 #5c3219, inset -3px 0 0 0 #5c3219, 0 4px 0 0 rgba(15, 23, 42, 0.35), 0 8px 16px -4px rgba(15, 23, 42, 0.45)',
         borderRadius: 8,
@@ -1080,8 +1113,7 @@ function FarmPlot({
       <div
         className="pointer-events-none absolute inset-0 opacity-50"
         style={{
-          backgroundImage:
-            'radial-gradient(circle, rgba(60, 30, 12, 0.6) 1px, transparent 1.5px)',
+          backgroundImage: 'radial-gradient(circle, rgba(60, 30, 12, 0.6) 1px, transparent 1.5px)',
           backgroundSize: '10px 10px',
           borderRadius: 8,
         }}
@@ -1216,10 +1248,7 @@ function PixelRect({
   h: number
 }) {
   return (
-    <div
-      className="absolute"
-      style={{ left, top, width: w, height: h, backgroundColor: color }}
-    />
+    <div className="absolute" style={{ left, top, width: w, height: h, backgroundColor: color }} />
   )
 }
 
@@ -1488,8 +1517,7 @@ function nearestLabel(item: Interactable, props: IslandSceneProps): string {
     case 'plot': {
       const plot = props.plots.find((p) => p.id === item.plotId)
       if (!plot) return ''
-      if (plot.state === 'empty')
-        return props.seeds > 0 ? 'Plantar (1 semente)' : 'Sem sementes!'
+      if (plot.state === 'empty') return props.seeds > 0 ? 'Plantar (1 semente)' : 'Sem sementes!'
       if (plot.state === 'growing') return 'Crescendo…'
       return 'Colher!'
     }

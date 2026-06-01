@@ -145,7 +145,9 @@ const AlunoDashboardPage: React.FC<DashboardProps> = ({
                         <div className="min-w-0">
                           <p className="truncate text-sm font-medium">{c.subject ?? 'Aula'}</p>
                           {c.teacherName ? (
-                            <p className="truncate text-xs text-muted-foreground">{c.teacherName}</p>
+                            <p className="truncate text-xs text-muted-foreground">
+                              {c.teacherName}
+                            </p>
                           ) : null}
                         </div>
                       </div>

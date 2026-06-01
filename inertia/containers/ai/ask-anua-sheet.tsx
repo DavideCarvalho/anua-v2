@@ -8,11 +8,7 @@ import { AiChatPane } from '~/components/ai/ai-chat-pane'
 import { useAuthUser } from '~/stores/auth_store'
 import { useIsMobile } from '~/hooks/use_mobile'
 import { api } from '~/lib/api'
-import {
-  askAnuaFreshKey,
-  askAnuaThreadKey,
-  type AskAnuaScreen,
-} from '~/lib/ask-anua-context'
+import { askAnuaFreshKey, askAnuaThreadKey, type AskAnuaScreen } from '~/lib/ask-anua-context'
 
 type AskAnuaPanelProps = {
   screen: AskAnuaScreen
@@ -205,11 +201,7 @@ export function AskAnuaSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side={isMobile ? 'bottom' : 'right'}
-        className={
-          isMobile
-            ? 'h-[90vh] w-full p-0'
-            : 'w-full p-0 sm:max-w-[560px]'
-        }
+        className={isMobile ? 'h-[90vh] w-full p-0' : 'w-full p-0 sm:max-w-[560px]'}
         showCloseButton={false}
       >
         <AskAnuaPanel

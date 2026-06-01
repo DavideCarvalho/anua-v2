@@ -179,7 +179,9 @@ export default class CreateInvoiceAsaasChargeController {
     return response.created({ invoiceUrl: invoice.invoiceUrl })
   }
 
-  private resolveGateway(school: School & { schoolChain?: SchoolChain | null }): PaymentGateway | null {
+  private resolveGateway(
+    school: School & { schoolChain?: SchoolChain | null }
+  ): PaymentGateway | null {
     const config = this.asaasService.resolveAsaasConfig(school)
     if (!config) return null
     return new AsaasPaymentGateway(this.asaasService, config)

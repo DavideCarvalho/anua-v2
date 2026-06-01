@@ -467,9 +467,7 @@ function UnacknowledgedAnnouncementsTable({
 }: {
   data: NonNullable<PedagogicalAlerts['unacknowledgedAnnouncements']>
 }) {
-  const sorted = [...data.announcements].sort(
-    (a, b) => b.pendingRecipients - a.pendingRecipients
-  )
+  const sorted = [...data.announcements].sort((a, b) => b.pendingRecipients - a.pendingRecipients)
 
   return (
     <Table>
@@ -501,10 +499,7 @@ function UnacknowledgedAnnouncementsTable({
                 <span className="ml-2 text-xs text-muted-foreground">({rate}%)</span>
               </TableCell>
               <TableCell className="text-right">
-                <Badge
-                  variant={isCritical ? 'destructive' : 'secondary'}
-                  className="tabular-nums"
-                >
+                <Badge variant={isCritical ? 'destructive' : 'secondary'} className="tabular-nums">
                   {announcement.pendingRecipients}
                 </Badge>
               </TableCell>

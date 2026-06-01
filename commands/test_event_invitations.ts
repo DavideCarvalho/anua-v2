@@ -4,7 +4,8 @@ import SendEventInvitationsJob from '#jobs/events/send_event_invitations_job'
 
 export default class TestEventInvitations extends BaseCommand {
   static commandName = 'test:event-invitations'
-  static description = 'Roda SendEventInvitationsJob síncrono pra testar criação de consents + notificações'
+  static description =
+    'Roda SendEventInvitationsJob síncrono pra testar criação de consents + notificações'
 
   static options: CommandOptions = { startApp: true }
 

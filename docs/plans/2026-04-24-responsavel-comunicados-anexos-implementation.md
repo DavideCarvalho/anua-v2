@@ -13,11 +13,13 @@
 ### Task 1: Garantir contrato de anexos na API de responsavel
 
 **Files:**
+
 - Modify: `tests/functional/responsavel/comunicados_api.spec.ts`
 
 **Step 1: Write the failing test**
 
 Adicionar um teste no grupo `Responsavel comunicados API` que:
+
 - cria comunicado publicado para responsavel,
 - cria um registro em `SchoolAnnouncementAttachment` para esse comunicado,
 - chama `GET /api/v1/responsavel/comunicados` autenticado,
@@ -57,11 +59,13 @@ git commit -m "test(responsavel): ensure comunicados list includes attachment li
 ### Task 2: Renderizar anexos na pagina do responsavel
 
 **Files:**
+
 - Modify: `inertia/pages/responsavel/comunicados.tsx`
 
 **Step 1: Write the failing test**
 
 Adicionar um teste de comportamento no arquivo de teste React da pagina (criar se nao existir) cobrindo:
+
 - exibe secao `Anexos` quando `attachments` existe,
 - renderiza link `Abrir` para cada anexo com `target="_blank"`,
 - mostra `Arquivo indisponivel` quando `fileUrl` for nulo.
@@ -77,6 +81,7 @@ Expected: FAIL antes da implementacao.
 **Step 3: Write minimal implementation**
 
 Em `inertia/pages/responsavel/comunicados.tsx`:
+
 - expandir `AnnouncementItem` com:
 
 ```ts
@@ -99,6 +104,7 @@ Expected: PASS.
 **Step 5: Manual verification**
 
 Validar em `https://anuaapp.com.br/responsavel/comunicados?aluno=cleiton-filho-019c05ed`:
+
 - comunicado com anexos mostra links,
 - clique abre arquivo,
 - comunicado sem anexo nao mostra secao.
@@ -113,6 +119,7 @@ git commit -m "feat(responsavel): show announcement attachments in list cards"
 ### Task 3: Validacao final e deploy
 
 **Files:**
+
 - No file changes required
 
 **Step 1: Run focused backend test suite**

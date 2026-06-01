@@ -167,9 +167,7 @@ export function AiChatEmpty({
             </span>
             <span className="flex-1 min-w-0">
               <span className="block text-sm font-medium text-foreground">{label}</span>
-              <span className="block truncate text-xs text-muted-foreground mt-0.5">
-                {prompt}
-              </span>
+              <span className="block truncate text-xs text-muted-foreground mt-0.5">{prompt}</span>
             </span>
           </button>
         ))}

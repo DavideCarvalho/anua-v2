@@ -205,15 +205,9 @@ function buildItems(data: AlertsResponse): InsightItem[] {
     const severity: Severity =
       next.daysUntil <= 2 ? 'critical' : next.daysUntil <= 4 ? 'warn' : 'info'
     const whenLabel =
-      next.daysUntil === 0
-        ? 'hoje'
-        : next.daysUntil === 1
-          ? 'amanhã'
-          : `em ${next.daysUntil} dias`
+      next.daysUntil === 0 ? 'hoje' : next.daysUntil === 1 ? 'amanhã' : `em ${next.daysUntil} dias`
     const countLabel =
-      alerts.upcomingExams.count === 1
-        ? '1 prova'
-        : `${alerts.upcomingExams.count} provas`
+      alerts.upcomingExams.count === 1 ? '1 prova' : `${alerts.upcomingExams.count} provas`
     const subjectPart = next.subject ? ` · ${next.subject}` : ''
     items.push({
       id: 'upcoming-exams',
@@ -228,7 +222,11 @@ function buildItems(data: AlertsResponse): InsightItem[] {
   // Risco cumulativo de frequência (30 dias) tem prioridade sobre "faltas
   // essa semana" — é o sinal estrutural que pode levar a reprovação. Se o
   // aluno está em risco, mostra só esse; se não, mostra o weekly como antes.
-  if (alerts.attendanceRisk && alerts.attendanceRisk.atRiskCount > 0 && alerts.attendanceRisk.worst) {
+  if (
+    alerts.attendanceRisk &&
+    alerts.attendanceRisk.atRiskCount > 0 &&
+    alerts.attendanceRisk.worst
+  ) {
     const worst = alerts.attendanceRisk.worst
     items.push({
       id: 'attendance-risk',

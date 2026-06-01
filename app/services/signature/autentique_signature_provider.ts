@@ -190,7 +190,9 @@ export default class AutentiqueSignatureProvider implements SignatureProvider {
     try {
       json = JSON.parse(text)
     } catch {
-      throw new Error(`Autentique resposta não-JSON (status ${response.status}): ${text.slice(0, 500)}`)
+      throw new Error(
+        `Autentique resposta não-JSON (status ${response.status}): ${text.slice(0, 500)}`
+      )
     }
     if (json.errors && json.errors.length > 0) {
       const details = json.errors
@@ -199,7 +201,9 @@ export default class AutentiqueSignatureProvider implements SignatureProvider {
       throw new Error(`Autentique: ${details}`)
     }
     if (!json.data) {
-      throw new Error(`Autentique resposta sem data (status ${response.status}): ${text.slice(0, 500)}`)
+      throw new Error(
+        `Autentique resposta sem data (status ${response.status}): ${text.slice(0, 500)}`
+      )
     }
     return json.data
   }
@@ -208,7 +212,7 @@ export default class AutentiqueSignatureProvider implements SignatureProvider {
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${this.apiKey}`,
+        'Authorization': `Bearer ${this.apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ query }),

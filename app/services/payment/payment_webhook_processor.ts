@@ -64,17 +64,15 @@ export default class PaymentWebhookProcessor {
     invoiceId: string,
     trx: TransactionClientContract
   ): Promise<void> {
-    const links = await AgreementProposalInvoice.query({ client: trx })
-      .where('invoiceId', invoiceId)
+    const links = await AgreementProposalInvoice.query({ client: trx }).where(
+      'invoiceId',
+      invoiceId
+    )
 
     for (const link of links) {
       const proposal = await AgreementProposal.query({ client: trx })
         .where('id', link.proposalId)
-        .whereIn('status', [
-          'PENDING_SCHOOL_APPROVAL',
-          'APPROVED',
-          'SENT_TO_RESPONSIBLE',
-        ])
+        .whereIn('status', ['PENDING_SCHOOL_APPROVAL', 'APPROVED', 'SENT_TO_RESPONSIBLE'])
         .first()
 
       if (proposal) {
@@ -84,7 +82,9 @@ export default class PaymentWebhookProcessor {
         proposal.cancellationReason = `Fatura ${invoiceId} foi paga — proposta cancelada automaticamente`
         await proposal.save()
 
-        logger.info(`[PROPOSALS] Cancelled proposal ${proposal.id} due to invoice ${invoiceId} payment`)
+        logger.info(
+          `[PROPOSALS] Cancelled proposal ${proposal.id} due to invoice ${invoiceId} payment`
+        )
       }
     }
   }

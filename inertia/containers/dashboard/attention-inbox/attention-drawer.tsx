@@ -25,10 +25,7 @@ import { Badge } from '~/components/ui/badge'
 import { cn, formatCurrency } from '~/lib/utils'
 import { api } from '~/lib/api'
 
-import {
-  PedagogicalAlertSheet,
-  type PedagogicalAlerts,
-} from '../pedagogical-alert-sheet'
+import { PedagogicalAlertSheet, type PedagogicalAlerts } from '../pedagogical-alert-sheet'
 import type { AttentionItem } from './types'
 import { formatBRL, type EnrollmentFunnel, type OverdueAging } from './use_attention_items'
 
@@ -69,9 +66,7 @@ export function AttentionDrawer({
         </SheetHeader>
 
         <div className="mt-6">
-          {item.category === 'financial' ? (
-            <FinancialOverdueDetail aging={overdueAging} />
-          ) : null}
+          {item.category === 'financial' ? <FinancialOverdueDetail aging={overdueAging} /> : null}
           {item.category === 'enrollment' && enrollmentFunnel ? (
             <EnrollmentFunnelBreakdown funnel={enrollmentFunnel} highlightItemId={item.id} />
           ) : null}
@@ -170,9 +165,7 @@ function FinancialOverdueDetail({ aging }: FinancialOverdueDetailProps) {
   }
 
   for (const bucket of BUCKET_ORDER) {
-    grouped[bucket].sort(
-      (a, b) => daysOverdue(b.dueDate) - daysOverdue(a.dueDate)
-    )
+    grouped[bucket].sort((a, b) => daysOverdue(b.dueDate) - daysOverdue(a.dueDate))
   }
 
   const totalLoaded = payments.length
@@ -241,8 +234,7 @@ function OverduePaymentsTable({ payments }: OverduePaymentsTableProps) {
           const days = daysOverdue(payment.dueDate)
           const amount = Number(payment.amount ?? 0)
           const studentName = payment.student?.user?.name ?? 'Aluno sem nome'
-          const reference =
-            payment.month && payment.year ? `${payment.month}/${payment.year}` : '-'
+          const reference = payment.month && payment.year ? `${payment.month}/${payment.year}` : '-'
           return (
             <TableRow key={payment.id}>
               <TableCell className="font-medium">{studentName}</TableCell>
@@ -254,10 +246,7 @@ function OverduePaymentsTable({ payments }: OverduePaymentsTableProps) {
                 {formatCurrency(amount)}
               </TableCell>
               <TableCell className="text-right">
-                <Badge
-                  variant={days > 60 ? 'destructive' : 'secondary'}
-                  className="tabular-nums"
-                >
+                <Badge variant={days > 60 ? 'destructive' : 'secondary'} className="tabular-nums">
                   {days} {days === 1 ? 'dia' : 'dias'}
                 </Badge>
               </TableCell>
@@ -313,8 +302,8 @@ function EnrollmentFunnelBreakdown({ funnel, highlightItemId }: EnrollmentBreakd
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Estado atual do funil de matrículas no período ativo. O item destacado é o que você abriu
-        no inbox.
+        Estado atual do funil de matrículas no período ativo. O item destacado é o que você abriu no
+        inbox.
       </p>
       <Table>
         <TableHeader>
@@ -336,7 +325,9 @@ function EnrollmentFunnelBreakdown({ funnel, highlightItemId }: EnrollmentBreakd
                 <TableCell className="font-medium">
                   {row.label}
                   {isHighlight ? (
-                    <span className="ml-2 text-xs font-normal text-muted-foreground">(selecionado)</span>
+                    <span className="ml-2 text-xs font-normal text-muted-foreground">
+                      (selecionado)
+                    </span>
                   ) : null}
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">{row.description}</TableCell>

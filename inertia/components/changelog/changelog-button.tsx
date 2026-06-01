@@ -2,11 +2,7 @@ import { useState } from 'react'
 import { Gift } from 'lucide-react'
 
 import { Button } from '../ui/button'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '../ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 import {
   changelog,

@@ -25,8 +25,7 @@ export default class ChangelogDigestMail extends BaseMail {
       .map((section) =>
         section.items
           .map(
-            (item) =>
-              `<p style="margin: 8px 0; color: #374151; white-space: pre-line;">${item}</p>`
+            (item) => `<p style="margin: 8px 0; color: #374151; white-space: pre-line;">${item}</p>`
           )
           .join('')
       )

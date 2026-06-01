@@ -118,53 +118,53 @@ const THEME = {
 }
 
 const LABELS: Record<string, string> = {
-  cancel: 'Cancelar',
-  field: 'Campo',
-  fieldName: 'Nome',
-  require: 'Obrigatório',
-  uniq: 'Único',
-  inputExample: 'Exemplo',
-  edit: 'Editar',
-  plsInputName: 'Informe o nome',
-  fieldMustUniq: 'O nome do campo deve ser único',
-  notUniq: '(não é único)',
-  noKeyName: '(sem nome)',
-  fieldsList: 'Campos',
-  addNewField: 'Adicionar campo',
-  editField: 'Editar campo',
-  type: 'Tipo',
-  errorOccurred: 'Ocorreu um erro',
-  errorBulkUpdateFieldName: 'Não foi possível atualizar os nomes dos campos',
-  commitBulkUpdateFieldName: 'Confirmar alterações',
-  bulkUpdateFieldName: 'Editar nomes dos campos',
-  addPageAfter: 'Adicionar página depois',
-  removePage: 'Remover página',
-  removePageConfirm: 'Tem certeza que deseja remover esta página?',
-  removeField: 'Remover campo',
-  duplicateField: 'Duplicar campo',
-  bringForward: 'Trazer para frente',
-  sendBackward: 'Enviar para trás',
-  width: 'Largura',
-  height: 'Altura',
-  opacity: 'Opacidade',
-  rotate: 'Rotação',
-  alignment: 'Alinhamento',
-  fontName: 'Fonte',
-  fontSize: 'Tamanho',
-  characterSpacing: 'Espaçamento',
-  lineHeight: 'Altura da linha',
-  textColor: 'Cor do texto',
-  bgColor: 'Cor de fundo',
-  borderColor: 'Cor da borda',
-  borderWidth: 'Borda',
-  color: 'Cor',
-  backgroundColor: 'Cor de fundo',
-  selectField: 'Selecione um campo',
-  zoomIn: 'Ampliar',
-  zoomOut: 'Reduzir',
-  page: 'Página',
-  format: 'Formato',
-  placeholder: 'Exemplo',
+  'cancel': 'Cancelar',
+  'field': 'Campo',
+  'fieldName': 'Nome',
+  'require': 'Obrigatório',
+  'uniq': 'Único',
+  'inputExample': 'Exemplo',
+  'edit': 'Editar',
+  'plsInputName': 'Informe o nome',
+  'fieldMustUniq': 'O nome do campo deve ser único',
+  'notUniq': '(não é único)',
+  'noKeyName': '(sem nome)',
+  'fieldsList': 'Campos',
+  'addNewField': 'Adicionar campo',
+  'editField': 'Editar campo',
+  'type': 'Tipo',
+  'errorOccurred': 'Ocorreu um erro',
+  'errorBulkUpdateFieldName': 'Não foi possível atualizar os nomes dos campos',
+  'commitBulkUpdateFieldName': 'Confirmar alterações',
+  'bulkUpdateFieldName': 'Editar nomes dos campos',
+  'addPageAfter': 'Adicionar página depois',
+  'removePage': 'Remover página',
+  'removePageConfirm': 'Tem certeza que deseja remover esta página?',
+  'removeField': 'Remover campo',
+  'duplicateField': 'Duplicar campo',
+  'bringForward': 'Trazer para frente',
+  'sendBackward': 'Enviar para trás',
+  'width': 'Largura',
+  'height': 'Altura',
+  'opacity': 'Opacidade',
+  'rotate': 'Rotação',
+  'alignment': 'Alinhamento',
+  'fontName': 'Fonte',
+  'fontSize': 'Tamanho',
+  'characterSpacing': 'Espaçamento',
+  'lineHeight': 'Altura da linha',
+  'textColor': 'Cor do texto',
+  'bgColor': 'Cor de fundo',
+  'borderColor': 'Cor da borda',
+  'borderWidth': 'Borda',
+  'color': 'Cor',
+  'backgroundColor': 'Cor de fundo',
+  'selectField': 'Selecione um campo',
+  'zoomIn': 'Ampliar',
+  'zoomOut': 'Reduzir',
+  'page': 'Página',
+  'format': 'Formato',
+  'placeholder': 'Exemplo',
   'date.format': 'Formato da data',
   'schemas.date.format': 'Formato da data',
 }
@@ -177,7 +177,8 @@ function autoNameFields(template: Template): Template {
   const counters: Record<string, number> = {}
   const schemas = template.schemas.map((page) =>
     page.map((field) => {
-      const typeLabel = field.type === 'signature' ? 'Assinatura' : field.type === 'date' ? 'Data' : field.type
+      const typeLabel =
+        field.type === 'signature' ? 'Assinatura' : field.type === 'date' ? 'Data' : field.type
       counters[typeLabel] = (counters[typeLabel] ?? 0) + 1
       return { ...field, name: `${typeLabel} ${counters[typeLabel]}` }
     })
@@ -246,7 +247,9 @@ export function PdfTemplateDesigner({
       <div className="mb-3 flex items-center justify-between">
         <div>
           <p className="text-sm text-muted-foreground">
-            Arraste <span className="font-medium text-foreground">Assinatura</span> ou <span className="font-medium text-foreground">Data</span> da barra lateral pra cima do documento. Selecione uma data pra escolher o formato no painel direito.
+            Arraste <span className="font-medium text-foreground">Assinatura</span> ou{' '}
+            <span className="font-medium text-foreground">Data</span> da barra lateral pra cima do
+            documento. Selecione uma data pra escolher o formato no painel direito.
           </p>
         </div>
         <button

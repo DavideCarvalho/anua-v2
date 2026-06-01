@@ -81,7 +81,10 @@ export function AgreementProposalBanner({ studentId }: { studentId: string }) {
               </div>
               <div>
                 <span className="text-muted-foreground">Parcelamento: </span>
-                <span className="font-semibold">{proposal.installments}x de {formatCurrency(Math.ceil(proposal.totalAmount / proposal.installments))}</span>
+                <span className="font-semibold">
+                  {proposal.installments}x de{' '}
+                  {formatCurrency(Math.ceil(proposal.totalAmount / proposal.installments))}
+                </span>
               </div>
             </div>
 

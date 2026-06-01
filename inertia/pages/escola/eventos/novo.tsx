@@ -951,10 +951,12 @@ export default function NovoEventoPage() {
                     <strong>Titulo:</strong> {values.title || '-'}
                   </p>
                   <p>
-                    <strong>Inicio:</strong> {values.startsAt ? format(values.startsAt, 'dd/MM/yyyy') : '-'}
+                    <strong>Inicio:</strong>{' '}
+                    {values.startsAt ? format(values.startsAt, 'dd/MM/yyyy') : '-'}
                   </p>
                   <p>
-                    <strong>Termino:</strong> {values.endsAt ? format(values.endsAt, 'dd/MM/yyyy') : '-'}
+                    <strong>Termino:</strong>{' '}
+                    {values.endsAt ? format(values.endsAt, 'dd/MM/yyyy') : '-'}
                   </p>
                   <p>
                     <strong>Horário:</strong>{' '}

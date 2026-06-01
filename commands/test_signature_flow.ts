@@ -16,7 +16,8 @@ const PDF_PATH = '/home/dudousxd/personal/anua-v2/contrato-escola-teste.pdf'
 
 export default class TestSignatureFlow extends BaseCommand {
   static commandName = 'test:signature-flow'
-  static description = 'Testa o fluxo de assinatura end-to-end (1 contrato, 1 matrícula, Autentique sandbox)'
+  static description =
+    'Testa o fluxo de assinatura end-to-end (1 contrato, 1 matrícula, Autentique sandbox)'
 
   static options: CommandOptions = { startApp: true }
 

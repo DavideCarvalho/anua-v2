@@ -415,9 +415,8 @@ export default class FinishEnrollmentController {
       }
 
       // Inicia fluxo de assinatura — fire and forget. Erro não quebra matrícula.
-      const { startEnrollmentSignature } = await import(
-        '#services/signature/enrollment_signature_service'
-      )
+      const { startEnrollmentSignature } =
+        await import('#services/signature/enrollment_signature_service')
       startEnrollmentSignature(studentHasLevel.id)
         .then((outcome) => {
           logger.info(

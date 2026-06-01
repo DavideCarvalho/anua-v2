@@ -25,7 +25,11 @@ interface AtRiskStudentsTableProps {
   subPeriodId?: string
 }
 
-export function AtRiskStudentsTable({ academicPeriodId, classId, subPeriodId }: AtRiskStudentsTableProps) {
+export function AtRiskStudentsTable({
+  academicPeriodId,
+  classId,
+  subPeriodId,
+}: AtRiskStudentsTableProps) {
   const query = { limit: 20, academicPeriodId, classId, subPeriodId }
 
   return (
@@ -33,12 +37,20 @@ export function AtRiskStudentsTable({ academicPeriodId, classId, subPeriodId }: 
       title="Alunos em Risco"
       queryKeys={[api.api.v1.grades.atRisk.queryOptions({ query } as any).queryKey]}
     >
-      <AtRiskStudentsTableContent academicPeriodId={academicPeriodId} classId={classId} subPeriodId={subPeriodId} />
+      <AtRiskStudentsTableContent
+        academicPeriodId={academicPeriodId}
+        classId={classId}
+        subPeriodId={subPeriodId}
+      />
     </DashboardCardBoundary>
   )
 }
 
-function AtRiskStudentsTableContent({ academicPeriodId, classId, subPeriodId }: AtRiskStudentsTableProps) {
+function AtRiskStudentsTableContent({
+  academicPeriodId,
+  classId,
+  subPeriodId,
+}: AtRiskStudentsTableProps) {
   const { data, isLoading } = useQuery({
     ...api.api.v1.grades.atRisk.queryOptions({
       query: { limit: 20, academicPeriodId, classId, subPeriodId },

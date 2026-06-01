@@ -110,9 +110,7 @@ function LessonStudents({
   }
 
   if (isError || !data) {
-    return (
-      <div className="py-3 text-xs text-destructive">Não foi possível carregar os alunos.</div>
-    )
+    return <div className="py-3 text-xs text-destructive">Não foi possível carregar os alunos.</div>
   }
 
   const rows = data.data
@@ -292,116 +290,115 @@ function LessonsTableContent({
           {!isLoading &&
             !isError &&
             lessons.map((lesson) => {
-            const isExpanded = expanded.has(lesson.id)
-            const date = lesson.date ? new Date(lesson.date) : null
-            const subject = lesson.slot?.subject?.name ?? 'Aula'
-            const teacher = lesson.slot?.teacher?.name
+              const isExpanded = expanded.has(lesson.id)
+              const date = lesson.date ? new Date(lesson.date) : null
+              const subject = lesson.slot?.subject?.name ?? 'Aula'
+              const teacher = lesson.slot?.teacher?.name
 
-            return (
-              <Fragment key={lesson.id}>
-                <TableRow
-                  className={cn('cursor-pointer', isExpanded && 'bg-muted/30')}
-                  onClick={() => toggle(lesson.id)}
-                >
-                  <TableCell className="w-8">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 w-7 p-0"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        toggle(lesson.id)
-                      }}
-                      aria-expanded={isExpanded}
-                      aria-label={isExpanded ? 'Recolher chamada' : 'Expandir chamada'}
-                    >
-                      {isExpanded ? (
-                        <ChevronDown className="h-4 w-4" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-0.5">
-                      <div className="text-sm font-medium leading-tight">
-                        {date
-                          ? format(date, "eee, dd 'de' MMMM 'às' HH:mm", { locale: ptBR }).replace(
-                              /^./,
-                              (c) => c.toUpperCase()
-                            )
-                          : '—'}
-                        <span className="text-muted-foreground"> · {subject}</span>
-                      </div>
-                      {teacher && (
-                        <div className="text-[11px] text-muted-foreground">{teacher}</div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-center tabular-nums">
-                    {lesson.counts.present}
-                  </TableCell>
-                  <TableCell className="text-center tabular-nums">
-                    {lesson.counts.absent > 0 ? (
-                      <span className="text-rose-700 dark:text-rose-300">
-                        {lesson.counts.absent}
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground">0</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-center tabular-nums">
-                    {lesson.counts.late > 0 ? (
-                      <span className="text-amber-700 dark:text-amber-300">
-                        {lesson.counts.late}
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground">0</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-center tabular-nums">
-                    {lesson.counts.excused > 0 ? (
-                      <span>{lesson.counts.excused}</span>
-                    ) : (
-                      <span className="text-muted-foreground">0</span>
-                    )}
-                  </TableCell>
-                </TableRow>
-                {isExpanded && (
-                  <TableRow className="hover:bg-transparent">
-                    <TableCell />
-                    <TableCell colSpan={5} className="bg-muted/20 py-2 pr-4">
-                      <LessonStudents
-                        attendanceId={lesson.id}
-                        classId={classId}
-                        subPeriodIsLocked={subPeriodIsLocked}
-                      />
-                      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border/60 pt-2 text-[11px] text-muted-foreground">
-                        {lesson.createdBy && (
-                          <span>
-                            Registro original: {lesson.createdBy.name}
-                            {lesson.createdAt && (
-                              <span>
-                                {' '}
-                                · {format(new Date(lesson.createdAt), "dd/MM 'às' HH:mm")}
-                              </span>
-                            )}
-                          </span>
+              return (
+                <Fragment key={lesson.id}>
+                  <TableRow
+                    className={cn('cursor-pointer', isExpanded && 'bg-muted/30')}
+                    onClick={() => toggle(lesson.id)}
+                  >
+                    <TableCell className="w-8">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toggle(lesson.id)
+                        }}
+                        aria-expanded={isExpanded}
+                        aria-label={isExpanded ? 'Recolher chamada' : 'Expandir chamada'}
+                      >
+                        {isExpanded ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
                         )}
-                        {lesson.lastEditedBy && lesson.lastEditedAt && (
-                          <span>
-                            Última edição: {lesson.lastEditedBy.name} ·{' '}
-                            {format(new Date(lesson.lastEditedAt), "dd/MM 'às' HH:mm")}
-                          </span>
+                      </Button>
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-0.5">
+                        <div className="text-sm font-medium leading-tight">
+                          {date
+                            ? format(date, "eee, dd 'de' MMMM 'às' HH:mm", {
+                                locale: ptBR,
+                              }).replace(/^./, (c) => c.toUpperCase())
+                            : '—'}
+                          <span className="text-muted-foreground"> · {subject}</span>
+                        </div>
+                        {teacher && (
+                          <div className="text-[11px] text-muted-foreground">{teacher}</div>
                         )}
                       </div>
                     </TableCell>
+                    <TableCell className="text-center tabular-nums">
+                      {lesson.counts.present}
+                    </TableCell>
+                    <TableCell className="text-center tabular-nums">
+                      {lesson.counts.absent > 0 ? (
+                        <span className="text-rose-700 dark:text-rose-300">
+                          {lesson.counts.absent}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">0</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center tabular-nums">
+                      {lesson.counts.late > 0 ? (
+                        <span className="text-amber-700 dark:text-amber-300">
+                          {lesson.counts.late}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">0</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center tabular-nums">
+                      {lesson.counts.excused > 0 ? (
+                        <span>{lesson.counts.excused}</span>
+                      ) : (
+                        <span className="text-muted-foreground">0</span>
+                      )}
+                    </TableCell>
                   </TableRow>
-                )}
-              </Fragment>
-            )
-          })}
+                  {isExpanded && (
+                    <TableRow className="hover:bg-transparent">
+                      <TableCell />
+                      <TableCell colSpan={5} className="bg-muted/20 py-2 pr-4">
+                        <LessonStudents
+                          attendanceId={lesson.id}
+                          classId={classId}
+                          subPeriodIsLocked={subPeriodIsLocked}
+                        />
+                        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border/60 pt-2 text-[11px] text-muted-foreground">
+                          {lesson.createdBy && (
+                            <span>
+                              Registro original: {lesson.createdBy.name}
+                              {lesson.createdAt && (
+                                <span>
+                                  {' '}
+                                  · {format(new Date(lesson.createdAt), "dd/MM 'às' HH:mm")}
+                                </span>
+                              )}
+                            </span>
+                          )}
+                          {lesson.lastEditedBy && lesson.lastEditedAt && (
+                            <span>
+                              Última edição: {lesson.lastEditedBy.name} ·{' '}
+                              {format(new Date(lesson.lastEditedAt), "dd/MM 'às' HH:mm")}
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </Fragment>
+              )
+            })}
         </TableBody>
       </Table>
 

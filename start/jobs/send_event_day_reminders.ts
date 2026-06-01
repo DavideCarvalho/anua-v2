@@ -127,9 +127,7 @@ export async function sendEventDayReminders(
   for (const { studentIds, event } of eventTargets) {
     // Aluno autorresponsável: avisa o próprio aluno
     // Responsável pedagógico: avisa esse responsável
-    const students = await Student.query()
-      .whereIn('id', Array.from(studentIds))
-      .preload('user')
+    const students = await Student.query().whereIn('id', Array.from(studentIds)).preload('user')
 
     for (const student of students) {
       const studentName = student.user?.name ?? 'aluno'

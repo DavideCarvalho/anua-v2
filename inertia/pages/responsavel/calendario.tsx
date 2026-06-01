@@ -7,11 +7,7 @@ import toast from 'react-hot-toast'
 import { ResponsavelLayout } from '../../components/layouts'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent } from '../../components/ui/card'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '../../components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/popover'
 import { useSelectedStudent } from '../../hooks/use_selected_student'
 import { api } from '../../lib/api'
 import {
@@ -85,9 +81,7 @@ function CalendarSyncButton({ studentId }: { studentId: string }) {
               Copiar link
             </button>
           )}
-          {isLoading && (
-            <p className="text-xs text-muted-foreground">Gerando link...</p>
-          )}
+          {isLoading && <p className="text-xs text-muted-foreground">Gerando link...</p>}
         </div>
       </PopoverContent>
     </Popover>

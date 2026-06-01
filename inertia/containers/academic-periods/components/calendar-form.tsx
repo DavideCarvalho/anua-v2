@@ -55,7 +55,7 @@ export function CalendarForm() {
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione um segmento">
                     {field.value
-                      ? SEGMENT_LABELS[field.value as Segment] ?? field.value
+                      ? (SEGMENT_LABELS[field.value as Segment] ?? field.value)
                       : undefined}
                   </SelectValue>
                 </SelectTrigger>

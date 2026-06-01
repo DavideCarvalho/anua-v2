@@ -31,14 +31,13 @@ export function FarmScene({
         className="absolute inset-x-0 top-0"
         style={{
           height: '38%',
-          background:
-            'linear-gradient(to bottom, #aee2ff 0%, #cdedff 60%, #e3f3d0 100%)',
+          background: 'linear-gradient(to bottom, #aee2ff 0%, #cdedff 60%, #e3f3d0 100%)',
         }}
       />
       {/* clouds */}
-      <Cloud style={{ left: '10%', top: '10%', '--cloud-w': '78px' } as any} delay="0s" />
-      <Cloud style={{ left: '45%', top: '5%', '--cloud-w': '54px' } as any} delay="-7s" />
-      <Cloud style={{ right: '18%', top: '14%', '--cloud-w': '64px' } as any} delay="-14s" />
+      <Cloud style={{ 'left': '10%', 'top': '10%', '--cloud-w': '78px' } as any} delay="0s" />
+      <Cloud style={{ 'left': '45%', 'top': '5%', '--cloud-w': '54px' } as any} delay="-7s" />
+      <Cloud style={{ 'right': '18%', 'top': '14%', '--cloud-w': '64px' } as any} delay="-14s" />
 
       {/* sun */}
       <div
@@ -221,8 +220,7 @@ function Cloud({ style, delay }: { style: React.CSSProperties; delay: string }) 
         style={{
           background: '#ffffff',
           borderRadius: '999px',
-          boxShadow:
-            'inset 0 -3px 0 0 #c9def2, 0 2px 0 0 rgba(15, 23, 42, 0.08)',
+          boxShadow: 'inset 0 -3px 0 0 #c9def2, 0 2px 0 0 rgba(15, 23, 42, 0.08)',
         }}
       />
       <div
@@ -521,26 +519,20 @@ function PlotTile({
       disabled={busy || (!isReady && !isEmpty)}
       className="group relative flex items-end justify-center overflow-hidden rounded-md outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-4 focus-visible:ring-white disabled:cursor-default disabled:hover:translate-y-0"
       style={{
-        background:
-          'linear-gradient(180deg, #a36138 0%, #8b5128 60%, #6e3f1f 100%)',
+        background: 'linear-gradient(180deg, #a36138 0%, #8b5128 60%, #6e3f1f 100%)',
         boxShadow:
           'inset 0 2px 0 0 #c98456, inset 0 -3px 0 0 #5c3219, inset 3px 0 0 0 #5c3219, inset -3px 0 0 0 #5c3219, 0 3px 0 0 rgba(15,23,42,0.3)',
         cursor: isReady || isEmpty ? 'pointer' : 'default',
       }}
       aria-label={
-        isReady
-          ? 'Colher esse canteiro'
-          : isEmpty
-            ? 'Plantar nesse canteiro'
-            : 'Aguardando crescer'
+        isReady ? 'Colher esse canteiro' : isEmpty ? 'Plantar nesse canteiro' : 'Aguardando crescer'
       }
     >
       {/* soil texture: dotted darker spots */}
       <div
         className="pointer-events-none absolute inset-0 opacity-50"
         style={{
-          backgroundImage:
-            'radial-gradient(circle, rgba(60, 30, 12, 0.6) 1px, transparent 1.5px)',
+          backgroundImage: 'radial-gradient(circle, rgba(60, 30, 12, 0.6) 1px, transparent 1.5px)',
           backgroundSize: '8px 8px',
         }}
       />
@@ -560,7 +552,9 @@ function PlotTile({
           style={{
             width: '70%',
             height: '95%',
-            animation: isReady ? 'fazendinha-plot-ready-pulse 1.2s ease-in-out infinite' : undefined,
+            animation: isReady
+              ? 'fazendinha-plot-ready-pulse 1.2s ease-in-out infinite'
+              : undefined,
           }}
         >
           <CropSprite stage={stage} cropType={plot.cropType ?? 'carrot'} />

@@ -1,5 +1,5 @@
 import type User from '#models/user'
-import AsaasService from '#services/asaas_service'
+import type AsaasService from '#services/asaas_service'
 import type { AsaasConfig } from '#services/asaas_service'
 import type {
   PaymentGateway,

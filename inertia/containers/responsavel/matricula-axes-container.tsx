@@ -19,7 +19,11 @@ import {
 
 import { Button } from '../../components/ui/button'
 import { Skeleton } from '../../components/ui/skeleton'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../components/ui/collapsible'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '../../components/ui/collapsible'
 import { cn } from '../../lib/utils'
 
 import { api } from '~/lib/api'
@@ -55,9 +59,19 @@ function relativeDeadlineLabel(iso: string | null) {
   const d = new Date(iso)
   const days = daysBetween(d)
   const formatted = brazilianDateFormatter(d)
-  if (days < 0) return { text: `Venceu há ${Math.abs(days)} dia${Math.abs(days) === 1 ? '' : 's'}`, tone: 'attention' as Tone, formatted }
+  if (days < 0)
+    return {
+      text: `Venceu há ${Math.abs(days)} dia${Math.abs(days) === 1 ? '' : 's'}`,
+      tone: 'attention' as Tone,
+      formatted,
+    }
   if (days === 0) return { text: 'Vence hoje', tone: 'attention' as Tone, formatted }
-  if (days <= 7) return { text: `Faltam ${days} dia${days === 1 ? '' : 's'}`, tone: 'attention' as Tone, formatted }
+  if (days <= 7)
+    return {
+      text: `Faltam ${days} dia${days === 1 ? '' : 's'}`,
+      tone: 'attention' as Tone,
+      formatted,
+    }
   return { text: `Faltam ${days} dias`, tone: 'pending' as Tone, formatted }
 }
 
@@ -97,13 +111,7 @@ function useDocumentsQuery(studentId: string, enabled: boolean) {
   })
 }
 
-function MatriculaAxesContent({
-  data,
-  matriculaId,
-}: {
-  data: AxesData
-  matriculaId: string
-}) {
+function MatriculaAxesContent({ data, matriculaId }: { data: AxesData; matriculaId: string }) {
   const queryClient = useQueryClient()
   const { axes } = data
   const deadline = relativeDeadlineLabel(data.enrollmentDeadline)
@@ -115,7 +123,11 @@ function MatriculaAxesContent({
   const completeFlags: Array<{ key: string; done: boolean; applicable: boolean }> = [
     { key: 'docs', done: axes.docs.status === 'COMPLETE', applicable: axes.docs.required > 0 },
     { key: 'signature', done: axes.signature === 'COMPLETED', applicable: true },
-    { key: 'payment', done: axes.payment === 'PAID', applicable: axes.payment !== 'NOT_APPLICABLE' },
+    {
+      key: 'payment',
+      done: axes.payment === 'PAID',
+      applicable: axes.payment !== 'NOT_APPLICABLE',
+    },
     { key: 'classAllocation', done: axes.classAllocation === 'ALLOCATED', applicable: true },
   ]
   const applicable = completeFlags.filter((f) => f.applicable)
@@ -288,7 +300,10 @@ function firstPendingKey(axes: AxesData['axes']): string | null {
   return null
 }
 
-function toneFor(axis: 'docs' | 'signature' | 'payment' | 'classAllocation', axes: AxesData['axes']): Tone {
+function toneFor(
+  axis: 'docs' | 'signature' | 'payment' | 'classAllocation',
+  axes: AxesData['axes']
+): Tone {
   if (axis === 'docs') {
     if (axes.docs.status === 'COMPLETE') return 'done'
     if (axes.docs.status === 'REJECTED') return 'attention'
@@ -313,7 +328,8 @@ function toneFor(axis: 'docs' | 'signature' | 'payment' | 'classAllocation', axe
 
 function docsSummary(axes: AxesData['axes']) {
   if (axes.docs.required === 0) return 'Sem documentos requeridos'
-  if (axes.docs.status === 'COMPLETE') return `${axes.docs.approved} de ${axes.docs.required} aprovados`
+  if (axes.docs.status === 'COMPLETE')
+    return `${axes.docs.approved} de ${axes.docs.required} aprovados`
   if (axes.docs.rejected > 0) {
     const r = axes.docs.rejected
     return `${r} rejeitado${r === 1 ? '' : 's'} · reenvie os arquivos`
@@ -419,9 +435,7 @@ function AxisSection({
                 {tone === 'pending' && sla && <span className="ml-1.5 opacity-70">{sla}</span>}
               </p>
               {relTime && (
-                <p className="text-[11px] text-muted-foreground/60 mt-0.5">
-                  Atualizado {relTime}
-                </p>
+                <p className="text-[11px] text-muted-foreground/60 mt-0.5">Atualizado {relTime}</p>
               )}
             </div>
             <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[open]:rotate-90" />
@@ -523,7 +537,12 @@ function DocsContent({
       fd.append('file', file)
       const res = await fetch(
         `/api/v1/responsavel/students/${studentId}/submissions/${submissionId}/files`,
-        { method: 'POST', credentials: 'include', headers: { Accept: 'application/json' }, body: fd }
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: { Accept: 'application/json' },
+          body: fd,
+        }
       )
       if (!res.ok) {
         const payload = await res.json().catch(() => null)
@@ -724,13 +743,15 @@ function SignatureContent({
   if (status === 'NOT_APPLICABLE') {
     return (
       <p className="text-sm text-muted-foreground">
-        A assinatura do contrato é presencial. A secretaria da escola vai entrar
-        em contato pra agendar o melhor dia e horário.
+        A assinatura do contrato é presencial. A secretaria da escola vai entrar em contato pra
+        agendar o melhor dia e horário.
       </p>
     )
   }
   if (status === 'COMPLETED') {
-    return <p className="text-sm text-muted-foreground">Contrato assinado por todos os responsáveis.</p>
+    return (
+      <p className="text-sm text-muted-foreground">Contrato assinado por todos os responsáveis.</p>
+    )
   }
   if (status === 'PARTIALLY_SIGNED') {
     return (
@@ -819,7 +840,10 @@ function PaymentContent({ data }: { data: AxesData }) {
         </p>
         {contract?.enrollmentValue ? (
           <p className="text-muted-foreground">
-            Valor previsto: <strong className="text-foreground">{brazilianRealFormatter(contract.enrollmentValue)}</strong>
+            Valor previsto:{' '}
+            <strong className="text-foreground">
+              {brazilianRealFormatter(contract.enrollmentValue)}
+            </strong>
           </p>
         ) : null}
       </div>
@@ -851,11 +875,13 @@ function PaymentContent({ data }: { data: AxesData }) {
               {due}
               {daysToDue !== null && (
                 <span className="ml-1.5 text-xs text-muted-foreground">
-                  ({daysToDue < 0
+                  (
+                  {daysToDue < 0
                     ? `${Math.abs(daysToDue)} dia${Math.abs(daysToDue) === 1 ? '' : 's'} de atraso`
                     : daysToDue === 0
                       ? 'hoje'
-                      : `em ${daysToDue} dia${daysToDue === 1 ? '' : 's'}`})
+                      : `em ${daysToDue} dia${daysToDue === 1 ? '' : 's'}`}
+                  )
                 </span>
               )}
             </p>
@@ -921,4 +947,3 @@ export function MatriculaAxesSkeleton() {
     </div>
   )
 }
-

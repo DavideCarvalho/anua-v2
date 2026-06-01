@@ -46,6 +46,7 @@ e ações: subir documento faltante, reenviar rejeitado, abrir contrato pra assi
 8. Pagamento da taxa confirmado
 
 Infra reusada:
+
 - `app/jobs/notifications/email_notification_job.ts`
 - `app/jobs/notifications/whatsapp_notification_job.ts` (via `arara_service.ts`)
 - `app/mails/` para templates

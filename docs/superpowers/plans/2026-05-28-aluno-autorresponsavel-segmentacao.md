@@ -33,6 +33,7 @@
 ## File Structure
 
 **Backend — criar:**
+
 - `app/services/self_responsible_link.ts` — `ensureSelfResponsibleLink(student, trx?)`, idempotente.
 - `app/services/self_responsible_context.ts` — `resolveSelfResponsibleContext(user)` → `{ isSelfResponsible, segment, studentId }`.
 - `commands/backfill_self_responsible_links.ts` — comando `backfill:self-responsible-links`.
@@ -44,6 +45,7 @@
 - `app/controllers/pages/aluno/show_aluno_matricula_page_controller.ts`
 
 **Backend — modificar:**
+
 - `app/controllers/online-enrollment/finish_enrollment_controller.ts` — hook do self-link.
 - `app/models/dto/user.dto.ts` — campos novos.
 - `app/transformers/user_transformer.ts` — campos novos.
@@ -53,6 +55,7 @@
 - `start/routes/pages/aluno.ts` — 5 rotas novas.
 
 **Frontend — criar:**
+
 - `inertia/containers/responsavel/comunicados-content.tsx` — extração do conteúdo de comunicados.
 - `inertia/pages/aluno/financeiro.tsx`
 - `inertia/pages/aluno/documentos.tsx`
@@ -61,6 +64,7 @@
 - `inertia/pages/aluno/matricula.tsx`
 
 **Frontend — modificar:**
+
 - `inertia/lib/types.ts` — campos no tipo `UserDto`.
 - `inertia/pages/responsavel/comunicados.tsx` — usar o container extraído.
 - `inertia/components/layouts/aluno-layout.tsx` — grupo "Minha Conta".
@@ -70,6 +74,7 @@
 ## Task 1: Service `ensureSelfResponsibleLink` (idempotente)
 
 **Files:**
+
 - Create: `app/services/self_responsible_link.ts`
 - Test: `tests/functional/students/self_responsible_link.spec.ts`
 
@@ -221,6 +226,7 @@ git commit -m "feat(aluno): service ensureSelfResponsibleLink idempotente"
 ## Task 2: Hook do self-link na matrícula online
 
 **Files:**
+
 - Modify: `app/controllers/online-enrollment/finish_enrollment_controller.ts` (após a criação do Student, ~linha 176)
 - Test: `tests/functional/online-enrollment/self_responsible_link_hook.spec.ts`
 
@@ -294,11 +300,11 @@ import { ensureSelfResponsibleLink } from '#services/self_responsible_link'
 Logo após o bloco onde `student` é criado/resolvido e antes do bloco de criação dos responsáveis (`if (!data.student.isSelfResponsible) { ... }`, ~linha 328), inserir:
 
 ```typescript
-    // Aluno autorresponsável vira seu próprio responsável (self-link) pra
-    // desbloquear acesso aos próprios dados via stack /responsavel.
-    if (data.student.isSelfResponsible) {
-      await ensureSelfResponsibleLink(student, trx)
-    }
+// Aluno autorresponsável vira seu próprio responsável (self-link) pra
+// desbloquear acesso aos próprios dados via stack /responsavel.
+if (data.student.isSelfResponsible) {
+  await ensureSelfResponsibleLink(student, trx)
+}
 ```
 
 - [ ] **Step 4: Run typecheck**
@@ -318,6 +324,7 @@ git commit -m "feat(matricula): cria self-link ao finalizar matrícula de aluno 
 ## Task 3: Comando de backfill `backfill:self-responsible-links`
 
 **Files:**
+
 - Create: `commands/backfill_self_responsible_links.ts`
 - Test: `tests/functional/commands/backfill_self_responsible_links.spec.ts`
 
@@ -436,6 +443,7 @@ export default class BackfillSelfResponsibleLinks extends BaseCommand {
 ```
 
 Adicionar o alias de import `#commands/*` se ainda não existir em `package.json` (`imports`). Verificar: `grep '"#commands/\*"' package.json`. Se ausente, adicionar:
+
 ```json
 "#commands/*": "./commands/*.js",
 ```
@@ -457,6 +465,7 @@ git commit -m "feat(aluno): comando backfill:self-responsible-links idempotente"
 ## Task 4: Service `resolveSelfResponsibleContext`
 
 **Files:**
+
 - Create: `app/services/self_responsible_context.ts`
 - Test: `tests/functional/users/self_responsible_context.spec.ts`
 
@@ -570,9 +579,7 @@ const EMPTY: SelfResponsibleContext = {
  * Deriva o contexto de aluno autorresponsável a partir do usuário.
  * Requer `user.role` carregado. Retorna vazio pra não-alunos.
  */
-export async function resolveSelfResponsibleContext(
-  user: User
-): Promise<SelfResponsibleContext> {
+export async function resolveSelfResponsibleContext(user: User): Promise<SelfResponsibleContext> {
   if (user.role?.name !== 'STUDENT') return EMPTY
 
   const student = await Student.find(user.id)
@@ -610,6 +617,7 @@ git commit -m "feat(aluno): service resolveSelfResponsibleContext"
 ## Task 5: Expor `isSelfResponsible`/`segment`/`studentId` no payload do usuário
 
 **Files:**
+
 - Modify: `app/models/dto/user.dto.ts`
 - Modify: `app/transformers/user_transformer.ts`
 - Modify: `app/controllers/auth/me.ts`
@@ -693,17 +701,20 @@ import type { AcademicPeriodSegment } from '#models/academic_period'
 Após `declare school?: SchoolDto` (linha 27):
 
 ```typescript
-  declare isSelfResponsible: boolean
-  declare segment: AcademicPeriodSegment | null
-  declare studentId: string | null
+declare
+isSelfResponsible: boolean
+declare
+segment: AcademicPeriodSegment | null
+declare
+studentId: string | null
 ```
 
 No construtor, após `this.school = ...` (linha 54), inicializar os defaults (serão sobrescritos por quem tem o contexto):
 
 ```typescript
-    this.isSelfResponsible = false
-    this.segment = null
-    this.studentId = null
+this.isSelfResponsible = false
+this.segment = null
+this.studentId = null
 ```
 
 - [ ] **Step 4: Add fields to `UserTransformer`**
@@ -748,9 +759,9 @@ import { resolveSelfResponsibleContext } from '#services/self_responsible_contex
 Substituir o `return` final por:
 
 ```typescript
-    const ctx = await resolveSelfResponsibleContext(user)
-    const dto = await serialize(UserTransformer.transform(user))
-    return response.ok({ ...dto, ...ctx })
+const ctx = await resolveSelfResponsibleContext(user)
+const dto = await serialize(UserTransformer.transform(user))
+return response.ok({ ...dto, ...ctx })
 ```
 
 (Com este caminho, o Step 4 do transformer é desnecessário.)
@@ -760,10 +771,10 @@ Substituir o `return` final por:
 Em `app/middleware/inertia_middleware.ts`, após construir `userDto = new UserDto(user)` (linha 62), popular os campos:
 
 ```typescript
-      const ctx = await resolveSelfResponsibleContext(user)
-      userDto.isSelfResponsible = ctx.isSelfResponsible
-      userDto.segment = ctx.segment
-      userDto.studentId = ctx.studentId
+const ctx = await resolveSelfResponsibleContext(user)
+userDto.isSelfResponsible = ctx.isSelfResponsible
+userDto.segment = ctx.segment
+userDto.studentId = ctx.studentId
 ```
 
 Adicionar o import no topo:
@@ -791,6 +802,7 @@ git commit -m "feat(aluno): expõe isSelfResponsible/segment/studentId no payloa
 ## Task 6: Gate de gamificação — defense-in-depth
 
 **Files:**
+
 - Modify: `app/middleware/inertia_middleware.ts:84`
 - Test: `tests/functional/aluno/gamification_self_responsible.spec.ts`
 
@@ -813,10 +825,7 @@ test.group('Gamificação — aluno autorresponsável nunca é gamified', (group
     return () => db.rollbackGlobalTransaction()
   })
 
-  test('autorresponsável com birthDate de criança → gamified false', async ({
-    client,
-    assert,
-  }) => {
+  test('autorresponsável com birthDate de criança → gamified false', async ({ client, assert }) => {
     const role = await Role.firstOrCreate({ name: 'STUDENT' }, { name: 'STUDENT' })
     const user = await User.create({
       name: 'Aluno Self',
@@ -865,12 +874,12 @@ Expected: FAIL — `gamified` é `true` (idade 10 ≤ 14).
 Em `app/middleware/inertia_middleware.ts`, no bloco onde `gamified` é calculado (linha 84):
 
 ```typescript
-        gamified =
-          isGamifiedStudent({
-            id: student.id,
-            birthDate: bd instanceof DateTime ? bd.toISO() : bd,
-            role: userDto.role,
-          }) && !student.isSelfResponsible
+gamified =
+  isGamifiedStudent({
+    id: student.id,
+    birthDate: bd instanceof DateTime ? bd.toISO() : bd,
+    role: userDto.role,
+  }) && !student.isSelfResponsible
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -890,6 +899,7 @@ git commit -m "fix(aluno): aluno autorresponsável nunca recebe modo gamified"
 ## Task 7: Teste de controle de acesso end-to-end (self-link → 200, outro aluno → 403)
 
 **Files:**
+
 - Test: `tests/functional/aluno/self_responsible_data_access.spec.ts`
 
 - [ ] **Step 1: Write the test**
@@ -979,6 +989,7 @@ git commit -m "test(aluno): acesso do autorresponsável aos próprios dados via 
 ## Task 8: Middleware `requireSelfResponsible` (guarda das rotas adultas)
 
 **Files:**
+
 - Create: `app/middleware/require_self_responsible_middleware.ts`
 - Modify: `start/kernel.ts` (registrar named middleware)
 - Test: `tests/functional/aluno/require_self_responsible.spec.ts`
@@ -1105,6 +1116,7 @@ git commit -m "feat(aluno): middleware requireSelfResponsible pras rotas adultas
 ## Task 9: Page controllers + rotas `/aluno/*` adultas
 
 **Files:**
+
 - Create: `app/controllers/pages/aluno/show_aluno_financeiro_page_controller.ts`
 - Create: `app/controllers/pages/aluno/show_aluno_documentos_page_controller.ts`
 - Create: `app/controllers/pages/aluno/show_aluno_autorizacoes_page_controller.ts`
@@ -1128,6 +1140,7 @@ export default class ShowAlunoFinanceiroPageController {
 ```
 
 Repetir trocando o nome e o template para:
+
 - `show_aluno_documentos_page_controller.ts` → `inertia.render('aluno/documentos', {})`
 - `show_aluno_autorizacoes_page_controller.ts` → `inertia.render('aluno/autorizacoes', {})`
 - `show_aluno_comunicados_page_controller.ts` → `inertia.render('aluno/comunicados', {})`
@@ -1158,26 +1171,26 @@ export default class ShowAlunoMatriculaPageController {
 Em `start/routes/pages/aluno.ts`, adicionar dentro do grupo (antes do `.prefix('/aluno')`), aplicando o middleware de guarda por rota:
 
 ```typescript
-      router
-        .get('/financeiro', [aluno.ShowAlunoFinanceiroPage])
-        .as('financeiro')
-        .use(middleware.requireSelfResponsible())
-      router
-        .get('/documentos', [aluno.ShowAlunoDocumentosPage])
-        .as('documentos')
-        .use(middleware.requireSelfResponsible())
-      router
-        .get('/autorizacoes', [aluno.ShowAlunoAutorizacoesPage])
-        .as('autorizacoes')
-        .use(middleware.requireSelfResponsible())
-      router
-        .get('/comunicados', [aluno.ShowAlunoComunicadosPage])
-        .as('comunicados')
-        .use(middleware.requireSelfResponsible())
-      router
-        .get('/matricula', [aluno.ShowAlunoMatriculaPage])
-        .as('matricula')
-        .use(middleware.requireSelfResponsible())
+router
+  .get('/financeiro', [aluno.ShowAlunoFinanceiroPage])
+  .as('financeiro')
+  .use(middleware.requireSelfResponsible())
+router
+  .get('/documentos', [aluno.ShowAlunoDocumentosPage])
+  .as('documentos')
+  .use(middleware.requireSelfResponsible())
+router
+  .get('/autorizacoes', [aluno.ShowAlunoAutorizacoesPage])
+  .as('autorizacoes')
+  .use(middleware.requireSelfResponsible())
+router
+  .get('/comunicados', [aluno.ShowAlunoComunicadosPage])
+  .as('comunicados')
+  .use(middleware.requireSelfResponsible())
+router
+  .get('/matricula', [aluno.ShowAlunoMatriculaPage])
+  .as('matricula')
+  .use(middleware.requireSelfResponsible())
 ```
 
 > Os nomes dos controllers no registry (`aluno.ShowAlunoFinanceiroPage` etc.) são derivados do nome do arquivo pelo gerador `#generated/controllers`. Após criar os arquivos, rodar `node ace` uma vez (ou o comando de geração do projeto) se o registry não atualizar automaticamente. Confirmar com `grep -rn "ShowAlunoFinanceiroPage" .adonisjs/ #generated 2>/dev/null` ou o caminho equivalente do projeto.
@@ -1199,6 +1212,7 @@ git commit -m "feat(aluno): page controllers + rotas /aluno adultas guardadas"
 ## Task 10: Extrair `ComunicadosContent` num container compartilhado
 
 **Files:**
+
 - Create: `inertia/containers/responsavel/comunicados-content.tsx`
 - Modify: `inertia/pages/responsavel/comunicados.tsx`
 
@@ -1243,6 +1257,7 @@ git commit -m "refactor(comunicados): extrai ComunicadosContent pra container re
 ## Task 11: Páginas `/aluno/*` adultas (renderizam containers do responsável)
 
 **Files:**
+
 - Create: `inertia/pages/aluno/financeiro.tsx`
 - Create: `inertia/pages/aluno/documentos.tsx`
 - Create: `inertia/pages/aluno/autorizacoes.tsx`
@@ -1270,9 +1285,7 @@ export default function AlunoFinanceiroPage() {
           <h1 className="text-2xl font-bold tracking-tight">Financeiro</h1>
           <p className="text-muted-foreground">Suas mensalidades e faturas</p>
         </div>
-        {user?.studentId ? (
-          <StudentPaymentsContainer studentId={user.studentId} />
-        ) : null}
+        {user?.studentId ? <StudentPaymentsContainer studentId={user.studentId} /> : null}
       </div>
     </AlunoLayout>
   )
@@ -1431,6 +1444,7 @@ git commit -m "feat(aluno): páginas adultas /aluno reusando containers do respo
 ## Task 12: Grupo de navegação "Minha Conta" no aluno-layout
 
 **Files:**
+
 - Modify: `inertia/components/layouts/aluno-layout.tsx`
 
 - [ ] **Step 1: Add the self-responsible nav array**
@@ -1447,7 +1461,12 @@ const selfResponsibleNavigation: NavItem[] = [
     href: '/aluno/autorizacoes',
     icon: ShieldCheck,
   },
-  { title: 'Matrícula', route: 'web.aluno.matricula', href: '/aluno/matricula', icon: GraduationCap },
+  {
+    title: 'Matrícula',
+    route: 'web.aluno.matricula',
+    href: '/aluno/matricula',
+    icon: GraduationCap,
+  },
   {
     title: 'Comunicados',
     route: 'web.aluno.comunicados',
@@ -1464,28 +1483,30 @@ const selfResponsibleNavigation: NavItem[] = [
 Em `AppSidebar`, após o `<SidebarGroup>` "Menu" existente (linha ~158), adicionar — usando `user.isSelfResponsible` (de `useAuthUser()`, já disponível como `user` na linha 105):
 
 ```tsx
-            {user?.isSelfResponsible && !gamified ? (
-              <SidebarGroup>
-                <SidebarGroupLabel>Minha Conta</SidebarGroupLabel>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {selfResponsibleNavigation.map((item) => {
-                      const isActive = pathname === item.href
-                      return (
-                        <SidebarMenuItem key={item.href}>
-                          <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
-                            <Link href={item.href}>
-                              <item.icon className="h-4 w-4" />
-                              <span>{item.title}</span>
-                            </Link>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      )
-                    })}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            ) : null}
+{
+  user?.isSelfResponsible && !gamified ? (
+    <SidebarGroup>
+      <SidebarGroupLabel>Minha Conta</SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {selfResponsibleNavigation.map((item) => {
+            const isActive = pathname === item.href
+            return (
+              <SidebarMenuItem key={item.href}>
+                <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
+                  <Link href={item.href}>
+                    <item.icon className="h-4 w-4" />
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )
+          })}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  ) : null
+}
 ```
 
 > O `<Link>` aqui é o do Inertia já importado no arquivo. Manter o padrão de import existente.
@@ -1509,9 +1530,11 @@ git commit -m "feat(aluno): grupo de navegação 'Minha Conta' pro aluno autorre
 - [ ] **Step 1: Rodar a suíte de testes nova**
 
 Run:
+
 ```bash
 node ace test functional --files tests/functional/students/self_responsible_link.spec.ts --files tests/functional/online-enrollment/self_responsible_link_hook.spec.ts --files tests/functional/commands/backfill_self_responsible_links.spec.ts --files tests/functional/users/self_responsible_context.spec.ts --files tests/functional/auth/me_self_responsible.spec.ts --files tests/functional/aluno/gamification_self_responsible.spec.ts --files tests/functional/aluno/self_responsible_data_access.spec.ts --files tests/functional/aluno/require_self_responsible.spec.ts
 ```
+
 Expected: todos PASS.
 
 - [ ] **Step 2: Typecheck completo**
@@ -1545,6 +1568,7 @@ git commit -m "docs(auditoria): marca #2 (segmentação do aluno autorresponsáv
 ## Self-Review (preenchido pelo autor do plano)
 
 **Spec coverage:**
+
 - Helper `resolveSelfResponsibleContext` em me.ts + inertia_middleware → Tasks 4, 5. ✓
 - Expor isSelfResponsible/segment/studentId (DTO, transformer/controller, frontend types) → Task 5. ✓
 - Gate `&& !isSelfResponsible` → Task 6. ✓
@@ -1558,6 +1582,7 @@ git commit -m "docs(auditoria): marca #2 (segmentação do aluno autorresponsáv
 **Type consistency:** `ensureSelfResponsibleLink` retorna `boolean` (usado em backfill); `resolveSelfResponsibleContext` retorna `SelfResponsibleContext` com os mesmos 3 campos do DTO/types; nomes de rota `web.aluno.*` consistentes entre Task 9 e Task 12.
 
 **Riscos conhecidos / verificações deixadas ao executor:**
+
 - Rota exata do `me` e dos endpoints `/responsavel/*` (confirmar via grep antes de rodar os testes).
 - Nome dos controllers no registry `#generated/controllers` e nomes de rota no registry do frontend (regeneração após criar arquivos).
 - Assinatura real de `ConsentHistoryContainer` (props de paginação).

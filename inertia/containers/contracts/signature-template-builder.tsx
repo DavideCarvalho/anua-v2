@@ -138,7 +138,11 @@ interface EndpointAdapter {
   templateData: TemplateData | null | undefined
   isLoading: boolean
   invalidate: () => void
-  upload: (body: { schemas: SerializedField[][]; fileBase64?: string; fileName?: string }) => Promise<void>
+  upload: (body: {
+    schemas: SerializedField[][]
+    fileBase64?: string
+    fileName?: string
+  }) => Promise<void>
   remove: () => Promise<void>
   removePending: boolean
 }
@@ -149,12 +153,8 @@ function useContractAdapter(contractId: string, isNew: boolean): EndpointAdapter
     params: { contractId },
   })
   const { data, isLoading } = useQuery({ ...queryOptions, enabled: !isNew })
-  const uploadMutation = useMutation(
-    api.api.v1.contracts.uploadSignatureTemplate.mutationOptions()
-  )
-  const deleteMutation = useMutation(
-    api.api.v1.contracts.deleteSignatureTemplate.mutationOptions()
-  )
+  const uploadMutation = useMutation(api.api.v1.contracts.uploadSignatureTemplate.mutationOptions())
+  const deleteMutation = useMutation(api.api.v1.contracts.deleteSignatureTemplate.mutationOptions())
 
   return {
     templateData: data?.template ?? null,
@@ -176,12 +176,8 @@ function useEventAdapter(eventId: string, isNew: boolean): EndpointAdapter {
     params: { eventId },
   })
   const { data, isLoading } = useQuery({ ...queryOptions, enabled: !isNew })
-  const uploadMutation = useMutation(
-    api.api.v1.events.uploadSignatureTemplate.mutationOptions()
-  )
-  const deleteMutation = useMutation(
-    api.api.v1.events.deleteSignatureTemplate.mutationOptions()
-  )
+  const uploadMutation = useMutation(api.api.v1.events.uploadSignatureTemplate.mutationOptions())
+  const deleteMutation = useMutation(api.api.v1.events.deleteSignatureTemplate.mutationOptions())
 
   return {
     templateData: data?.template ?? null,
@@ -299,11 +295,13 @@ export function SignatureTemplateBuilder({
           ...(fileBase64 ? { fileBase64, fileName } : {}),
         })
 
-        await toast.promise(promise, {
-          loading: 'Salvando template...',
-          success: 'Template de assinatura salvo',
-          error: 'Erro ao salvar template',
-        }).unwrap()
+        await toast
+          .promise(promise, {
+            loading: 'Salvando template...',
+            success: 'Template de assinatura salvo',
+            error: 'Erro ao salvar template',
+          })
+          .unwrap()
 
         adapter.invalidate()
       } catch {
@@ -317,11 +315,13 @@ export function SignatureTemplateBuilder({
     if (!adapter.templateData) return
     try {
       const promise = adapter.remove()
-      await toast.promise(promise, {
-        loading: 'Removendo template...',
-        success: 'Template removido',
-        error: 'Erro ao remover template',
-      }).unwrap()
+      await toast
+        .promise(promise, {
+          loading: 'Removendo template...',
+          success: 'Template removido',
+          error: 'Erro ao remover template',
+        })
+        .unwrap()
 
       setPdfBase64(null)
       setPdfName(null)
@@ -342,7 +342,8 @@ export function SignatureTemplateBuilder({
     return (
       <Card>
         <CardContent className="py-8 text-center text-sm text-muted-foreground">
-          {notSavedYetMessage ?? 'Salve as informações básicas primeiro pra liberar o template de assinatura.'}
+          {notSavedYetMessage ??
+            'Salve as informações básicas primeiro pra liberar o template de assinatura.'}
         </CardContent>
       </Card>
     )
@@ -414,7 +415,8 @@ export function SignatureTemplateBuilder({
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          {emptyCardDescription ?? 'Faça upload do PDF e posicione os campos de assinatura visualmente.'}
+          {emptyCardDescription ??
+            'Faça upload do PDF e posicione os campos de assinatura visualmente.'}
         </p>
 
         <label className="group relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-foreground/20 bg-muted/30 p-8 transition-colors hover:border-primary/50 hover:bg-muted/50">

@@ -13,11 +13,13 @@
 ### Task 1: Criar contrato de comportamento com teste browser (RED)
 
 **Files:**
+
 - Modify: `tests/browser/escola/simplified_layout_modules.spec.ts`
 
 **Step 1: Write the failing test**
 
 Adicionar um novo teste no grupo atual para `/escola/financeiro/faturas` em modo simplificado validando:
+
 - existe tabela simplificada de faturas
 - cabecalhos `Aluno`, `Vencimento`, `Valor`, `Acao`
 - nao existem cabecalhos da tabela completa (`Referência`, `Descontos`, `Encargos`, `Valor Recebido`, `Total Cobrado`, `Status`)
@@ -49,12 +51,14 @@ git commit -m "test: define simplified invoices table contract"
 ### Task 2: Implementar container dedicado da visao simplificada (GREEN)
 
 **Files:**
+
 - Create: `inertia/containers/invoices-simplified-table.tsx`
 - Modify: `inertia/pages/escola/financeiro/faturas.tsx`
 
 **Step 1: Write minimal implementation**
 
 Criar `InvoicesSimplifiedTable` com:
+
 - Query para `api.api.v1.invoices.index` com `status: 'OPEN,PENDING,OVERDUE'`
 - Ordenacao padrao por vencimento ascendente (`sortBy: 'dueDate'`, `sortDirection: 'asc'`)
 - Tabela minima com `data-testid="simplified-invoices-table"`
@@ -104,11 +108,13 @@ git commit -m "feat: add objective simplified invoices table for actionable char
 ### Task 3: Cobrir regras de acao e regressao de view mode
 
 **Files:**
+
 - Modify: `tests/browser/escola/dashboard_view_mode.spec.ts`
 
 **Step 1: Write failing assertions**
 
 Adicionar caso que entra em `/escola/financeiro/faturas` no modo simplificado e valida:
+
 - tabela simplificada presente
 - visao completa nao vaza colunas
 - botao de alternancia de modo continua funcional
@@ -130,6 +136,7 @@ git commit -m "test: cover simplified invoices table in view-mode flows"
 ### Task 4: Verificacao final e limpeza
 
 **Files:**
+
 - Modify (if needed): `inertia/containers/invoices-simplified-table.tsx`
 
 **Step 1: Run final verification suite**
@@ -146,6 +153,7 @@ Expected: ambos PASS.
 **Step 2: Manual smoke check (recommended)**
 
 Verificar no browser local:
+
 - `http://localhost:3333/escola/financeiro/faturas`
 - alternar entre `Visão completa` e `Visão simplificada`
 - confirmar que simplificada mostra somente 4 colunas.

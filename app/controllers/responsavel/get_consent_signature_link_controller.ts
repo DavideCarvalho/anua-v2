@@ -10,9 +10,7 @@ export default class GetConsentSignatureLinkController {
       throw AppException.forbidden('Usuário não autenticado')
     }
 
-    const consent = await EventParentalConsent.query()
-      .where('id', params.consentId)
-      .first()
+    const consent = await EventParentalConsent.query().where('id', params.consentId).first()
 
     if (!consent) {
       throw AppException.notFound('Autorização não encontrada')

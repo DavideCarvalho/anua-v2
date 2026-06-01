@@ -42,7 +42,12 @@ export default class extends BaseSchema {
 
     this.schema.createTable('AgreementProposalInvoice', (table) => {
       table.string('id').primary()
-      table.string('proposalId').notNullable().references('id').inTable('AgreementProposal').onDelete('CASCADE')
+      table
+        .string('proposalId')
+        .notNullable()
+        .references('id')
+        .inTable('AgreementProposal')
+        .onDelete('CASCADE')
       table.string('invoiceId').notNullable().references('id').inTable('Invoice')
       table.integer('amount').notNullable()
       table.integer('overdueDays').notNullable()

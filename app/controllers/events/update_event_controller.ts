@@ -398,10 +398,7 @@ export default class UpdateEventController {
     // Push imediato pra responsáveis/alunos quando data ou local mudam num
     // evento já publicado. Eventos em DRAFT não notificam (ainda não
     // visíveis pra família).
-    if (
-      result.wasPublished &&
-      (result.changedFields.date || result.changedFields.location)
-    ) {
+    if (result.wasPublished && (result.changedFields.date || result.changedFields.location)) {
       try {
         await notifyEventRescheduled({ event, changedFields: result.changedFields })
       } catch (error) {

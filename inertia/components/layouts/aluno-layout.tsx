@@ -104,11 +104,21 @@ const gamifiedNavigation: NavItem[] = [
 
 const academicNavigation: NavItem[] = [
   { title: 'Notas', route: 'web.aluno.notas', href: '/aluno/notas', icon: Award },
-  { title: 'Frequência', route: 'web.aluno.frequencia', href: '/aluno/frequencia', icon: CalendarCheck },
+  {
+    title: 'Frequência',
+    route: 'web.aluno.frequencia',
+    href: '/aluno/frequencia',
+    icon: CalendarCheck,
+  },
   { title: 'Horário', route: 'web.aluno.horario', href: '/aluno/horario', icon: Clock },
   { title: 'Atividades', route: 'web.aluno.atividades', href: '/aluno/atividades', icon: BookOpen },
   { title: 'Calendário', route: 'web.aluno.calendario', href: '/aluno/calendario', icon: Calendar },
-  { title: 'Ocorrências', route: 'web.aluno.ocorrencias', href: '/aluno/ocorrencias', icon: AlertCircle },
+  {
+    title: 'Ocorrências',
+    route: 'web.aluno.ocorrencias',
+    href: '/aluno/ocorrencias',
+    icon: AlertCircle,
+  },
 ]
 
 const minhaContaNavigation: NavItem[] = [

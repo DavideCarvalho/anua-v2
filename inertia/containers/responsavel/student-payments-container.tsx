@@ -1,5 +1,15 @@
 import { useState } from 'react'
-import { CheckCircle, Clock, AlertTriangle, XCircle, ExternalLink, Loader2, Info, Copy, QrCode } from 'lucide-react'
+import {
+  CheckCircle,
+  Clock,
+  AlertTriangle,
+  XCircle,
+  ExternalLink,
+  Loader2,
+  Info,
+  Copy,
+  QrCode,
+} from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useQuery } from '@tanstack/react-query'
@@ -16,11 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../../components/ui/dialog'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '../../components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/popover'
 import {
   Table,
   TableBody,
@@ -312,7 +318,10 @@ export function StudentPaymentsContainer({ studentId }: StudentPaymentsContainer
     }
 
     const isPendingPayment =
-      invoice.status === 'OPEN' || invoice.status === 'PENDING' || invoice.status === 'OVERDUE' || isOverdue
+      invoice.status === 'OPEN' ||
+      invoice.status === 'PENDING' ||
+      invoice.status === 'OVERDUE' ||
+      isOverdue
     if (!isPendingPayment) return null
 
     return <OfflinePaymentFallback schoolPaymentInfo={data.schoolPaymentInfo} />
@@ -457,7 +466,7 @@ export function StudentPaymentsContainer({ studentId }: StudentPaymentsContainer
                                 {getPaymentDescription(payment)}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                {format(new Date(payment.dueDate), "MMM yyyy", { locale: ptBR })}
+                                {format(new Date(payment.dueDate), 'MMM yyyy', { locale: ptBR })}
                               </p>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">

@@ -92,8 +92,7 @@ export class NotificationService {
       )
     }
 
-    const enablePush =
-      channels?.push !== undefined ? channels.push : pref ? pref.enablePush : true
+    const enablePush = channels?.push !== undefined ? channels.push : pref ? pref.enablePush : true
     if (enablePush && user.pushSubscription) {
       const { sendPushNotification } = await import('#services/push_notification_service')
       dispatches.push(

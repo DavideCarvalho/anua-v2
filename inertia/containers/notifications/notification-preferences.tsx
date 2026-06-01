@@ -242,7 +242,9 @@ function PreferenceSection({
                   </div>
                   <Switch
                     checked={grouped[type]?.whatsApp ?? true}
-                    onCheckedChange={() => onToggle(type, 'whatsapp', grouped[type]?.whatsApp ?? true)}
+                    onCheckedChange={() =>
+                      onToggle(type, 'whatsapp', grouped[type]?.whatsApp ?? true)
+                    }
                     disabled={isUpdating}
                   />
                 </div>

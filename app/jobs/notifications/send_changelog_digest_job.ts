@@ -30,9 +30,7 @@ const AUDIENCE_LABEL: Record<Audience, string> = {
 }
 
 function filterItemsForAudience(items: ChangelogItem[], audience: Audience): string[] {
-  return items
-    .filter((i) => i.audience === audience || i.audience === 'all')
-    .map((i) => i.text)
+  return items.filter((i) => i.audience === audience || i.audience === 'all').map((i) => i.text)
 }
 
 async function generateEmailForAudience(
@@ -86,10 +84,7 @@ export default class SendChangelogDigestJob extends Job<SendChangelogDigestPaylo
   async execute(): Promise<void> {
     const { entries } = this.payload
 
-    const users = await User.query()
-      .whereNotNull('email')
-      .where('active', true)
-      .preload('role')
+    const users = await User.query().whereNotNull('email').where('active', true).preload('role')
 
     const audiences: Audience[] = ['responsavel', 'escola', 'admin']
     let totalSent = 0
@@ -116,9 +111,7 @@ export default class SendChangelogDigestJob extends Job<SendChangelogDigestPaylo
           const personalBody = generated.body.replace(/NOME/g, firstName)
 
           await mail.send(
-            new ChangelogDigestMail(user, [
-              { title: generated.subject, items: [personalBody] },
-            ])
+            new ChangelogDigestMail(user, [{ title: generated.subject, items: [personalBody] }])
           )
           totalSent++
         } catch (error) {

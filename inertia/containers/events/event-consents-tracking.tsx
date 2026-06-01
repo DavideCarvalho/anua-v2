@@ -1,5 +1,13 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { CheckCircle2, XCircle, Clock, AlertCircle, Users, FileSignature, MousePointerClick } from 'lucide-react'
+import {
+  CheckCircle2,
+  XCircle,
+  Clock,
+  AlertCircle,
+  Users,
+  FileSignature,
+  MousePointerClick,
+} from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useState } from 'react'
