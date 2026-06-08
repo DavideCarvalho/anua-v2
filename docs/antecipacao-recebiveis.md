@@ -44,13 +44,13 @@ quem tem a licença é o Asaas.
 
 **Endpoints Asaas** (confirmados na doc — base `/v3`):
 
-| Endpoint | Pra quê |
-|---|---|
-| `GET /anticipations/limits` | Limite antecipável da escola (boleto/cartão) |
-| `POST /anticipations/simulate` | Simula: valor líquido, taxa e `isDocumentationRequired` |
-| `POST /anticipations` | Solicita antecipação de uma `payment` (cobrança) ou `installment` (parcela) |
-| `GET /anticipations` / `/{id}` | Lista / status |
-| Webhook de antecipações | Eventos de status |
+| Endpoint                       | Pra quê                                                                     |
+| ------------------------------ | --------------------------------------------------------------------------- |
+| `GET /anticipations/limits`    | Limite antecipável da escola (boleto/cartão)                                |
+| `POST /anticipations/simulate` | Simula: valor líquido, taxa e `isDocumentationRequired`                     |
+| `POST /anticipations`          | Solicita antecipação de uma `payment` (cobrança) ou `installment` (parcela) |
+| `GET /anticipations` / `/{id}` | Lista / status                                                              |
+| Webhook de antecipações        | Eventos de status                                                           |
 
 > Para **boleto**, a antecipação é **por parcela individual**, e o Asaas pode exigir
 > documentação (`isDocumentationRequired`) — NF-e ou contrato, que a Anuá já tem.
@@ -72,11 +72,11 @@ das famílias passa a ser do Anuá em vez de split com a escola. É o que o Isaa
 
 **Não necessariamente** — depende da estrutura:
 
-| Estrutura | Precisa licença BACEN? | Observação |
-|---|---|---|
-| Empréstimo com juros (Anuá empresta pra escola) | 🔴 Sim — SCD ou banco (Res. 4.656/2018) | Evitar |
-| **Factoring / fomento mercantil** | 🟢 Não | Compra de recebíveis (cessão); não cobra "juros", só deságio; tem obrigações de **PLD/FT (COAF)** |
-| **FIDC** (fundo compra os recebíveis) | 🟢 Não — veículo regulado pela **CVM** | Forma padrão de fazer em escala (modelo Isaac) |
+| Estrutura                                       | Precisa licença BACEN?                  | Observação                                                                                        |
+| ----------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Empréstimo com juros (Anuá empresta pra escola) | 🔴 Sim — SCD ou banco (Res. 4.656/2018) | Evitar                                                                                            |
+| **Factoring / fomento mercantil**               | 🟢 Não                                  | Compra de recebíveis (cessão); não cobra "juros", só deságio; tem obrigações de **PLD/FT (COAF)** |
+| **FIDC** (fundo compra os recebíveis)           | 🟢 Não — veículo regulado pela **CVM**  | Forma padrão de fazer em escala (modelo Isaac)                                                    |
 
 O caminho padrão pro Modelo B: um **FIDC** compra os recebíveis (cessão), paga a escola
 adiantado, famílias pagam na conta de cobrança do fundo, Anuá é originador/servicer. O

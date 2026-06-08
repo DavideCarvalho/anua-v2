@@ -28,7 +28,10 @@ import { cn } from '~/lib/utils'
 
 type HealthStatus = 'healthy' | 'warning' | 'critical' | 'inactive'
 
-const HEALTH_CONFIG: Record<HealthStatus, { label: string; icon: typeof CheckCircle2; class: string }> = {
+const HEALTH_CONFIG: Record<
+  HealthStatus,
+  { label: string; icon: typeof CheckCircle2; class: string }
+> = {
   healthy: { label: 'Saudável', icon: CheckCircle2, class: 'text-green-600 bg-green-600/10' },
   warning: { label: 'Atenção', icon: Clock, class: 'text-amber-600 bg-amber-600/10' },
   critical: { label: 'Crítico', icon: AlertTriangle, class: 'text-destructive bg-destructive/10' },
@@ -53,9 +56,7 @@ function formatDaysAgo(days: number | null): string {
 }
 
 export default function SchoolHealthPage() {
-  const { data, isLoading } = useQuery(
-    api.api.v1.admin.schoolHealth.queryOptions()
-  )
+  const { data, isLoading } = useQuery(api.api.v1.admin.schoolHealth.queryOptions())
 
   const [search, setSearch] = useState('')
   const [healthFilter, setHealthFilter] = useState<HealthStatus | 'all'>('all')
@@ -112,7 +113,9 @@ export default function SchoolHealthPage() {
                     onClick={() => handleCardClick(status)}
                   >
                     <CardContent className="flex items-center gap-3 py-4">
-                      <span className={cn('grid h-9 w-9 place-items-center rounded-lg', config.class)}>
+                      <span
+                        className={cn('grid h-9 w-9 place-items-center rounded-lg', config.class)}
+                      >
                         <Icon className="h-4.5 w-4.5" />
                       </span>
                       <div>
@@ -184,11 +187,18 @@ export default function SchoolHealthPage() {
                             <TableCell className="font-medium">{school.name}</TableCell>
                             <TableCell>
                               <Badge variant="secondary" className="text-xs">
-                                {SUBSCRIPTION_LABELS[school.subscriptionStatus] ?? school.subscriptionStatus}
+                                {SUBSCRIPTION_LABELS[school.subscriptionStatus] ??
+                                  school.subscriptionStatus}
                               </Badge>
                             </TableCell>
                             <TableCell>
-                              <span className={cn('inline-flex items-center gap-1 text-xs font-medium', config.class, 'rounded-full px-2 py-0.5')}>
+                              <span
+                                className={cn(
+                                  'inline-flex items-center gap-1 text-xs font-medium',
+                                  config.class,
+                                  'rounded-full px-2 py-0.5'
+                                )}
+                              >
                                 <Icon className="h-3 w-3" />
                                 {config.label}
                               </span>
@@ -203,7 +213,8 @@ export default function SchoolHealthPage() {
                               <span
                                 className={cn(
                                   'text-xs',
-                                  school.healthStatus === 'critical' || school.healthStatus === 'inactive'
+                                  school.healthStatus === 'critical' ||
+                                    school.healthStatus === 'inactive'
                                     ? 'text-destructive font-medium'
                                     : 'text-muted-foreground'
                                 )}
@@ -215,7 +226,11 @@ export default function SchoolHealthPage() {
                               <div className="flex flex-wrap gap-1">
                                 {school.featureAdoption.length > 0 ? (
                                   school.featureAdoption.map((f: string) => (
-                                    <Badge key={f} variant="outline" className="text-[10px] px-1.5 py-0">
+                                    <Badge
+                                      key={f}
+                                      variant="outline"
+                                      className="text-[10px] px-1.5 py-0"
+                                    >
                                       {f}
                                     </Badge>
                                   ))

@@ -73,8 +73,7 @@ export default class Contract extends compose(BaseModel, Auditable) {
 
   @column({
     columnName: 'signatureTemplateSchemas',
-    prepare: (value: SignatureTemplateSchemas | null) =>
-      value ? JSON.stringify(value) : null,
+    prepare: (value: SignatureTemplateSchemas | null) => (value ? JSON.stringify(value) : null),
     consume: (value: string | SignatureTemplateSchemas | null): SignatureTemplateSchemas | null => {
       if (!value) return null
       if (typeof value === 'string') return JSON.parse(value) as SignatureTemplateSchemas

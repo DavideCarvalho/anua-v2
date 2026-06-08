@@ -1,12 +1,6 @@
 import { Fragment, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import {
-  AlertCircle,
-  ChevronDown,
-  ChevronRight,
-  Loader2,
-  Users,
-} from 'lucide-react'
+import { AlertCircle, ChevronDown, ChevronRight, Loader2, Users } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -145,9 +139,7 @@ function StudentHistory({
               </div>
               <div className="space-y-0.5">
                 <div className="text-sm font-medium leading-tight">{subject}</div>
-                {teacher && (
-                  <div className="text-[11px] text-muted-foreground">{teacher}</div>
-                )}
+                {teacher && <div className="text-[11px] text-muted-foreground">{teacher}</div>}
                 {record.justification && (
                   <div className="text-[11px] italic text-muted-foreground">
                     “{record.justification}”
@@ -290,7 +282,12 @@ function AttendancesTableContent({
     setPage(1)
   }
 
-  const { data: response, isLoading, isFetching, isError } = useQuery(
+  const {
+    data: response,
+    isLoading,
+    isFetching,
+    isError,
+  } = useQuery(
     api.api.v1.attendance.classStudents.queryOptions({
       params: { classId },
       query: {
@@ -419,93 +416,93 @@ function AttendancesTableContent({
           {!isLoading &&
             !isError &&
             attendances.map((attendance) => {
-            const isExpanded = expanded.has(attendance.student.id)
-            return (
-              <Fragment key={attendance.student.id}>
-                <TableRow
-                  className={cn('cursor-pointer', isExpanded && 'bg-muted/30')}
-                  onClick={() => toggle(attendance.student.id)}
-                >
-                  <TableCell className="w-8">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 w-7 p-0"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        toggle(attendance.student.id)
-                      }}
-                      aria-expanded={isExpanded}
-                      aria-label={isExpanded ? 'Recolher histórico' : 'Expandir histórico'}
-                    >
-                      {isExpanded ? (
-                        <ChevronDown className="h-4 w-4" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </TableCell>
-                  <TableCell className="font-medium">{attendance.student.name}</TableCell>
-                  <TableCell className="text-center tabular-nums">
-                    {attendance.presentCount}
-                  </TableCell>
-                  <TableCell className="text-center tabular-nums">
-                    {attendance.absentCount > 0 ? (
-                      <span className="text-rose-700 dark:text-rose-300">
-                        {attendance.absentCount}
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground">0</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-center tabular-nums">
-                    {attendance.lateCount > 0 ? (
-                      <span className="text-amber-700 dark:text-amber-300">
-                        {attendance.lateCount}
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground">0</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-center tabular-nums">
-                    {attendance.justifiedCount > 0 ? (
-                      <span>{attendance.justifiedCount}</span>
-                    ) : (
-                      <span className="text-muted-foreground">0</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center justify-center gap-2">
-                      <Progress value={attendance.attendancePercentage} className="h-1.5 w-20" />
-                      <span
-                        className={cn(
-                          'tabular-nums text-xs font-medium',
-                          getFrequencyTone(attendance.attendancePercentage)
-                        )}
+              const isExpanded = expanded.has(attendance.student.id)
+              return (
+                <Fragment key={attendance.student.id}>
+                  <TableRow
+                    className={cn('cursor-pointer', isExpanded && 'bg-muted/30')}
+                    onClick={() => toggle(attendance.student.id)}
+                  >
+                    <TableCell className="w-8">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toggle(attendance.student.id)
+                        }}
+                        aria-expanded={isExpanded}
+                        aria-label={isExpanded ? 'Recolher histórico' : 'Expandir histórico'}
                       >
-                        {attendance.attendancePercentage}%
-                      </span>
-                    </div>
-                  </TableCell>
-                </TableRow>
-                {isExpanded && (
-                  <TableRow className="hover:bg-transparent">
-                    <TableCell />
-                    <TableCell colSpan={6} className="bg-muted/20 py-2 pr-4">
-                      <StudentHistory
-                        studentId={attendance.student.id}
-                        classId={classId}
-                        academicPeriodId={academicPeriodId}
-                        subPeriodId={subPeriodId}
-                        subPeriodIsLocked={subPeriodIsLocked}
-                      />
+                        {isExpanded ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </TableCell>
+                    <TableCell className="font-medium">{attendance.student.name}</TableCell>
+                    <TableCell className="text-center tabular-nums">
+                      {attendance.presentCount}
+                    </TableCell>
+                    <TableCell className="text-center tabular-nums">
+                      {attendance.absentCount > 0 ? (
+                        <span className="text-rose-700 dark:text-rose-300">
+                          {attendance.absentCount}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">0</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center tabular-nums">
+                      {attendance.lateCount > 0 ? (
+                        <span className="text-amber-700 dark:text-amber-300">
+                          {attendance.lateCount}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">0</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center tabular-nums">
+                      {attendance.justifiedCount > 0 ? (
+                        <span>{attendance.justifiedCount}</span>
+                      ) : (
+                        <span className="text-muted-foreground">0</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-center gap-2">
+                        <Progress value={attendance.attendancePercentage} className="h-1.5 w-20" />
+                        <span
+                          className={cn(
+                            'tabular-nums text-xs font-medium',
+                            getFrequencyTone(attendance.attendancePercentage)
+                          )}
+                        >
+                          {attendance.attendancePercentage}%
+                        </span>
+                      </div>
                     </TableCell>
                   </TableRow>
-                )}
-              </Fragment>
-            )
-          })}
+                  {isExpanded && (
+                    <TableRow className="hover:bg-transparent">
+                      <TableCell />
+                      <TableCell colSpan={6} className="bg-muted/20 py-2 pr-4">
+                        <StudentHistory
+                          studentId={attendance.student.id}
+                          classId={classId}
+                          academicPeriodId={academicPeriodId}
+                          subPeriodId={subPeriodId}
+                          subPeriodIsLocked={subPeriodIsLocked}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </Fragment>
+              )
+            })}
         </TableBody>
       </Table>
 

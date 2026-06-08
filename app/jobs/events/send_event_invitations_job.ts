@@ -104,9 +104,8 @@ export default class SendEventInvitationsJob extends Job<SendEventInvitationsPay
           // Se evento tem template de assinatura, dispara fluxo no Autentique.
           // Fire-and-forget — erro não impede outras consents nem o job.
           if (event.signatureTemplatePdfKey && event.signatureTemplateSchemas) {
-            const { startConsentSignature } = await import(
-              '#services/signature/event_consent_signature_service'
-            )
+            const { startConsentSignature } =
+              await import('#services/signature/event_consent_signature_service')
             startConsentSignature(createdConsentId)
               .then((outcome) => {
                 console.info(
@@ -114,10 +113,7 @@ export default class SendEventInvitationsJob extends Job<SendEventInvitationsPay
                 )
               })
               .catch((err) => {
-                console.error(
-                  `[EVENT_INVITES] consent=${createdConsentId} signature crashed`,
-                  err
-                )
+                console.error(`[EVENT_INVITES] consent=${createdConsentId} signature crashed`, err)
               })
           }
         } catch (error) {

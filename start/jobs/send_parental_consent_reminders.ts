@@ -79,16 +79,8 @@ export async function sendParentalConsentReminders(
     }
 
     const studentName = consent.student?.user?.name ?? 'seu filho'
-    const daysUntil = Math.max(
-      0,
-      Math.ceil(event.startDate.diff(now, 'days').days)
-    )
-    const whenLabel =
-      daysUntil === 0
-        ? 'hoje'
-        : daysUntil === 1
-          ? 'amanhã'
-          : `em ${daysUntil} dias`
+    const daysUntil = Math.max(0, Math.ceil(event.startDate.diff(now, 'days').days))
+    const whenLabel = daysUntil === 0 ? 'hoje' : daysUntil === 1 ? 'amanhã' : `em ${daysUntil} dias`
 
     if (dryRun) {
       logger.info(

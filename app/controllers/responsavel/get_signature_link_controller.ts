@@ -23,9 +23,7 @@ export default class GetSignatureLinkController {
       throw AppException.notFound('Matrícula não encontrada')
     }
 
-    const isResponsible = shl.student.responsibles.some(
-      (r) => r.responsibleId === user.id
-    )
+    const isResponsible = shl.student.responsibles.some((r) => r.responsibleId === user.id)
     if (!isResponsible) {
       throw AppException.forbidden('Você não é responsável por essa matrícula')
     }

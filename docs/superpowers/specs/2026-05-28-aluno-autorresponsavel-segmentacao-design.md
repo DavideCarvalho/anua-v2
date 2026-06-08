@@ -38,13 +38,13 @@ Nota de modelo: o PK de `Student` é o mesmo do `User` (`Student.find(user.id)` 
 
 Em `inertia/components/layouts/aluno-layout.tsx`, quando `user.isSelfResponsible`, renderizar um **novo `SidebarGroup` "Minha Conta"** após o grupo "Menu" existente (paleta adulta, item ativo `bg-primary/10` conforme DESIGN.md), com:
 
-| Item | Rota | Container reusado |
-|---|---|---|
-| Financeiro | `/aluno/financeiro` | `StudentPaymentsContainer` |
-| Documentos | `/aluno/documentos` | container de documentos do responsável |
-| Autorizações | `/aluno/autorizacoes` | `autorizacoes` (#30) |
-| Matrícula | `/aluno/matricula` | `matricula-axes-container` (#9) |
-| Comunicados | `/aluno/comunicados` | container de comunicados do responsável |
+| Item         | Rota                  | Container reusado                       |
+| ------------ | --------------------- | --------------------------------------- |
+| Financeiro   | `/aluno/financeiro`   | `StudentPaymentsContainer`              |
+| Documentos   | `/aluno/documentos`   | container de documentos do responsável  |
+| Autorizações | `/aluno/autorizacoes` | `autorizacoes` (#30)                    |
+| Matrícula    | `/aluno/matricula`    | `matricula-axes-container` (#9)         |
+| Comunicados  | `/aluno/comunicados`  | container de comunicados do responsável |
 
 Novas páginas Inertia `/aluno/*` que renderizam os containers existentes do responsável passando `studentId = user.studentId`. **Zero mudança nos containers ou na API** — o self-link faz a checagem IDOR passar. Novas rotas registradas no grupo `/aluno` (`start/routes/pages/aluno.ts`), que já usa `auth` + `impersonation`.
 

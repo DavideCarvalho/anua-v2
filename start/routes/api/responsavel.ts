@@ -9,9 +9,7 @@ export function registerVerifyEnrollmentRoute() {
 }
 
 export function registerCalendarFeedRoutes() {
-  router
-    .get('/calendars/:token', [controllers.calendars.GetCalendarFeed])
-    .as('calendar_feed')
+  router.get('/calendars/:token', [controllers.calendars.GetCalendarFeed]).as('calendar_feed')
 }
 
 export function registerResponsavelApiRoutes() {
@@ -80,9 +78,7 @@ export function registerResponsavelApiRoutes() {
         .get('/matriculas/:matriculaId', [controllers.responsavel.GetEnrollmentAxes])
         .as('enrollment_axes')
       router
-        .get('/matriculas/:matriculaId/signature-link', [
-          controllers.responsavel.GetSignatureLink,
-        ])
+        .get('/matriculas/:matriculaId/signature-link', [controllers.responsavel.GetSignatureLink])
         .as('enrollment_signature_link')
       router
         .get('/consents/:consentId/signature-link', [
@@ -107,9 +103,7 @@ export function registerResponsavelApiRoutes() {
         .get('/students/:studentId/calendar', [controllers.responsavel.GetStudentCalendar])
         .as('student_calendar')
       router
-        .get('/students/:studentId/calendar-feed-url', [
-          controllers.calendars.GetCalendarFeedUrl,
-        ])
+        .get('/students/:studentId/calendar-feed-url', [controllers.calendars.GetCalendarFeedUrl])
         .as('student_calendar_feed_url')
       router
         .get('/matriculas/:matriculaId/certificate', [

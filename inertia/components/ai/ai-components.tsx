@@ -28,37 +28,37 @@ function formatBRL(cents: number) {
 // columns consistently, so we translate on the way out. Keys are
 // case-insensitive (we lowercase before lookup).
 const COLUMN_LABELS: Record<string, string> = {
-  id: 'ID',
-  name: 'Nome',
-  email: 'E-mail',
-  phone: 'Telefone',
-  status: 'Status',
-  type: 'Tipo',
-  qtd: 'Quantidade',
-  total: 'Total',
-  turma: 'Turma',
-  class_name: 'Turma',
-  total_alunos: 'Total de alunos',
-  total_turmas: 'Total de turmas',
-  total_professores: 'Total de professores',
-  enrollmentstatus: 'Status',
-  monthlypaymentamount: 'Mensalidade',
-  overdueamount: 'Inadimplência',
-  createdat: 'Criado em',
-  updatedat: 'Atualizado em',
-  duedate: 'Vencimento',
+  'id': 'ID',
+  'name': 'Nome',
+  'email': 'E-mail',
+  'phone': 'Telefone',
+  'status': 'Status',
+  'type': 'Tipo',
+  'qtd': 'Quantidade',
+  'total': 'Total',
+  'turma': 'Turma',
+  'class_name': 'Turma',
+  'total_alunos': 'Total de alunos',
+  'total_turmas': 'Total de turmas',
+  'total_professores': 'Total de professores',
+  'enrollmentstatus': 'Status',
+  'monthlypaymentamount': 'Mensalidade',
+  'overdueamount': 'Inadimplência',
+  'createdat': 'Criado em',
+  'updatedat': 'Atualizado em',
+  'duedate': 'Vencimento',
   // English aliases the model sometimes emits despite the PT-BR context
-  student_name: 'Aluno',
+  'student_name': 'Aluno',
   'student name': 'Aluno',
-  studentname: 'Aluno',
-  total_amount: 'Valor total',
+  'studentname': 'Aluno',
+  'total_amount': 'Valor total',
   'total amount': 'Valor total',
-  totalamount: 'Valor total',
-  month: 'Mês',
-  year: 'Ano',
-  amount: 'Valor',
-  description: 'Descrição',
-  count: 'Quantidade',
+  'totalamount': 'Valor total',
+  'month': 'Mês',
+  'year': 'Ano',
+  'amount': 'Valor',
+  'description': 'Descrição',
+  'count': 'Quantidade',
 }
 
 // Discrete enum values the schema uses; mapping to PT-BR labels.
@@ -78,13 +78,7 @@ const VALUE_LABELS: Record<string, string> = {
 }
 
 // Columns whose integer values are in BRL cents and should render as money.
-const MONEY_COLUMNS = new Set([
-  'total',
-  'amount',
-  'valor',
-  'monthlyPaymentAmount',
-  'overdueAmount',
-])
+const MONEY_COLUMNS = new Set(['total', 'amount', 'valor', 'monthlyPaymentAmount', 'overdueAmount'])
 
 const MONEY_COLUMN_PATTERN = /centavos?\b|\bcents?\b|amount/i
 
@@ -98,12 +92,16 @@ function humanizeColumn(col: string): string {
     .replace(/\s*\(centavos?\)\s*/gi, '')
     .replace(/[_-]?cents?\b/gi, '')
     .trim()
-  const spaced = stripped.replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase()
+  const spaced = stripped
+    .replace(/_/g, ' ')
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .toLowerCase()
   return spaced.charAt(0).toUpperCase() + spaced.slice(1)
 }
 
 // Detect ISO-8601 dates (with or without time) and format to pt-BR
-const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?$/
+const ISO_DATE_RE =
+  /^\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?$/
 
 function formatIsoDate(raw: string): string {
   const d = new Date(raw)
@@ -254,7 +252,9 @@ export function QueryResultCard({ rows, rowCount }: { rows?: DataRow[]; rowCount
   return (
     <div className="overflow-x-auto rounded-lg border py-2">
       <DataTable rows={rows} />
-      <p className="px-3 py-1 text-xs text-muted-foreground">{rowCount ?? rows.length} resultado(s)</p>
+      <p className="px-3 py-1 text-xs text-muted-foreground">
+        {rowCount ?? rows.length} resultado(s)
+      </p>
     </div>
   )
 }
@@ -388,10 +388,7 @@ export function Comparison({
   const TrendIcon = dir === 'flat' ? Minus : dir === 'up' ? TrendingUp : TrendingDown
   // Cor é função de "melhorou ou piorou", não da direção crua. Para overdue
   // ou faltas, descer é verde; para matrículas/comunicados, subir é verde.
-  const improvement =
-    typeof isImprovement === 'boolean'
-      ? isImprovement
-      : dir === 'flat'
+  const improvement = typeof isImprovement === 'boolean' ? isImprovement : dir === 'flat'
 
   const deltaColor =
     dir === 'flat'
@@ -434,8 +431,8 @@ export function Comparison({
             {pctLabel}
           </span>
           <span className="text-muted-foreground">
-            vs {periodLabel ?? 'período anterior'} ({thenValue.toLocaleString('pt-BR')}{' '}
-            {unit ?? ''})
+            vs {periodLabel ?? 'período anterior'} ({thenValue.toLocaleString('pt-BR')} {unit ?? ''}
+            )
           </span>
         </div>
         {breakdown?.items && breakdown.items.length > 0 ? (
@@ -447,7 +444,8 @@ export function Comparison({
               {breakdown.items.map((item, i) => {
                 const delta = item.delta ?? (item.now ?? 0) - (item.then ?? 0)
                 const itemDir = delta === 0 ? 'flat' : delta > 0 ? 'up' : 'down'
-                const ItemIcon = itemDir === 'flat' ? Minus : itemDir === 'up' ? TrendingUp : TrendingDown
+                const ItemIcon =
+                  itemDir === 'flat' ? Minus : itemDir === 'up' ? TrendingUp : TrendingDown
                 // Mesma heurística: se o agregado sobe e isImprovement=false,
                 // então subir item-a-item também é ruim.
                 const itemIsBad =
@@ -471,7 +469,9 @@ export function Comparison({
                         {(item.now ?? 0).toLocaleString('pt-BR')} (era{' '}
                         {(item.then ?? 0).toLocaleString('pt-BR')})
                       </span>
-                      <span className={cn('inline-flex items-center gap-0.5 font-medium', itemColor)}>
+                      <span
+                        className={cn('inline-flex items-center gap-0.5 font-medium', itemColor)}
+                      >
                         <ItemIcon className="h-3 w-3" />
                         {delta > 0 ? '+' : ''}
                         {delta}
@@ -605,7 +605,9 @@ export function Grid({ children, columns = 2 }: { children?: ReactNode; columns?
 
 const componentRegistry: Record<string, (props: Record<string, unknown>) => ReactNode> = {
   SchoolStatsCard: (p) => <SchoolStatsCard {...(p as Parameters<typeof SchoolStatsCard>[0])} />,
-  StudentAlertsCard: (p) => <StudentAlertsCard {...(p as Parameters<typeof StudentAlertsCard>[0])} />,
+  StudentAlertsCard: (p) => (
+    <StudentAlertsCard {...(p as Parameters<typeof StudentAlertsCard>[0])} />
+  ),
   DataTable: (p) => <DataTable {...(p as Parameters<typeof DataTable>[0])} />,
   InfoCard: (p) => <InfoCard {...(p as Parameters<typeof InfoCard>[0])} />,
   Stat: (p) => <Stat {...(p as Parameters<typeof Stat>[0])} />,
@@ -642,4 +644,3 @@ export const toolComponents: Record<string, ToolRenderer> = {
     return render({ ...data, title })
   },
 }
-

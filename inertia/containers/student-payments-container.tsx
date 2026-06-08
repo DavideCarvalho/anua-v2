@@ -1,5 +1,10 @@
 import { useState, useMemo } from 'react'
-import { useQuery, useMutation, useQueryClient, QueryErrorResetBoundary } from '@tanstack/react-query'
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  QueryErrorResetBoundary,
+} from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
 import type { LucideIcon } from 'lucide-react'
@@ -307,9 +312,7 @@ function StudentPaymentsContent({
     })
   }
 
-  const createProposalMutation = useMutation(
-    api.api.v1.agreementProposals.store.mutationOptions()
-  )
+  const createProposalMutation = useMutation(api.api.v1.agreementProposals.store.mutationOptions())
 
   // URL state with nuqs
   const [filters, setFilters] = useQueryStates({
@@ -341,7 +344,14 @@ function StudentPaymentsContent({
   )
   const classes: ClassItem[] = classesData?.data ?? []
 
-  const hasActiveFilters = !!(filterStatus || filterType || filterMonth || filterYear || classId || overdueRange !== '_all')
+  const hasActiveFilters = !!(
+    filterStatus ||
+    filterType ||
+    filterMonth ||
+    filterYear ||
+    classId ||
+    overdueRange !== '_all'
+  )
 
   function clearFilters() {
     setFilters({ status: null, type: null, month: null, year: null, classId: null, page: 1 })
@@ -378,18 +388,16 @@ function StudentPaymentsContent({
     [selectedPayments]
   )
 
-  const canCreateProposal =
-    selectedPayments.length >= 2 && selectedStudentIds.size === 1
+  const canCreateProposal = selectedPayments.length >= 2 && selectedStudentIds.size === 1
 
-  const proposalError = selectedPayments.length >= 2 && selectedStudentIds.size > 1
-    ? 'Selecione faturas do mesmo aluno'
-    : null
+  const proposalError =
+    selectedPayments.length >= 2 && selectedStudentIds.size > 1
+      ? 'Selecione faturas do mesmo aluno'
+      : null
 
   async function handleCreateProposal() {
     try {
-      const invoiceIds = selectedPayments
-        .map((p) => p.invoiceId)
-        .filter((id): id is string => !!id)
+      const invoiceIds = selectedPayments.map((p) => p.invoiceId).filter((id): id is string => !!id)
 
       await createProposalMutation.mutateAsync({
         body: { invoiceIds, installments: proposalInstallments },
@@ -524,7 +532,10 @@ function StudentPaymentsContent({
         <div className="flex items-center gap-2">
           <Select
             value={overdueRange}
-            onValueChange={(v) => { setOverdueRange(v as OverdueRange); setFilters({ page: 1 }) }}
+            onValueChange={(v) => {
+              setOverdueRange(v as OverdueRange)
+              setFilters({ page: 1 })
+            }}
           >
             <SelectTrigger className="w-40">
               <SelectValue>
@@ -596,7 +607,10 @@ function StudentPaymentsContent({
                   const daysOverdue = getDaysOverdue(payment.status, payment.dueDate)
 
                   return (
-                    <tr key={payment.id} className={`border-t hover:bg-muted/30 transition-colors ${selectedIds.has(payment.id) ? 'bg-primary/5' : ''}`}>
+                    <tr
+                      key={payment.id}
+                      className={`border-t hover:bg-muted/30 transition-colors ${selectedIds.has(payment.id) ? 'bg-primary/5' : ''}`}
+                    >
                       {activeStatus === 'OVERDUE' && (
                         <td className="p-4">
                           <Checkbox
@@ -711,16 +725,11 @@ function StudentPaymentsContent({
       {selectedIds.size > 0 && activeStatus === 'OVERDUE' && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-lg bg-foreground px-4 py-3 text-background shadow-lg">
           <span className="text-sm font-medium">
-            {selectedIds.size} fatura{selectedIds.size > 1 ? 's' : ''} selecionada{selectedIds.size > 1 ? 's' : ''}
+            {selectedIds.size} fatura{selectedIds.size > 1 ? 's' : ''} selecionada
+            {selectedIds.size > 1 ? 's' : ''}
           </span>
-          {proposalError && (
-            <span className="text-xs text-destructive">{proposalError}</span>
-          )}
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => setSelectedIds(new Set())}
-          >
+          {proposalError && <span className="text-xs text-destructive">{proposalError}</span>}
+          <Button size="sm" variant="secondary" onClick={() => setSelectedIds(new Set())}>
             Limpar
           </Button>
           <Button
@@ -728,7 +737,8 @@ function StudentPaymentsContent({
             onClick={() => {
               if (!canCreateProposal) {
                 if (selectedIds.size < 2) toast.error('Selecione pelo menos 2 faturas')
-                else if (selectedStudentIds.size > 1) toast.error('Selecione faturas do mesmo aluno')
+                else if (selectedStudentIds.size > 1)
+                  toast.error('Selecione faturas do mesmo aluno')
                 return
               }
               const total = selectedPayments.reduce((s, p) => s + Number(p.amount ?? 0), 0)
@@ -747,17 +757,22 @@ function StudentPaymentsContent({
           <DialogHeader>
             <DialogTitle>Criar proposta de acordo</DialogTitle>
             <DialogDescription>
-              Proposta para {selectedPayments[0]?.student?.user?.name ?? 'aluno'} com {selectedPayments.length} faturas em atraso.
+              Proposta para {selectedPayments[0]?.student?.user?.name ?? 'aluno'} com{' '}
+              {selectedPayments.length} faturas em atraso.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="rounded-lg bg-muted/50 p-3 space-y-2">
               <p className="text-sm font-medium">
-                Total: {formatCurrency(selectedPayments.reduce((s, p) => s + Number(p.amount ?? 0), 0))}
+                Total:{' '}
+                {formatCurrency(selectedPayments.reduce((s, p) => s + Number(p.amount ?? 0), 0))}
               </p>
               <div className="flex flex-wrap gap-1">
                 {selectedPayments.map((p) => (
-                  <span key={p.id} className="text-xs bg-background px-2 py-1 rounded ring-1 ring-foreground/10">
+                  <span
+                    key={p.id}
+                    className="text-xs bg-background px-2 py-1 rounded ring-1 ring-foreground/10"
+                  >
                     {p.month}/{p.year} — {formatCurrency(Number(p.amount ?? 0))}
                   </span>
                 ))}
@@ -773,8 +788,18 @@ function StudentPaymentsContent({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="2">2x de {formatCurrency(Math.ceil(selectedPayments.reduce((s, p) => s + Number(p.amount ?? 0), 0) / 2))}</SelectItem>
-                  <SelectItem value="3">3x de {formatCurrency(Math.ceil(selectedPayments.reduce((s, p) => s + Number(p.amount ?? 0), 0) / 3))}</SelectItem>
+                  <SelectItem value="2">
+                    2x de{' '}
+                    {formatCurrency(
+                      Math.ceil(selectedPayments.reduce((s, p) => s + Number(p.amount ?? 0), 0) / 2)
+                    )}
+                  </SelectItem>
+                  <SelectItem value="3">
+                    3x de{' '}
+                    {formatCurrency(
+                      Math.ceil(selectedPayments.reduce((s, p) => s + Number(p.amount ?? 0), 0) / 3)
+                    )}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -783,10 +808,7 @@ function StudentPaymentsContent({
             <Button variant="outline" onClick={() => setProposalDialogOpen(false)}>
               Cancelar
             </Button>
-            <Button
-              onClick={handleCreateProposal}
-              disabled={createProposalMutation.isPending}
-            >
+            <Button onClick={handleCreateProposal} disabled={createProposalMutation.isPending}>
               <Handshake className="mr-1 h-3.5 w-3.5" />
               Criar proposta
             </Button>

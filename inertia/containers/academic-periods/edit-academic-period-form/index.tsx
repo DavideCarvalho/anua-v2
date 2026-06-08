@@ -127,7 +127,10 @@ export function EditAcademicPeriodForm({ academicPeriod }: EditAcademicPeriodFor
     api.api.v1.academicPeriods.updateAcademicPeriod.mutationOptions()
   )
   const updatePeriodMutation = useMutation({
-    mutationFn: async (payload: { data: EditAcademicPeriodFormValues; subPeriods?: SubPeriodPayload[] }) => {
+    mutationFn: async (payload: {
+      data: EditAcademicPeriodFormValues
+      subPeriods?: SubPeriodPayload[]
+    }) => {
       await updateAcademicPeriodMutation.mutateAsync({
         params: { id: academicPeriod.id },
         body: {

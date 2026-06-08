@@ -27,9 +27,7 @@ export default function MatriculaPage() {
             <GraduationCap className="h-6 w-6" />
             Minha matrícula
           </h1>
-          <p className="text-muted-foreground">
-            Acompanhe o que falta pra concluir sua matrícula.
-          </p>
+          <p className="text-muted-foreground">Acompanhe o que falta pra concluir sua matrícula.</p>
         </div>
 
         <ErrorBoundary

@@ -114,9 +114,7 @@ function AuditRowItem({ row }: { row: AuditRow }) {
         <TableCell className="text-xs">
           {row.thread ? (
             <span className="inline-flex items-center gap-1.5">
-              <span className="max-w-[200px] truncate">
-                {row.thread.title ?? 'Sem título'}
-              </span>
+              <span className="max-w-[200px] truncate">{row.thread.title ?? 'Sem título'}</span>
               <Badge variant="outline" className="text-[10px] uppercase">
                 {row.thread.channel}
               </Badge>
@@ -219,9 +217,8 @@ export default function AiAuditPage() {
               Auditoria de IA
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Histórico de toda chamada de tool feita pelo assistente. Esta
-              tela é só leitura — a aprovação de tools de escrita acontece
-              no próprio chat de quem fez o pedido.
+              Histórico de toda chamada de tool feita pelo assistente. Esta tela é só leitura — a
+              aprovação de tools de escrita acontece no próprio chat de quem fez o pedido.
             </p>
           </div>
           <div className="text-xs tabular-nums text-muted-foreground">{total} chamadas</div>
@@ -334,8 +331,8 @@ export default function AiAuditPage() {
         {!isLoading && !error && rows.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center text-sm text-muted-foreground">
-              Nenhuma chamada registrada ainda. Toda vez que o assistente usar
-              uma tool, ela aparece aqui.
+              Nenhuma chamada registrada ainda. Toda vez que o assistente usar uma tool, ela aparece
+              aqui.
             </CardContent>
           </Card>
         ) : null}

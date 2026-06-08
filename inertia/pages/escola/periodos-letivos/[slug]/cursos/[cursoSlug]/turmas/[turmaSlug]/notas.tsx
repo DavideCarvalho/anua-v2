@@ -100,9 +100,7 @@ export default function TurmaNotasPage({
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Notas por Matéria</CardTitle>
-              <CardDescription>
-                Visualize as notas dos alunos agrupadas por matéria
-              </CardDescription>
+              <CardDescription>Visualize as notas dos alunos agrupadas por matéria</CardDescription>
             </div>
             {subjects.length > 0 && (
               <div className="w-64">

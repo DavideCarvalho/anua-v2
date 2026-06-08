@@ -39,10 +39,7 @@ function ToolbarButton({
       aria-pressed={active}
       disabled={disabled}
       onClick={onClick}
-      className={cn(
-        'h-8 px-2 text-muted-foreground',
-        active && 'bg-muted text-foreground'
-      )}
+      className={cn('h-8 px-2 text-muted-foreground', active && 'bg-muted text-foreground')}
     >
       {children}
     </Button>

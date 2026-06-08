@@ -26,9 +26,7 @@ export async function notifySchoolStaff(schoolId: string, params: NotifyParams) 
     .whereIn('roleId', staffRoleIds)
     .where('active', true)
 
-  const linkedUserSchools = await UserHasSchool.query()
-    .where('schoolId', schoolId)
-    .preload('user')
+  const linkedUserSchools = await UserHasSchool.query().where('schoolId', schoolId).preload('user')
 
   const userIds = new Set<string>()
   for (const u of directUsers) userIds.add(u.id)

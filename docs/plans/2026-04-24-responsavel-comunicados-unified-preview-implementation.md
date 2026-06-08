@@ -13,6 +13,7 @@
 ### Task 1: Garantir contrato de anexos para preview no endpoint de responsavel
 
 **Files:**
+
 - Modify: `tests/functional/responsavel/comunicados_api.spec.ts`
 - Optional modify (somente se teste falhar): `app/controllers/responsavel/list_comunicados_controller.ts`
 - Optional modify (somente se teste falhar): `app/transformers/school_announcement_attachment_transformer.ts`
@@ -20,6 +21,7 @@
 **Step 1: Write the failing test**
 
 Adicionar teste cobrindo que a listagem de comunicados retorna anexos com campos necessarios para preview unificado:
+
 - `id`
 - `fileName`
 - `fileUrl` (campo presente, podendo ser `null`)
@@ -41,6 +43,7 @@ Expected: FAIL se o contrato nao estiver consistente.
 **Step 3: Write minimal implementation**
 
 Se necessario, ajustar serializacao em:
+
 - `app/controllers/responsavel/list_comunicados_controller.ts`
 - `app/transformers/school_announcement_attachment_transformer.ts`
 
@@ -62,12 +65,14 @@ git commit -m "test(responsavel): lock attachments contract for in-app preview"
 ### Task 2: Implementar componente de preview unificado (modal unico)
 
 **Files:**
+
 - Create: `inertia/components/ui/file-preview-lightbox.tsx`
 - Modify (se necessario para utilitarios): `inertia/lib/utils.ts`
 
 **Step 1: Write the failing test**
 
 Criar teste do componente (no padrao existente do projeto) cobrindo:
+
 - renderiza imagem quando arquivo e `image/*`
 - renderiza `iframe` quando arquivo e PDF
 - renderiza fallback quando tipo e desconhecido ou URL ausente
@@ -93,6 +98,7 @@ type PreviewFile = {
 ```
 
 Comportamento:
+
 - `Dialog` fullscreen com overlay escuro.
 - Header: nome arquivo + contador + botoes anterior/proximo/baixar/fechar.
 - Body:
@@ -116,11 +122,13 @@ git commit -m "feat(ui): add unified file preview lightbox for images and pdfs"
 ### Task 3: Integrar lightbox na pagina de comunicados do responsavel
 
 **Files:**
+
 - Modify: `inertia/pages/responsavel/comunicados.tsx`
 
 **Step 1: Write the failing test**
 
 Adicionar teste da pagina cobrindo:
+
 - clique em anexo abre modal (em vez de nova aba)
 - navegacao entre anexos no mesmo modal
 - imagem e PDF renderizam com o mesmo overlay escuro
@@ -134,6 +142,7 @@ Expected: FAIL antes da integracao.
 **Step 3: Write minimal implementation**
 
 Em `inertia/pages/responsavel/comunicados.tsx`:
+
 - adicionar estado do modal (`open`, `files`, `initialIndex`)
 - trocar links externos por botoes que abrem `FilePreviewLightbox`
 - manter bloco de anexos no card
@@ -155,6 +164,7 @@ git commit -m "feat(responsavel): open comunicado attachments in unified in-app 
 ### Task 4: Validacao final e deploy
 
 **Files:**
+
 - No file changes required
 
 **Step 1: Run focused tests**
@@ -183,9 +193,11 @@ Expected: workflows `Deploy` e `Deploy Quave` com `success`.
 **Step 4: Validate in production**
 
 Testar em:
+
 - `https://anuaapp.com.br/responsavel/comunicados?aluno=cleiton-filho-019c05ed`
 
 Checklist:
+
 - abre modal unico para anexos
 - imagem renderiza in-app
 - PDF renderiza in-app no mesmo estilo

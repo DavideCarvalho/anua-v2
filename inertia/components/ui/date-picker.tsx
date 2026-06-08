@@ -104,7 +104,7 @@ export function DatePicker({
     setOpen(false)
   }
 
-      return (
+  return (
     <Popover open={open} onOpenChange={setOpen}>
       <div className="relative">
         <Input

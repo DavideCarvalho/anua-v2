@@ -51,9 +51,7 @@ export default function InadimplenciaPage() {
     </>
   )
 
-  const paymentsContainer = (
-    <StudentPaymentsContainer status="OVERDUE" showSearch={false} />
-  )
+  const paymentsContainer = <StudentPaymentsContainer status="OVERDUE" showSearch={false} />
 
   if (viewMode === 'simple') {
     return (

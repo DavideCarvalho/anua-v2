@@ -19,9 +19,7 @@ export default class ApproveAgreementProposalController {
       .firstOrFail()
 
     if (proposal.status !== 'PENDING_SCHOOL_APPROVAL') {
-      throw AppException.badRequest(
-        `Proposta não pode ser aprovada no status "${proposal.status}"`
-      )
+      throw AppException.badRequest(`Proposta não pode ser aprovada no status "${proposal.status}"`)
     }
 
     proposal.status = 'APPROVED'
@@ -40,19 +38,21 @@ export default class ApproveAgreementProposalController {
 
     const notificationService = new NotificationService()
     for (const rel of financialResponsibles) {
-      notificationService.send({
-        userId: rel.responsibleId,
-        type: 'AGREEMENT_PROPOSAL',
-        title: 'Proposta de Acordo Disponível',
-        message: `Sua escola disponibilizou uma proposta de acordo no valor de ${totalFormatted} em ${proposal.installments}x para faturas em atraso. Acesse o portal para aceitar.`,
-        data: {
-          proposalId: proposal.id,
-          studentId: proposal.studentId,
-          totalAmount: proposal.totalAmount,
-          installments: proposal.installments,
-        },
-        actionUrl: '/financeiro',
-      }).catch(() => {})
+      notificationService
+        .send({
+          userId: rel.responsibleId,
+          type: 'AGREEMENT_PROPOSAL',
+          title: 'Proposta de Acordo Disponível',
+          message: `Sua escola disponibilizou uma proposta de acordo no valor de ${totalFormatted} em ${proposal.installments}x para faturas em atraso. Acesse o portal para aceitar.`,
+          data: {
+            proposalId: proposal.id,
+            studentId: proposal.studentId,
+            totalAmount: proposal.totalAmount,
+            installments: proposal.installments,
+          },
+          actionUrl: '/financeiro',
+        })
+        .catch(() => {})
     }
 
     proposal.status = 'SENT_TO_RESPONSIBLE'
@@ -62,4 +62,3 @@ export default class ApproveAgreementProposalController {
     return serialize(AgreementProposalTransformer.transform(proposal))
   }
 }
-

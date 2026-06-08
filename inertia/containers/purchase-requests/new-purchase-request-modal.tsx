@@ -125,17 +125,16 @@ export function NewPurchaseRequestModal({
           queryKey: api.api.v1.purchaseRequests.index.pathKey(),
         })
         queryClient.invalidateQueries({
-          queryKey: api.api.v1.purchaseRequests.show
-            .queryOptions({ params: { id: purchaseRequestId } })
-            .queryKey,
+          queryKey: api.api.v1.purchaseRequests.show.queryOptions({
+            params: { id: purchaseRequestId },
+          }).queryKey,
         })
 
         toast.success('Solicitação atualizada com sucesso!')
         form.reset()
         onSubmit()
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : 'Erro ao atualizar solicitação'
+        const message = error instanceof Error ? error.message : 'Erro ao atualizar solicitação'
         toast.error(message)
       }
       return

@@ -141,7 +141,9 @@ export default class RunGenerateAgreementProposals extends BaseCommand {
         created++
       } catch (error) {
         await trx.rollback()
-        this.logger.error(`  Erro ao criar proposta para ${studentId}: ${error instanceof Error ? error.message : String(error)}`)
+        this.logger.error(
+          `  Erro ao criar proposta para ${studentId}: ${error instanceof Error ? error.message : String(error)}`
+        )
       }
     }
 

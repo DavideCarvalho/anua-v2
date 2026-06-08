@@ -251,9 +251,7 @@ export default function HorariosPage() {
           disabled={loadingPeriods}
         >
           <SelectTrigger>
-            <SelectValue
-              placeholder={loadingPeriods ? 'Carregando...' : 'Selecione um período'}
-            >
+            <SelectValue placeholder={loadingPeriods ? 'Carregando...' : 'Selecione um período'}>
               {academicPeriods.find((ap) => ap.id === selectedAcademicPeriodId)?.name ||
                 (loadingPeriods ? 'Carregando...' : 'Selecione um período')}
             </SelectValue>

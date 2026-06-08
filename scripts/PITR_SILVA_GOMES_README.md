@@ -37,6 +37,7 @@ PGPASSWORD='SUA_SENHA' psql "postgresql://app_user@35.199.111.141:5432/school_su
 ### 3. Comparar com o resultado do prod (já executado)
 
 O baseline do prod foi salvo. Compare:
+
 - **ContractPaymentDay**: datas de pagamento (10, 15, 20, 25) por contrato
 - **StudentPayment**: parcelas com dueDate e updatedAt
 - **Contratos**: contagem de payment days por contrato

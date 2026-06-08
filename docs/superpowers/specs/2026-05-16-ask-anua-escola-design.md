@@ -26,6 +26,7 @@ Reutiliza toda a infra de AI existente (`AiChatPane`, `AiService`, `ChatScope`).
 ### Backend
 
 **Migration** `add_surface_to_ai_threads`:
+
 - Coluna `surface text NOT NULL DEFAULT 'page'`.
 - Backfill via default cobre threads existentes — todas viram `'page'` e continuam aparecendo em `/escola/ia`.
 - Sem índice por enquanto (cardinalidade baixa, queries sempre combinadas com `user_id`).
@@ -33,6 +34,7 @@ Reutiliza toda a infra de AI existente (`AiChatPane`, `AiService`, `ChatScope`).
 **`AiThread` model**: atributo novo `declare surface: 'page' | 'sheet'`.
 
 **`ChatScope`** (extender o tipo em `app/ai/chat_scope.ts`):
+
 ```ts
 export type ChatScope = {
   // ...existing fields
@@ -44,30 +46,36 @@ export type ChatScope = {
 ```
 
 **`chat_controller.ts`**:
+
 - Aceita `screen` no body (junto com `threadId`, `persona`).
 - Aceita `surface` no body (default `'page'` quando ausente — mantém compat com `/escola/ia`).
 - Passa ambos pro `AiService.chat()`.
 
 **`AiService.chat()`**:
+
 - `loadOrCreateThread`: ao criar thread, propaga `surface` recebido.
 - `buildPromptContext`: anexa `scope.screen` ao `SystemPromptContext`.
 - Persona `gestor` (em `app/ai/personas.ts` ou equivalente): se `ctx.scope.screen` presente, anexa ao system prompt um parágrafo gerado dinamicamente. Formato exato:
 
   Quando `screen.id === 'escola_dashboard'` e `filters` vazio/ausente:
+
   > "O usuário está olhando o dashboard geral da escola, sem filtros aplicados. Quando ele perguntar 'a escola' ou usar termos genéricos, assuma o escopo de toda a escola."
 
   Quando `screen.id === 'escola_dashboard'` e há filtros (cada filtro presente vira uma linha labelizada por mapping fixo: `academicPeriodId → "período letivo"`, `subPeriodId → "etapa/sub-período"`, `courseId → "curso"`, `levelId → "nível"`, `classId → "turma"`):
+
   > "O usuário está olhando o dashboard da escola com os seguintes filtros aplicados agora: período letivo=2026, turma=1º ano A. Use esses filtros como contexto implícito — quando ele perguntar 'a turma', 'esse período', etc., assuma os valores acima. Ao chamar tools que aceitam esses parâmetros, passe os ids correspondentes salvo se ele pedir explicitamente outra coisa."
 
   IDs são passados raw no system prompt (modelo pode usar pra tool calls). Labelização (nome legível) só é usada no header do Sheet (frontend), não no system prompt — o model trabalha com ids.
 
 **`list_threads_controller.ts`**:
+
 - Adiciona `where('surface', 'page')` ao default query.
 - Query param opcional `?surface=sheet` libera lookup explícito (não usado por enquanto, mas deixa porta aberta).
 
 ### Frontend
 
 **Novo componente**: `inertia/containers/ai/ask-anua-sheet.tsx`
+
 - Props: `open: boolean`, `onOpenChange: (open: boolean) => void`, `filters: TabFilterState`, `academicPeriods/courses/levels/classes` (pra labelizar filtros no header).
 - Internamente:
   - sessionStorage key: `anua:ask-sheet:thread:${schoolId}`.
@@ -81,15 +89,18 @@ export type ChatScope = {
 **Visibilidade do botão**: mesma lógica de `canViewFinancialTab` no `/escola/index.tsx` atual — `roleName in ['SCHOOL_ADMIN', 'SCHOOL_CHAIN_DIRECTOR', 'SCHOOL_DIRECTOR']`. SCHOOL_TEACHER/TEACHER não veem (alinha com a persona `gestor` que assume escopo de escola inteira).
 
 **Mudanças em `AiChatPane`**:
+
 - Nova prop `hideHeader?: boolean` (default `false`). Quando `true`, não renderiza o `ChatHeader` interno.
 - Nova prop `screen?: { id: string; filters?: Record<string, string> }` — passa no `body` do transport do `useChat`.
 - Nova prop `surface?: 'page' | 'sheet'` (default `'page'`) — passa no `body` do transport.
 - Nova prop `suggestions?: string[]` — sobrescreve prompts do `AiChatEmpty`.
 
 **Mudanças em `AiChatEmpty`**:
+
 - Nova prop `suggestions?: string[]`. Quando presente, substitui o default da persona.
 
 **Função utilitária**: `inertia/lib/contextual-prompts.ts`
+
 - `buildContextualPrompts(filters, labels): string[]` retorna array de prompts baseado em qual nível de filtro está setado:
   - **Nenhum filtro** (todos `'all'`): visão geral.
   - **Só período**: prompts no escopo do período.
@@ -159,6 +170,7 @@ export type ChatScope = {
 ## Testing
 
 ### Backend
+
 - Unit: `AiService.chat()` com `scope.screen` injeta context no `system` arg do `streamText` (mock model).
 - Unit: persona `gestor` system prompt sem `scope.screen` é idêntico ao baseline.
 - Integration: `POST /api/v1/ai/chat` com `body.surface='sheet'` cria thread com `surface='sheet'`.
@@ -167,11 +179,13 @@ export type ChatScope = {
 - Segurança: `body.screen.filters.classId` de outra escola não vaza dados via tools.
 
 ### Frontend
+
 - Unit: `formatContextLabel` retorna strings esperadas para 5 combinações (nenhum / período / período+curso / período+curso+nível / tudo).
 - Unit: `buildContextualPrompts` retorna prompt sets diferentes por nível de filtro.
 - Component: `AskAnuaSheet` empty state mostra prompts contextualizados quando `classId` setado.
 
 ### Manual E2E
+
 1. Abrir `/escola` como SCHOOL_DIRECTOR.
 2. Botão "Perguntar ao Anuá" aparece no header.
 3. Click → Sheet abre, empty state com prompts gerais.
@@ -196,12 +210,14 @@ export type ChatScope = {
 ## Arquivos esperados (estimativa)
 
 **Novos**:
+
 - `database/migrations/<timestamp>_add_surface_to_ai_threads.ts`
 - `inertia/containers/ai/ask-anua-sheet.tsx`
 - `inertia/lib/contextual-prompts.ts`
 - Testes correspondentes.
 
 **Modificados**:
+
 - `app/models/ai_thread.ts` — coluna `surface`.
 - `app/ai/chat_scope.ts` — campo `screen`.
 - `app/ai/ai_service.ts` — propaga `surface` e `screen`.

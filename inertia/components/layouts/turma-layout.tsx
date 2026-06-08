@@ -9,10 +9,7 @@ import { Button } from '../ui/button'
 import { AskAnuaPanel, AskAnuaSheet } from '../../containers/ai/ask-anua-sheet'
 import { useAuthUser } from '../../stores/auth_store'
 import { useIsMobile } from '../../hooks/use_mobile'
-import {
-  useTurmaAskAnuaContext,
-  type TurmaScreenId,
-} from '../../lib/ask-anua-context'
+import { useTurmaAskAnuaContext, type TurmaScreenId } from '../../lib/ask-anua-context'
 import { EscolaLayout } from './escola-layout'
 
 interface TurmaLayoutProps extends PropsWithChildren {
@@ -75,11 +72,7 @@ export function TurmaLayout({
   })
 
   const askAnuaSheet = canUseAskAnua ? (
-    <AskAnuaSheet
-      open={isAskAnuaOpen}
-      onOpenChange={setIsAskAnuaOpen}
-      {...askAnuaContext}
-    />
+    <AskAnuaSheet open={isAskAnuaOpen} onOpenChange={setIsAskAnuaOpen} {...askAnuaContext} />
   ) : null
 
   const askAnuaInline =

@@ -30,7 +30,9 @@ export default class TestSignatureLink extends BaseCommand {
     }
 
     if (!shl.signatureSubmissionId) {
-      this.logger.error('Matrícula não tem signatureSubmissionId — rode test:signature-flow primeiro')
+      this.logger.error(
+        'Matrícula não tem signatureSubmissionId — rode test:signature-flow primeiro'
+      )
       return
     }
 
@@ -71,10 +73,16 @@ export default class TestSignatureLink extends BaseCommand {
 
     this.logger.info('\n--- Status final do StudentHasLevel ---')
     await shl.refresh()
-    console.log(JSON.stringify({
-      id: shl.id,
-      signatureStatus: shl.signatureStatus,
-      signatureSubmissionId: shl.signatureSubmissionId,
-    }, null, 2))
+    console.log(
+      JSON.stringify(
+        {
+          id: shl.id,
+          signatureStatus: shl.signatureStatus,
+          signatureSubmissionId: shl.signatureSubmissionId,
+        },
+        null,
+        2
+      )
+    )
   }
 }

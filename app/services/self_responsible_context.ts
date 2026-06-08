@@ -19,9 +19,7 @@ const EMPTY: SelfResponsibleContext = {
  * Deriva o contexto de aluno autorresponsável a partir do usuário.
  * Requer `user.role` carregado. Retorna vazio pra não-alunos.
  */
-export async function resolveSelfResponsibleContext(
-  user: User
-): Promise<SelfResponsibleContext> {
+export async function resolveSelfResponsibleContext(user: User): Promise<SelfResponsibleContext> {
   if (user.role?.name !== 'STUDENT') return EMPTY
 
   const student = await Student.find(user.id)

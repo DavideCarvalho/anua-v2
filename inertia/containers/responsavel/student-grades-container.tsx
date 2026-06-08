@@ -69,8 +69,10 @@ export function StudentGradesContainer({
   }
 
   const getGradePill = (average: number) => {
-    if (average >= 7) return 'bg-green-500/10 ring-1 ring-green-600/20 text-green-700 dark:text-green-400'
-    if (average >= 5) return 'bg-yellow-500/10 ring-1 ring-yellow-600/20 text-yellow-700 dark:text-yellow-400'
+    if (average >= 7)
+      return 'bg-green-500/10 ring-1 ring-green-600/20 text-green-700 dark:text-green-400'
+    if (average >= 5)
+      return 'bg-yellow-500/10 ring-1 ring-yellow-600/20 text-yellow-700 dark:text-yellow-400'
     return 'bg-red-500/10 ring-1 ring-red-600/20 text-red-700 dark:text-red-400'
   }
 

@@ -10,12 +10,12 @@ Decisão: **uma Matrícula tem quatro eixos de Pendência que avançam de forma 
 
 ## Os quatro eixos
 
-| Eixo | Fonte da verdade | "Resolvido" quando |
-|---|---|---|
-| **Documentação** | `StudentDocumentSubmission.status` por slot, contado contra `ContractDocument.required` | Todos os `ContractDocument` com `required = true` têm uma `StudentDocumentSubmission` correspondente com `status = APPROVED` |
-| **Assinatura** | `StudentHasLevel.signature_status` (enum interno normalizado) | `signature_status = COMPLETED` |
+| Eixo                        | Fonte da verdade                                                                              | "Resolvido" quando                                                                                                                                                                                                                                                                          |
+| --------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Documentação**            | `StudentDocumentSubmission.status` por slot, contado contra `ContractDocument.required`       | Todos os `ContractDocument` com `required = true` têm uma `StudentDocumentSubmission` correspondente com `status = APPROVED`                                                                                                                                                                |
+| **Assinatura**              | `StudentHasLevel.signature_status` (enum interno normalizado)                                 | `signature_status = COMPLETED`                                                                                                                                                                                                                                                              |
 | **Pagamento** (condicional) | `StudentPayment.status` da Taxa de Matrícula + prazo de `Contract.enrollmentPaymentUntilDays` | Se `Contract.enrollmentValue > 0`: estado `PAID` (taxa paga), `PENDING` (devida, dentro do prazo) ou `OVERDUE` (passou do prazo sem pagar — só aplicável se `enrollmentPaymentUntilDays` não for null). Eixo "verde" só quando `PAID`. Se `enrollmentValue = 0` ou null: eixo não se aplica |
-| **Alocação de Turma** | `StudentHasLevel.classId` | `classId` preenchido |
+| **Alocação de Turma**       | `StudentHasLevel.classId`                                                                     | `classId` preenchido                                                                                                                                                                                                                                                                        |
 
 Mensalidades (`monthlyFee`) **não bloqueiam** matrícula — são cobranças recorrentes do aluno já matriculado, problema do módulo financeiro.
 

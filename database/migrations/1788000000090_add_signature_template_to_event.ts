@@ -8,7 +8,9 @@ export default class extends BaseSchema {
        WHERE table_name = 'Event'
        AND column_name IN ('signatureTemplateSchemas', 'signatureTemplatePdfKey')`
     )
-    const eventColNames: string[] = eventCols.rows.map((r: { column_name: string }) => r.column_name)
+    const eventColNames: string[] = eventCols.rows.map(
+      (r: { column_name: string }) => r.column_name
+    )
 
     this.schema.alterTable('Event', (table) => {
       if (!eventColNames.includes('signatureTemplateSchemas')) {

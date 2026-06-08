@@ -19,9 +19,7 @@ export default class RejectResponsibleAgreementProposalController {
       .firstOrFail()
 
     if (proposal.status !== 'SENT_TO_RESPONSIBLE') {
-      throw AppException.badRequest(
-        `Proposta não pode ser recusada no status "${proposal.status}"`
-      )
+      throw AppException.badRequest(`Proposta não pode ser recusada no status "${proposal.status}"`)
     }
 
     const isResponsible = await StudentHasResponsible.query()

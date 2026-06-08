@@ -61,17 +61,18 @@ Implementação completa do sistema de sub-períodos (bimestres, trimestres, sem
 
 Criado componente `SubPeriodFilter` reutilizável (abas "Todas" + cada sub-período).
 
-| Página | Status | Mecanismo |
-|--------|--------|-----------|
-| **Atividades** | ✅ | Filtra por `subPeriodId` no `list_assignments_controller` |
-| **Provas** | ✅ | Filtra por `subPeriodId` no `list_exams_controller` |
-| **Presenças** | ✅ | JOIN com `Attendance` + filtro por data range |
-| **Notas** | ✅ | Já tinha nativo (via `subject-grades-table.tsx`) |
-| **Situação** | ✅ | Filtra assignments, exams e attendance por sub-period ANTES de calcular status |
+| Página         | Status | Mecanismo                                                                      |
+| -------------- | ------ | ------------------------------------------------------------------------------ |
+| **Atividades** | ✅     | Filtra por `subPeriodId` no `list_assignments_controller`                      |
+| **Provas**     | ✅     | Filtra por `subPeriodId` no `list_exams_controller`                            |
+| **Presenças**  | ✅     | JOIN com `Attendance` + filtro por data range                                  |
+| **Notas**      | ✅     | Já tinha nativo (via `subject-grades-table.tsx`)                               |
+| **Situação**   | ✅     | Filtra assignments, exams e attendance por sub-period ANTES de calcular status |
 
 ### 9. Substituição com Merge de Atividades/Provas
 
 No `generate_controller.ts`:
+
 - `overwrite=true`: soft-deleta sub-períodos antigos, cria novos
 - Reassocia TODAS as atividades (`Assignment`) e provas (`Exam`) do período letivo para os novos sub-períodos baseado na data (`dueDate` / `examDate`)
 - Se não for overwrite: reassocia apenas itens com `subPeriodId = null`
@@ -88,69 +89,74 @@ No `generate_controller.ts`:
 
 ### Backend (23 arquivos)
 
-| Arquivo | Mudança |
-|---------|---------|
-| `database/migrations/1781000007000_*.ts` | Add `periodStructure` + `recoveryGradeMethod` na AcademicPeriod |
-| `database/migrations/1781000008000_*.ts` | Add `breakStartDate` + `breakEndDate` na AcademicPeriod |
-| `database/migrations/1781000009000_*.ts` | Add `ANUAL` ao enum PeriodStructure |
-| `app/models/school.ts` | Type `PeriodStructure` inclui `'ANUAL'` |
-| `app/models/academic_period.ts` | Campos `periodStructure`, `recoveryGradeMethod`, `breakStartDate`, `breakEndDate` |
-| `app/models/dto/academic_period.dto.ts` | Campos no DTO |
-| `app/validators/school.ts` | `periodStructure` aceita `'ANUAL'` |
-| `app/validators/academic_period.ts` | `periodStructure` e `recoveryGradeMethod` aceitam `'ANUAL'` |
-| `app/validators/academic_sub_period.ts` | `periodStructure` no generate; removido `preview` |
-| `app/validators/attendance.ts` | `subPeriodId` no `getClassStudentsAttendanceValidator` |
-| `app/validators/student_status.ts` | `subPeriodId` no `getStudentStatusValidator` |
-| `app/controllers/schools/update.ts` | `periodStructure` e `recoveryGradeMethod` no merge |
-| `app/controllers/schools/show.ts` | `periodStructure` e `recoveryGradeMethod` na resposta |
-| `app/controllers/academic_periods/create_*.ts` | Salva `periodStructure`, `recoveryGradeMethod`, `breakStartDate`, `breakEndDate` |
-| `app/controllers/academic_periods/update_*.ts` | Merge dos campos |
-| `app/controllers/academic_sub_periods/generate_*.ts` | Overwrite + reassign + `periodStructure` override |
-| `app/controllers/assignments/list_assignments_*.ts` | Filtro `subPeriodId` |
-| `app/controllers/exams/list_exams_*.ts` | Filtro `subPeriodId` |
-| `app/controllers/attendance/get_class_students_*.ts` | Filtro por data range via JOIN |
-| `app/controllers/students/get_student_status_*.ts` | Filtra assignments/exams/attendance por subPeriodId |
-| `app/transformers/school_transformer.ts` | `periodStructure` e `recoveryGradeMethod` no pick |
-| `app/transformers/assignment_transformer.ts` | `subPeriodId` no pick |
-| `app/transformers/exam_transformer.ts` | `subPeriodId` no pick |
+| Arquivo                                              | Mudança                                                                           |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `database/migrations/1781000007000_*.ts`             | Add `periodStructure` + `recoveryGradeMethod` na AcademicPeriod                   |
+| `database/migrations/1781000008000_*.ts`             | Add `breakStartDate` + `breakEndDate` na AcademicPeriod                           |
+| `database/migrations/1781000009000_*.ts`             | Add `ANUAL` ao enum PeriodStructure                                               |
+| `app/models/school.ts`                               | Type `PeriodStructure` inclui `'ANUAL'`                                           |
+| `app/models/academic_period.ts`                      | Campos `periodStructure`, `recoveryGradeMethod`, `breakStartDate`, `breakEndDate` |
+| `app/models/dto/academic_period.dto.ts`              | Campos no DTO                                                                     |
+| `app/validators/school.ts`                           | `periodStructure` aceita `'ANUAL'`                                                |
+| `app/validators/academic_period.ts`                  | `periodStructure` e `recoveryGradeMethod` aceitam `'ANUAL'`                       |
+| `app/validators/academic_sub_period.ts`              | `periodStructure` no generate; removido `preview`                                 |
+| `app/validators/attendance.ts`                       | `subPeriodId` no `getClassStudentsAttendanceValidator`                            |
+| `app/validators/student_status.ts`                   | `subPeriodId` no `getStudentStatusValidator`                                      |
+| `app/controllers/schools/update.ts`                  | `periodStructure` e `recoveryGradeMethod` no merge                                |
+| `app/controllers/schools/show.ts`                    | `periodStructure` e `recoveryGradeMethod` na resposta                             |
+| `app/controllers/academic_periods/create_*.ts`       | Salva `periodStructure`, `recoveryGradeMethod`, `breakStartDate`, `breakEndDate`  |
+| `app/controllers/academic_periods/update_*.ts`       | Merge dos campos                                                                  |
+| `app/controllers/academic_sub_periods/generate_*.ts` | Overwrite + reassign + `periodStructure` override                                 |
+| `app/controllers/assignments/list_assignments_*.ts`  | Filtro `subPeriodId`                                                              |
+| `app/controllers/exams/list_exams_*.ts`              | Filtro `subPeriodId`                                                              |
+| `app/controllers/attendance/get_class_students_*.ts` | Filtro por data range via JOIN                                                    |
+| `app/controllers/students/get_student_status_*.ts`   | Filtra assignments/exams/attendance por subPeriodId                               |
+| `app/transformers/school_transformer.ts`             | `periodStructure` e `recoveryGradeMethod` no pick                                 |
+| `app/transformers/assignment_transformer.ts`         | `subPeriodId` no pick                                                             |
+| `app/transformers/exam_transformer.ts`               | `subPeriodId` no pick                                                             |
 
 ### Frontend (~30 arquivos)
 
-| Arquivo | Mudança |
-|---------|---------|
-| `inertia/components/ui/date-picker.tsx` | Rewrite com `react-imask` |
-| `inertia/containers/academic-periods/schemas/edit_academic_period.schema.ts` | `ANUAL`, descrições nos options |
-| `inertia/containers/academic-periods/edit-academic-period-form/index.tsx` | Steps reordenados, save com validação |
-| `inertia/containers/academic-periods/edit-academic-period-form/calendar-form.tsx` | Remove estrutura (vai pro step 2), add férias |
+| Arquivo                                                                              | Mudança                                                      |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
+| `inertia/components/ui/date-picker.tsx`                                              | Rewrite com `react-imask`                                    |
+| `inertia/containers/academic-periods/schemas/edit_academic_period.schema.ts`         | `ANUAL`, descrições nos options                              |
+| `inertia/containers/academic-periods/edit-academic-period-form/index.tsx`            | Steps reordenados, save com validação                        |
+| `inertia/containers/academic-periods/edit-academic-period-form/calendar-form.tsx`    | Remove estrutura (vai pro step 2), add férias                |
 | `inertia/containers/academic-periods/edit-academic-period-form/sub-periods-form.tsx` | Radio cards, diff dialog, overwrite, estrutura no mesmo card |
-| `inertia/containers/academic-periods/components/calendar-form.tsx` | DatePicker + férias |
-| `inertia/containers/academic-periods/components/sub-periods-config-form.tsx` | Radio cards para novo período |
-| `inertia/containers/academic-periods/components/sub-period-filter.tsx` | **Novo**: componente de filtro por sub-período |
-| `inertia/containers/academic-periods/new-academic-period-form.tsx` | Step de sub-períodos + férias |
-| `inertia/containers/turma/assignments-table.tsx` | Filtro `subPeriodId` |
-| `inertia/containers/academico/exams-list.tsx` | Filtro `subPeriodId` |
-| `inertia/containers/turma/attendances-table.tsx` | Aceita `subPeriodId` |
-| `inertia/containers/turma/student-status-table.tsx` | Aceita `subPeriodId` |
-| `inertia/pages/escola/.../atividades.tsx` | SubPeriodFilter + subPeriodId state |
-| `inertia/pages/escola/.../provas.tsx` | SubPeriodFilter + subPeriodId state |
-| `inertia/pages/escola/.../presencas.tsx` | SubPeriodFilter + subPeriodId state |
-| `inertia/pages/escola/.../notas.tsx` | Rewrite: select de matéria em vez de accordion |
-| `inertia/pages/escola/.../situacao.tsx` | SubPeriodFilter + subPeriodId state |
-| `inertia/containers/settings/school-settings-form.tsx` | `invalidateQueries` corrigido, `ANUAL`, acentos |
+| `inertia/containers/academic-periods/components/calendar-form.tsx`                   | DatePicker + férias                                          |
+| `inertia/containers/academic-periods/components/sub-periods-config-form.tsx`         | Radio cards para novo período                                |
+| `inertia/containers/academic-periods/components/sub-period-filter.tsx`               | **Novo**: componente de filtro por sub-período               |
+| `inertia/containers/academic-periods/new-academic-period-form.tsx`                   | Step de sub-períodos + férias                                |
+| `inertia/containers/turma/assignments-table.tsx`                                     | Filtro `subPeriodId`                                         |
+| `inertia/containers/academico/exams-list.tsx`                                        | Filtro `subPeriodId`                                         |
+| `inertia/containers/turma/attendances-table.tsx`                                     | Aceita `subPeriodId`                                         |
+| `inertia/containers/turma/student-status-table.tsx`                                  | Aceita `subPeriodId`                                         |
+| `inertia/pages/escola/.../atividades.tsx`                                            | SubPeriodFilter + subPeriodId state                          |
+| `inertia/pages/escola/.../provas.tsx`                                                | SubPeriodFilter + subPeriodId state                          |
+| `inertia/pages/escola/.../presencas.tsx`                                             | SubPeriodFilter + subPeriodId state                          |
+| `inertia/pages/escola/.../notas.tsx`                                                 | Rewrite: select de matéria em vez de accordion               |
+| `inertia/pages/escola/.../situacao.tsx`                                              | SubPeriodFilter + subPeriodId state                          |
+| `inertia/containers/settings/school-settings-form.tsx`                               | `invalidateQueries` corrigido, `ANUAL`, acentos              |
 
 ## O que falta fazer
 
 ### Dashboard (`/escola`)
+
 Os cards do dashboard (Risco de Reprovação, Média Geral, etc.) não são filtrados por sub-período. Precisam de um seletor de sub-período e recalcular métricas baseado no período selecionado.
 
 ### Presenças no Dashboard
+
 A tendência de frequência no dashboard não considera sub-períodos.
 
 ### Página de Notas na Turma
+
 O `SubjectGradesTable` já tem abas de sub-período. Mas a nota máxima (`maxPossibleGrade`) dentro de cada aba precisa ser validada — atualmente mostra valores consistentes.
 
 ### Testes Automatizados
+
 Adicionar testes para os novos endpoints e fluxos:
+
 - Geração de sub-períodos com overwrite
 - Filtros por `subPeriodId` nos controllers
 - Integridade dos dados após reassociação

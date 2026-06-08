@@ -19,7 +19,7 @@ function makeSubmitExtension(onSubmit: () => void | Promise<void>) {
     name: 'submitOnEnter',
     addKeyboardShortcuts() {
       return {
-        Enter: () => {
+        'Enter': () => {
           void onSubmit()
           return true
         },

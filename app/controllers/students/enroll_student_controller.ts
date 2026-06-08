@@ -438,9 +438,8 @@ export default class EnrollStudentController {
         // Inicia fluxo de assinatura — fire and forget. Erro aqui não quebra
         // a matrícula; status fica como SKIPPED/FAILED no log e admin pode
         // re-disparar manualmente se necessário.
-        const { startEnrollmentSignature } = await import(
-          '#services/signature/enrollment_signature_service'
-        )
+        const { startEnrollmentSignature } =
+          await import('#services/signature/enrollment_signature_service')
         startEnrollmentSignature(createdStudentHasLevelId)
           .then((outcome) => {
             logger.info(

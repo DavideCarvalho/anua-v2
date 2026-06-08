@@ -18,10 +18,22 @@ export const changelog: ChangelogEntry[] = [
     date: '28 de maio de 2026',
     title: 'Acordos de Inadimplência',
     items: [
-      { text: 'Acordos de inadimplência automáticos — o sistema identifica famílias com faturas em atraso e gera propostas de parcelamento pra você aprovar', audience: 'escola' },
-      { text: 'Novo fluxo de cobrança: aprove a proposta, o responsável recebe pelo app e aceita ou recusa, e as parcelas são geradas sozinhas', audience: 'escola' },
-      { text: 'Crie propostas manualmente selecionando faturas na tela de inadimplência', audience: 'escola' },
-      { text: 'Acompanhe tudo na aba "Propostas de acordo" dentro de Inadimplência, com auditoria de quem aprovou e quando', audience: 'escola' },
+      {
+        text: 'Acordos de inadimplência automáticos — o sistema identifica famílias com faturas em atraso e gera propostas de parcelamento pra você aprovar',
+        audience: 'escola',
+      },
+      {
+        text: 'Novo fluxo de cobrança: aprove a proposta, o responsável recebe pelo app e aceita ou recusa, e as parcelas são geradas sozinhas',
+        audience: 'escola',
+      },
+      {
+        text: 'Crie propostas manualmente selecionando faturas na tela de inadimplência',
+        audience: 'escola',
+      },
+      {
+        text: 'Acompanhe tudo na aba "Propostas de acordo" dentro de Inadimplência, com auditoria de quem aprovou e quando',
+        audience: 'escola',
+      },
     ],
   },
   {
@@ -30,7 +42,10 @@ export const changelog: ChangelogEntry[] = [
     title: 'Maio 2026',
     items: [
       { text: 'Pagamento via PIX com QR Code direto no app', audience: 'responsavel' },
-      { text: 'Botão "Como pagar" quando pagamento online não está disponível', audience: 'responsavel' },
+      {
+        text: 'Botão "Como pagar" quando pagamento online não está disponível',
+        audience: 'responsavel',
+      },
       { text: 'Sincronização de calendário com Google/Apple Calendar', audience: 'responsavel' },
       { text: 'Comprovante de matrícula digital com QR verificável', audience: 'responsavel' },
       { text: 'Acompanhamento da matrícula com prazos e SLA', audience: 'responsavel' },
