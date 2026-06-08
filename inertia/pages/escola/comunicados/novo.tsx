@@ -25,7 +25,17 @@ import {
   writeEscolaDashboardViewMode,
 } from '../../../lib/escola-dashboard-view-mode'
 import { useAuthUser } from '../../../stores/auth_store'
-import { Check, ChevronsUpDown, X, UploadCloud, Paperclip, BookmarkPlus, FileText, Trash2, Eye } from 'lucide-react'
+import {
+  Check,
+  ChevronsUpDown,
+  X,
+  UploadCloud,
+  Paperclip,
+  BookmarkPlus,
+  FileText,
+  Trash2,
+  Eye,
+} from 'lucide-react'
 import { api } from '~/lib/api'
 
 type Option = {
@@ -206,9 +216,7 @@ export default function NovoComunicadoPage() {
   const user = useAuthUser()
   const queryClient = useQueryClient()
 
-  const { data: templatesData } = useQuery(
-    api.api.v1.announcementTemplates.list.queryOptions()
-  )
+  const { data: templatesData } = useQuery(api.api.v1.announcementTemplates.list.queryOptions())
   const templates = templatesData?.data ?? []
 
   const createTemplateMutation = useMutation(
@@ -1054,7 +1062,6 @@ export default function NovoComunicadoPage() {
               </Link>
             </div>
           </form>
-
         </CardContent>
       </Card>
     </>

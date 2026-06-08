@@ -78,9 +78,7 @@ export default class GetSchoolHealthController {
     `)
 
     const schools = rows.rows.map((r: Record<string, string | number | boolean | null>) => {
-      const lastActivity = r.last_user_login
-        ? new Date(r.last_user_login as string)
-        : null
+      const lastActivity = r.last_user_login ? new Date(r.last_user_login as string) : null
       const daysSinceActivity = lastActivity
         ? Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24))
         : null
@@ -119,8 +117,10 @@ export default class GetSchoolHealthController {
       total: schools.length,
       healthy: schools.filter((s: { healthStatus: string }) => s.healthStatus === 'healthy').length,
       warning: schools.filter((s: { healthStatus: string }) => s.healthStatus === 'warning').length,
-      critical: schools.filter((s: { healthStatus: string }) => s.healthStatus === 'critical').length,
-      inactive: schools.filter((s: { healthStatus: string }) => s.healthStatus === 'inactive').length,
+      critical: schools.filter((s: { healthStatus: string }) => s.healthStatus === 'critical')
+        .length,
+      inactive: schools.filter((s: { healthStatus: string }) => s.healthStatus === 'inactive')
+        .length,
     }
 
     return { schools, summary }

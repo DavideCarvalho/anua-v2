@@ -2,124 +2,124 @@
 name: Anua
 description: Painel de controle escolar — rápido, claro, calmo. Sem cara de SaaS-genérico, sem cara de app infantil.
 colors:
-  background: "oklch(1 0 0)"
-  foreground: "oklch(0.141 0.01 285)"
-  card: "oklch(1 0 0)"
-  card-foreground: "oklch(0.141 0.01 285)"
-  popover: "oklch(1 0 0)"
-  popover-foreground: "oklch(0.141 0.01 285)"
-  primary: "oklch(0.58 0.22 285)"
-  primary-foreground: "oklch(0.985 0 0)"
-  secondary: "oklch(0.97 0.01 285)"
-  secondary-foreground: "oklch(0.21 0.02 285)"
-  muted: "oklch(0.97 0.01 285)"
-  muted-foreground: "oklch(0.55 0.02 285)"
-  accent: "oklch(0.97 0.01 285)"
-  accent-foreground: "oklch(0.21 0.02 285)"
-  destructive: "oklch(0.58 0.22 25)"
-  destructive-foreground: "oklch(0.985 0 0)"
-  border: "oklch(0.92 0.01 285)"
-  input: "oklch(0.92 0.01 285)"
-  ring: "oklch(0.58 0.22 285)"
-  sidebar: "oklch(0.985 0 0)"
-  sidebar-border: "oklch(0.92 0.01 285)"
-  chart-1: "oklch(0.65 0.18 250)"
-  chart-2: "oklch(0.6 0.15 170)"
-  chart-3: "oklch(0.55 0.12 220)"
-  chart-4: "oklch(0.7 0.16 300)"
-  chart-5: "oklch(0.62 0.14 340)"
+  background: 'oklch(1 0 0)'
+  foreground: 'oklch(0.141 0.01 285)'
+  card: 'oklch(1 0 0)'
+  card-foreground: 'oklch(0.141 0.01 285)'
+  popover: 'oklch(1 0 0)'
+  popover-foreground: 'oklch(0.141 0.01 285)'
+  primary: 'oklch(0.58 0.22 285)'
+  primary-foreground: 'oklch(0.985 0 0)'
+  secondary: 'oklch(0.97 0.01 285)'
+  secondary-foreground: 'oklch(0.21 0.02 285)'
+  muted: 'oklch(0.97 0.01 285)'
+  muted-foreground: 'oklch(0.55 0.02 285)'
+  accent: 'oklch(0.97 0.01 285)'
+  accent-foreground: 'oklch(0.21 0.02 285)'
+  destructive: 'oklch(0.58 0.22 25)'
+  destructive-foreground: 'oklch(0.985 0 0)'
+  border: 'oklch(0.92 0.01 285)'
+  input: 'oklch(0.92 0.01 285)'
+  ring: 'oklch(0.58 0.22 285)'
+  sidebar: 'oklch(0.985 0 0)'
+  sidebar-border: 'oklch(0.92 0.01 285)'
+  chart-1: 'oklch(0.65 0.18 250)'
+  chart-2: 'oklch(0.6 0.15 170)'
+  chart-3: 'oklch(0.55 0.12 220)'
+  chart-4: 'oklch(0.7 0.16 300)'
+  chart-5: 'oklch(0.62 0.14 340)'
 typography:
   display:
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1.5rem"
+    fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif'
+    fontSize: '1.5rem'
     fontWeight: 600
-    lineHeight: "1.2"
-    letterSpacing: "-0.01em"
+    lineHeight: '1.2'
+    letterSpacing: '-0.01em'
   headline:
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1.125rem"
+    fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif'
+    fontSize: '1.125rem'
     fontWeight: 600
-    lineHeight: "1.3"
-    letterSpacing: "normal"
+    lineHeight: '1.3'
+    letterSpacing: 'normal'
   title:
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "0.875rem"
+    fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif'
+    fontSize: '0.875rem'
     fontWeight: 600
-    lineHeight: "1.4"
-    letterSpacing: "normal"
+    lineHeight: '1.4'
+    letterSpacing: 'normal'
   body:
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "0.875rem"
+    fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif'
+    fontSize: '0.875rem'
     fontWeight: 400
-    lineHeight: "1.5"
-    letterSpacing: "normal"
+    lineHeight: '1.5'
+    letterSpacing: 'normal'
   label:
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "0.75rem"
+    fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif'
+    fontSize: '0.75rem'
     fontWeight: 500
-    lineHeight: "1.4"
-    letterSpacing: "0.02em"
+    lineHeight: '1.4'
+    letterSpacing: '0.02em'
 rounded:
-  sm: "calc(0.625rem - 4px)"
-  md: "calc(0.625rem - 2px)"
-  lg: "0.625rem"
-  xl: "0.75rem"
+  sm: 'calc(0.625rem - 4px)'
+  md: 'calc(0.625rem - 2px)'
+  lg: '0.625rem'
+  xl: '0.75rem'
 spacing:
-  xs: "0.25rem"
-  sm: "0.5rem"
-  md: "0.75rem"
-  lg: "1rem"
-  xl: "1.5rem"
+  xs: '0.25rem'
+  sm: '0.5rem'
+  md: '0.75rem'
+  lg: '1rem'
+  xl: '1.5rem'
 components:
   button-primary:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.primary-foreground}"
-    typography: "{typography.title}"
-    rounded: "{rounded.lg}"
-    padding: "0 0.625rem"
-    height: "2rem"
+    backgroundColor: '{colors.primary}'
+    textColor: '{colors.primary-foreground}'
+    typography: '{typography.title}'
+    rounded: '{rounded.lg}'
+    padding: '0 0.625rem'
+    height: '2rem'
   button-primary-hover:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.primary-foreground}"
+    backgroundColor: '{colors.primary}'
+    textColor: '{colors.primary-foreground}'
   button-outline:
-    backgroundColor: "{colors.background}"
-    textColor: "{colors.foreground}"
-    rounded: "{rounded.lg}"
-    padding: "0 0.625rem"
-    height: "2rem"
+    backgroundColor: '{colors.background}'
+    textColor: '{colors.foreground}'
+    rounded: '{rounded.lg}'
+    padding: '0 0.625rem'
+    height: '2rem'
   button-outline-hover:
-    backgroundColor: "{colors.muted}"
-    textColor: "{colors.foreground}"
+    backgroundColor: '{colors.muted}'
+    textColor: '{colors.foreground}'
   button-ghost:
-    backgroundColor: "{colors.background}"
-    textColor: "{colors.foreground}"
-    rounded: "{rounded.lg}"
-    padding: "0 0.625rem"
-    height: "2rem"
+    backgroundColor: '{colors.background}'
+    textColor: '{colors.foreground}'
+    rounded: '{rounded.lg}'
+    padding: '0 0.625rem'
+    height: '2rem'
   button-ghost-hover:
-    backgroundColor: "{colors.muted}"
-    textColor: "{colors.foreground}"
+    backgroundColor: '{colors.muted}'
+    textColor: '{colors.foreground}'
   button-destructive:
-    backgroundColor: "{colors.destructive}"
-    textColor: "{colors.destructive-foreground}"
-    rounded: "{rounded.lg}"
-    padding: "0 0.625rem"
-    height: "2rem"
+    backgroundColor: '{colors.destructive}'
+    textColor: '{colors.destructive-foreground}'
+    rounded: '{rounded.lg}'
+    padding: '0 0.625rem'
+    height: '2rem'
   card:
-    backgroundColor: "{colors.card}"
-    textColor: "{colors.card-foreground}"
-    rounded: "{rounded.xl}"
-    padding: "1rem 0"
+    backgroundColor: '{colors.card}'
+    textColor: '{colors.card-foreground}'
+    rounded: '{rounded.xl}'
+    padding: '1rem 0'
   input:
-    backgroundColor: "{colors.background}"
-    textColor: "{colors.foreground}"
-    rounded: "{rounded.lg}"
-    padding: "0.25rem 0.625rem"
-    height: "2rem"
+    backgroundColor: '{colors.background}'
+    textColor: '{colors.foreground}'
+    rounded: '{rounded.lg}'
+    padding: '0.25rem 0.625rem'
+    height: '2rem'
   input-focus:
-    backgroundColor: "{colors.background}"
-    textColor: "{colors.foreground}"
-    rounded: "{rounded.lg}"
+    backgroundColor: '{colors.background}'
+    textColor: '{colors.foreground}'
+    rounded: '{rounded.lg}'
 ---
 
 # Design System: Anua
@@ -135,6 +135,7 @@ A linguagem visual é restrained: neutros levemente tintados de violeta, um úni
 O sistema rejeita explicitamente três armadilhas que vêm do PRODUCT.md: estética enterprise-corporativa (cinza puro, tabelas densas sem ar, menus infinitos), visual infantilizado (cores primárias gritantes, ilustrações cartoon, fontes display para tudo), e startup template genérico (gradiente roxo no hero, glassmorphism, hero-metric com big-number-and-three-small-stats). A escola já é séria; a interface não precisa fingir.
 
 **Key Characteristics:**
+
 - Restrained palette: neutros tintados + um só accent violeta, ≤10% da tela
 - Flat by default, profundidade via `ring-1 ring-foreground/10`, nunca via sombra decorativa
 - Inter como família única, scale tight (1.125–1.2 entre passos)
@@ -201,7 +202,7 @@ Paleta de um só acorde: neutros frios levemente tintados na direção do violet
 
 Sistema flat por padrão. Profundidade vem de duas fontes apenas: **ring de 1px** (hairline) e **mudança de tom** entre `bg-background` e `bg-card` no dark mode. Sombras decorativas em hover, em cards normais, em qualquer surface estável: proibido.
 
-A única sombra aceita é em surfaces *transientes* de z-index alto: dropdown menus, dialogs, popovers, tooltips. Mesmo nessas, o que carrega o "destaque" é o ring + o fundo opaco, não a sombra grossa.
+A única sombra aceita é em surfaces _transientes_ de z-index alto: dropdown menus, dialogs, popovers, tooltips. Mesmo nessas, o que carrega o "destaque" é o ring + o fundo opaco, não a sombra grossa.
 
 ### Shadow Vocabulary
 

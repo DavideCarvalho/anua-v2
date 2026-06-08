@@ -390,7 +390,10 @@ export function StudentsListContainer() {
         },
       },
       {
-        onSuccess: () => toast.success('Exportação iniciada! Você receberá uma notificação quando estiver pronta.'),
+        onSuccess: () =>
+          toast.success(
+            'Exportação iniciada! Você receberá uma notificação quando estiver pronta.'
+          ),
         onError: () => toast.error('Erro ao iniciar exportação'),
       }
     )
@@ -410,7 +413,12 @@ export function StudentsListContainer() {
           />
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={handleExportCsv} disabled={exportMutation.isPending}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportCsv}
+            disabled={exportMutation.isPending}
+          >
             <Download className="h-4 w-4 mr-2" />
             {exportMutation.isPending ? 'Exportando...' : 'Exportar CSV'}
           </Button>

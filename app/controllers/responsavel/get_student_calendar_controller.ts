@@ -233,65 +233,73 @@ export default class GetStudentCalendarController {
     )
 
     const items: CalendarItem[] = [
-      ...assignments.map((assignment): CalendarItem => ({
-        id: `assignment:${assignment.id}`,
-        sourceType: 'assignment',
-        sourceId: assignment.id,
-        title: assignment.name,
-        description: assignment.description,
-        startAt: assignment.dueDate.toISO()!,
-        endAt: null,
-        allDay: true,
-        className: assignment.teacherHasClass?.class?.name ?? student.class.name,
-        subjectName: assignment.teacherHasClass?.subject?.name ?? null,
-        status: null,
-        colorToken: 'assignment',
-      })),
-      ...exams.map((exam): CalendarItem => ({
-        id: `exam:${exam.id}`,
-        sourceType: 'exam',
-        sourceId: exam.id,
-        title: exam.title,
-        description: exam.description,
-        startAt: exam.examDate.toISO()!,
-        endAt: exam.endTime?.toISO() ?? null,
-        allDay: true,
-        className: exam.class?.name ?? student.class.name,
-        subjectName: exam.subject?.name ?? null,
-        status: exam.status,
-        colorToken: 'exam',
-      })),
-      ...events.map((event): CalendarItem => ({
-        id: `event:${event.id}`,
-        sourceType: 'event',
-        sourceId: event.id,
-        title: event.title,
-        description: event.description,
-        startAt: event.startDate.toISO()!,
-        endAt: event.endDate?.toISO() ?? null,
-        allDay: event.isAllDay,
-        className: student.class.name,
-        subjectName: null,
-        status: event.status,
-        colorToken: 'event',
-        consent: consentByEventId.get(event.id) ?? null,
-      })),
-      ...holidays.map((holiday): CalendarItem => ({
-        id: `holiday:${holiday.id}`,
-        sourceType: 'holiday',
-        sourceId: holiday.id,
-        title: 'Feriado',
-        description: null,
-        // Feriado é data pura (sem hora). Emitimos como local flutuante
-        // (sem offset) pra não deslocar de dia ao virar pro fuso do browser.
-        startAt: `${holiday.date.toISODate()!}T00:00:00`,
-        endAt: null,
-        allDay: true,
-        className: null,
-        subjectName: null,
-        status: null,
-        colorToken: 'holiday',
-      })),
+      ...assignments.map(
+        (assignment): CalendarItem => ({
+          id: `assignment:${assignment.id}`,
+          sourceType: 'assignment',
+          sourceId: assignment.id,
+          title: assignment.name,
+          description: assignment.description,
+          startAt: assignment.dueDate.toISO()!,
+          endAt: null,
+          allDay: true,
+          className: assignment.teacherHasClass?.class?.name ?? student.class.name,
+          subjectName: assignment.teacherHasClass?.subject?.name ?? null,
+          status: null,
+          colorToken: 'assignment',
+        })
+      ),
+      ...exams.map(
+        (exam): CalendarItem => ({
+          id: `exam:${exam.id}`,
+          sourceType: 'exam',
+          sourceId: exam.id,
+          title: exam.title,
+          description: exam.description,
+          startAt: exam.examDate.toISO()!,
+          endAt: exam.endTime?.toISO() ?? null,
+          allDay: true,
+          className: exam.class?.name ?? student.class.name,
+          subjectName: exam.subject?.name ?? null,
+          status: exam.status,
+          colorToken: 'exam',
+        })
+      ),
+      ...events.map(
+        (event): CalendarItem => ({
+          id: `event:${event.id}`,
+          sourceType: 'event',
+          sourceId: event.id,
+          title: event.title,
+          description: event.description,
+          startAt: event.startDate.toISO()!,
+          endAt: event.endDate?.toISO() ?? null,
+          allDay: event.isAllDay,
+          className: student.class.name,
+          subjectName: null,
+          status: event.status,
+          colorToken: 'event',
+          consent: consentByEventId.get(event.id) ?? null,
+        })
+      ),
+      ...holidays.map(
+        (holiday): CalendarItem => ({
+          id: `holiday:${holiday.id}`,
+          sourceType: 'holiday',
+          sourceId: holiday.id,
+          title: 'Feriado',
+          description: null,
+          // Feriado é data pura (sem hora). Emitimos como local flutuante
+          // (sem offset) pra não deslocar de dia ao virar pro fuso do browser.
+          startAt: `${holiday.date.toISODate()!}T00:00:00`,
+          endAt: null,
+          allDay: true,
+          className: null,
+          subjectName: null,
+          status: null,
+          colorToken: 'holiday',
+        })
+      ),
     ].sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime())
 
     return {

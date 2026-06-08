@@ -6,7 +6,8 @@ import { gamificationEventService } from '#services/gamification/gamification_ev
 
 export default class GamificationBackfill extends BaseCommand {
   static commandName = 'gamification:backfill'
-  static description = 'Backfill de eventos de gamificação a partir do último evento processado por tipo'
+  static description =
+    'Backfill de eventos de gamificação a partir do último evento processado por tipo'
 
   static options: CommandOptions = {
     startApp: true,
@@ -48,13 +49,16 @@ export default class GamificationBackfill extends BaseCommand {
     const lastDate = await this.getLastEventDate('Attendance')
     const cutoff = lastDate ?? sinceDate
 
-    const rows = await db.rawQuery<{ rows: Array<{
-      id: string
-      studentId: string
-      status: string
-      date: string
-      attendanceId: string
-    }> }>(`
+    const rows = await db.rawQuery<{
+      rows: Array<{
+        id: string
+        studentId: string
+        status: string
+        date: string
+        attendanceId: string
+      }>
+    }>(
+      `
       SELECT sha.id, sha."studentId", sha.status,
              a.date::text as date, sha."attendanceId"
       FROM "StudentHasAttendance" sha
@@ -62,7 +66,9 @@ export default class GamificationBackfill extends BaseCommand {
       WHERE sha.status IN ('PRESENT', 'LATE')
         AND sha."createdAt" > ?
       ORDER BY sha."createdAt" ASC
-    `, [cutoff])
+    `,
+      [cutoff]
+    )
 
     const records = rows.rows
     this.logger.info(`Attendance: ${records.length} registros encontrados (desde ${cutoff})`)
@@ -90,13 +96,16 @@ export default class GamificationBackfill extends BaseCommand {
     const lastDate = await this.getLastEventDate('Assignment')
     const cutoff = lastDate ?? sinceDate
 
-    const rows = await db.rawQuery<{ rows: Array<{
-      id: string
-      studentId: string
-      grade: number
-      assignmentId: string
-      maxGrade: number
-    }> }>(`
+    const rows = await db.rawQuery<{
+      rows: Array<{
+        id: string
+        studentId: string
+        grade: number
+        assignmentId: string
+        maxGrade: number
+      }>
+    }>(
+      `
       SELECT sha.id, sha."studentId", sha.grade,
              sha."assignmentId",
              COALESCE(a.grade, 10) as "maxGrade"
@@ -105,7 +114,9 @@ export default class GamificationBackfill extends BaseCommand {
       WHERE sha.grade IS NOT NULL
         AND sha."createdAt" > ?
       ORDER BY sha."createdAt" ASC
-    `, [cutoff])
+    `,
+      [cutoff]
+    )
 
     const records = rows.rows
     this.logger.info(`Assignment grades: ${records.length} registros encontrados (desde ${cutoff})`)
@@ -133,14 +144,17 @@ export default class GamificationBackfill extends BaseCommand {
     const lastDate = await this.getLastEventDate('Grade')
     const cutoff = lastDate ?? sinceDate
 
-    const rows = await db.rawQuery<{ rows: Array<{
-      id: string
-      studentId: string
-      score: number
-      examId: string
-      maxScore: number
-      title: string
-    }> }>(`
+    const rows = await db.rawQuery<{
+      rows: Array<{
+        id: string
+        studentId: string
+        score: number
+        examId: string
+        maxScore: number
+        title: string
+      }>
+    }>(
+      `
       SELECT eg.id, eg."studentId", eg.score,
              eg."examId", e."maxScore", e.title
       FROM exam_grades eg
@@ -148,7 +162,9 @@ export default class GamificationBackfill extends BaseCommand {
       WHERE eg.score IS NOT NULL
         AND eg."createdAt" > ?
       ORDER BY eg."createdAt" ASC
-    `, [cutoff])
+    `,
+      [cutoff]
+    )
 
     const records = rows.rows
     this.logger.info(`Exam grades: ${records.length} registros encontrados (desde ${cutoff})`)

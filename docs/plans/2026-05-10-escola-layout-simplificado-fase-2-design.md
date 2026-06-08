@@ -6,11 +6,11 @@ A Fase 1 entregou visão simplificada para 6 módulos principais da Escola (Alun
 
 Com base em dados reais de pageviews dos últimos 90 dias (PostHog), as 3 páginas mais acessadas que **ainda não têm** visão simplificada são:
 
-| # | Página | Rota | Pageviews (90d) |
-|---|--------|------|-----------------:|
-| 1 | Bolsas | `/escola/administrativo/bolsas` | 501 |
-| 2 | Horários | `/escola/pedagogico/horarios` | 209 |
-| 3 | Inadimplência | `/escola/financeiro/inadimplencia` | 172 |
+| #   | Página        | Rota                               | Pageviews (90d) |
+| --- | ------------- | ---------------------------------- | --------------: |
+| 1   | Bolsas        | `/escola/administrativo/bolsas`    |             501 |
+| 2   | Horários      | `/escola/pedagogico/horarios`      |             209 |
+| 3   | Inadimplência | `/escola/financeiro/inadimplencia` |             172 |
 
 **Escopo**: apenas área Escola. Outras áreas (responsável, aluno, admin, loja) seguem sem modo simplificado.
 
@@ -73,11 +73,11 @@ return <EscolaLayout topbarActions={viewModeToggle}> ...conteúdo completo... </
 
 ### Componentes reutilizados
 
-| Componente | Caminho | Função |
-|---|---|---|
-| `EscolaLayoutSimplificado` | `components/layouts/escola-layout-simplificado.tsx` | Layout mínimo com header + toggle |
-| `SimplifiedPageShell` | `components/escola/simplified-page-shell.tsx` | Shell com título, descrição, ações primárias |
-| `SimplifiedBasicList` | `components/escola/simplified-basic-list.tsx` | Wrapper de lista com estados vazio/loading/erro |
+| Componente                 | Caminho                                             | Função                                          |
+| -------------------------- | --------------------------------------------------- | ----------------------------------------------- |
+| `EscolaLayoutSimplificado` | `components/layouts/escola-layout-simplificado.tsx` | Layout mínimo com header + toggle               |
+| `SimplifiedPageShell`      | `components/escola/simplified-page-shell.tsx`       | Shell com título, descrição, ações primárias    |
+| `SimplifiedBasicList`      | `components/escola/simplified-basic-list.tsx`       | Wrapper de lista com estados vazio/loading/erro |
 
 ### Persistência
 
@@ -109,11 +109,11 @@ Página simples (43 linhas). Renderiza `ScholarshipsTableContainer` com tabela p
 
 ### Comportamento
 
-| Estado | Comportamento |
-|---|---|
-| Loading | Skeleton de 3 linhas |
-| Empty | "Nenhuma bolsa cadastrada" + CTA "Nova bolsa" |
-| Erro | Card com mensagem + botão "Tentar novamente" |
+| Estado  | Comportamento                                 |
+| ------- | --------------------------------------------- |
+| Loading | Skeleton de 3 linhas                          |
+| Empty   | "Nenhuma bolsa cadastrada" + CTA "Nova bolsa" |
+| Erro    | Card com mensagem + botão "Tentar novamente"  |
 
 ### Implementação
 
@@ -144,13 +144,13 @@ A simplificação aqui é **substancial** — o drag-and-drop e o config form s�
 
 ### Comportamento
 
-| Estado | Comportamento |
-|---|---|
-| Sem seleção | Card amarelo "Selecione uma turma e um período letivo" |
-| Loading (seletores) | Selects desabilitados com "Carregando..." |
-| Loading (grade) | Skeleton da grade |
+| Estado               | Comportamento                                                                      |
+| -------------------- | ---------------------------------------------------------------------------------- |
+| Sem seleção          | Card amarelo "Selecione uma turma e um período letivo"                             |
+| Loading (seletores)  | Selects desabilitados com "Carregando..."                                          |
+| Loading (grade)      | Skeleton da grade                                                                  |
 | Empty (sem horários) | "Nenhum horário configurado para esta turma" + link "Configurar na visão completa" |
-| Erro | Card com mensagem + botão "Tentar novamente" |
+| Erro                 | Card com mensagem + botão "Tentar novamente"                                       |
 
 ### Implementação
 
@@ -182,11 +182,11 @@ Página mínima (20 linhas). Renderiza `StudentPaymentsContainer` com `status="O
 
 ### Comportamento
 
-| Estado | Comportamento |
-|---|---|
-| Loading | Skeleton de 5 linhas |
-| Empty | "Nenhum aluno com pagamento em atraso" |
-| Erro | Card com mensagem + botão "Tentar novamente" |
+| Estado  | Comportamento                                |
+| ------- | -------------------------------------------- |
+| Loading | Skeleton de 5 linhas                         |
+| Empty   | "Nenhum aluno com pagamento em atraso"       |
+| Erro    | Card com mensagem + botão "Tentar novamente" |
 
 ### Implementação
 
@@ -206,11 +206,11 @@ Página mínima (20 linhas). Renderiza `StudentPaymentsContainer` com `status="O
 
 ## Riscos e Mitigações
 
-| Risco | Mitigação |
-|---|---|
-| `ScheduleGrid` (1516 linhas) pode ser frágil ao receber prop `readOnly` | Testar exaustivamente no modo readOnly; fallback: não renderizar o grid simplificado e mostrar link para visão completa |
-| `StudentPaymentsContainer` pode não ter todos os estados (empty/loading/error) cobertos no shell simplificado | Testar cada estado isoladamente |
-| Regressão no modo completo das 3 páginas | Suite de testes browser existente cobre toggle e modo completo |
+| Risco                                                                                                         | Mitigação                                                                                                               |
+| ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `ScheduleGrid` (1516 linhas) pode ser frágil ao receber prop `readOnly`                                       | Testar exaustivamente no modo readOnly; fallback: não renderizar o grid simplificado e mostrar link para visão completa |
+| `StudentPaymentsContainer` pode não ter todos os estados (empty/loading/error) cobertos no shell simplificado | Testar cada estado isoladamente                                                                                         |
+| Regressão no modo completo das 3 páginas                                                                      | Suite de testes browser existente cobre toggle e modo completo                                                          |
 
 ---
 

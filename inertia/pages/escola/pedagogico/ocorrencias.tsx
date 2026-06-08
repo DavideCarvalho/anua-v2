@@ -426,7 +426,11 @@ function NewOccurrenceModal({
 
           <div className="space-y-2">
             <Label>Descrição</Label>
-            <Textarea rows={5} placeholder="Descreva o que aconteceu..." {...form.register('text')} />
+            <Textarea
+              rows={5}
+              placeholder="Descreva o que aconteceu..."
+              {...form.register('text')}
+            />
             {form.formState.errors.text && (
               <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>
             )}

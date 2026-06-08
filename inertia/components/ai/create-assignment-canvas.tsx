@@ -96,7 +96,7 @@ export function CreateAssignmentCanvas({ threadId, toolPart, onClose }: Props) {
     queryFn: async () => {
       const res = await fetch('/api/v1/ai/resolve-names', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         credentials: 'include',
         body: JSON.stringify(idsForResolve),
       })
@@ -112,7 +112,7 @@ export function CreateAssignmentCanvas({ threadId, toolPart, onClose }: Props) {
     staleTime: 0,
     refetchOnMount: 'always',
   })
-  const className = fields.classId ? resolved?.classes?.[fields.classId]?.name ?? null : null
+  const className = fields.classId ? (resolved?.classes?.[fields.classId]?.name ?? null) : null
 
   const queryClient = useQueryClient()
   const submitMutation = useMutation(api.api.v1.ai.canvas.submit.mutationOptions())

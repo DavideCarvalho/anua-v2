@@ -55,10 +55,7 @@ import {
 import { SubPeriodFilter } from '../../containers/academic-periods/components/sub-period-filter'
 import { AskAnuaPanel, AskAnuaSheet } from '../../containers/ai/ask-anua-sheet'
 import type { FilterLabels } from '../../lib/contextual-prompts'
-import {
-  askAnuaThreadKey,
-  useDashboardAskAnuaContext,
-} from '../../lib/ask-anua-context'
+import { askAnuaThreadKey, useDashboardAskAnuaContext } from '../../lib/ask-anua-context'
 import { api } from '~/lib/api'
 import { useIsMobile } from '../../hooks/use_mobile'
 
@@ -226,23 +223,22 @@ export default function EscolaDashboard() {
         ? `${selectedClass.levelName} - ${selectedClass.name}`
         : 'Todas as turmas'
 
-  const askAnuaLabels: FilterLabels = useMemo(() => ({
-    academicPeriodName:
-      filters.academicPeriodId === 'all'
-        ? undefined
-        : academicPeriods.find((p) => p.id === filters.academicPeriodId)?.name,
-    courseName:
-      filters.courseId === 'all'
-        ? undefined
-        : courses.find((c) => c.courseId === filters.courseId)?.name,
-    levelName:
-      filters.levelId === 'all'
-        ? undefined
-        : levels.find((l) => l.id === filters.levelId)?.name,
-    className: selectedClass
-      ? `${selectedClass.levelName} - ${selectedClass.name}`
-      : undefined,
-  }), [filters, academicPeriods, courses, levels, selectedClass])
+  const askAnuaLabels: FilterLabels = useMemo(
+    () => ({
+      academicPeriodName:
+        filters.academicPeriodId === 'all'
+          ? undefined
+          : academicPeriods.find((p) => p.id === filters.academicPeriodId)?.name,
+      courseName:
+        filters.courseId === 'all'
+          ? undefined
+          : courses.find((c) => c.courseId === filters.courseId)?.name,
+      levelName:
+        filters.levelId === 'all' ? undefined : levels.find((l) => l.id === filters.levelId)?.name,
+      className: selectedClass ? `${selectedClass.levelName} - ${selectedClass.name}` : undefined,
+    }),
+    [filters, academicPeriods, courses, levels, selectedClass]
+  )
 
   const askAnuaContext = useDashboardAskAnuaContext(filters, askAnuaLabels)
 
@@ -414,19 +410,12 @@ export default function EscolaDashboard() {
   // do simple view (independente de breakpoint). Em desktop full view ele
   // dá lugar ao painel inline.
   const askAnuaSheet = canUseAskAnua ? (
-    <AskAnuaSheet
-      open={isAskAnuaOpen}
-      onOpenChange={setIsAskAnuaOpen}
-      {...askAnuaContext}
-    />
+    <AskAnuaSheet open={isAskAnuaOpen} onOpenChange={setIsAskAnuaOpen} {...askAnuaContext} />
   ) : null
 
   const askAnuaInline =
     canUseAskAnua && !isMobile && isAskAnuaOpen ? (
-      <AskAnuaPanel
-        {...askAnuaContext}
-        onClose={() => setIsAskAnuaOpen(false)}
-      />
+      <AskAnuaPanel {...askAnuaContext} onClose={() => setIsAskAnuaOpen(false)} />
     ) : null
 
   if (viewMode === 'simple') {

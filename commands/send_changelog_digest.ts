@@ -5,7 +5,8 @@ import SendChangelogDigestJob from '#jobs/notifications/send_changelog_digest_jo
 
 export default class SendChangelogDigest extends BaseCommand {
   static commandName = 'changelog:send-digest'
-  static description = 'Gera emails personalizados por IA pra cada perfil e envia o digest de novidades'
+  static description =
+    'Gera emails personalizados por IA pra cada perfil e envia o digest de novidades'
 
   static options: CommandOptions = {
     startApp: true,
@@ -26,14 +27,18 @@ export default class SendChangelogDigest extends BaseCommand {
 
     const entry = changelog.find((e) => e.id === releaseId)
     if (!entry) {
-      this.logger.error(`Release "${releaseId}" não encontrada. Disponíveis: ${changelog.map((e) => e.id).join(', ')}`)
+      this.logger.error(
+        `Release "${releaseId}" não encontrada. Disponíveis: ${changelog.map((e) => e.id).join(', ')}`
+      )
       return
     }
 
     this.logger.info(`Release: ${entry.title} (${entry.id})`)
     this.logger.info(`Total de items: ${entry.items.length}`)
 
-    const responsavelItems = entry.items.filter((i) => i.audience === 'responsavel' || i.audience === 'all')
+    const responsavelItems = entry.items.filter(
+      (i) => i.audience === 'responsavel' || i.audience === 'all'
+    )
     const escolaItems = entry.items.filter((i) => i.audience === 'escola' || i.audience === 'all')
     const adminItems = entry.items.filter((i) => i.audience === 'admin' || i.audience === 'all')
 
@@ -50,6 +55,8 @@ export default class SendChangelogDigest extends BaseCommand {
       entries: [{ title: entry.title, items: entry.items }],
     })
 
-    this.logger.success('Job de digest enfileirado! A IA vai gerar o texto e os emails serão enviados em background.')
+    this.logger.success(
+      'Job de digest enfileirado! A IA vai gerar o texto e os emails serão enviados em background.'
+    )
   }
 }

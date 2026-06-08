@@ -24,7 +24,8 @@ export default class ExportStudentsCsvController {
     })
 
     return response.accepted({
-      message: 'Exportação iniciada. Você receberá uma notificação quando o arquivo estiver pronto.',
+      message:
+        'Exportação iniciada. Você receberá uma notificação quando o arquivo estiver pronto.',
     })
   }
 

@@ -928,7 +928,8 @@ export function ContractForm({ schoolId, initialData }: ContractFormProps) {
                   <div>
                     <h3 className="text-lg font-medium">Assinatura Digital</h3>
                     <p className="text-sm text-muted-foreground">
-                      Faça upload do PDF do contrato e posicione os campos de assinatura. Opcional — pule se ainda não tem o documento pronto.
+                      Faça upload do PDF do contrato e posicione os campos de assinatura. Opcional —
+                      pule se ainda não tem o documento pronto.
                     </p>
                   </div>
                   <SignatureTemplateBuilder

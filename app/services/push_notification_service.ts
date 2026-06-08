@@ -29,10 +29,7 @@ export async function sendPushNotification(userId: string, payload: PushPayload)
 
   try {
     const subscription = JSON.parse(user.pushSubscription)
-    await webpush.sendNotification(
-      subscription,
-      JSON.stringify(payload)
-    )
+    await webpush.sendNotification(subscription, JSON.stringify(payload))
     return true
   } catch (error) {
     if (error instanceof webpush.WebPushError && error.statusCode === 410) {

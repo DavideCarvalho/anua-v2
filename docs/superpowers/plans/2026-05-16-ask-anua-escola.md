@@ -5,12 +5,14 @@
 **Goal:** Adicionar botão "Perguntar ao Anuá" no header de `/escola` que abre um Sheet lateral com chat AI contextualizado — sabendo a tela atual e os filtros aplicados pelo gestor — reutilizando toda a infra de AI existente.
 
 **Architecture:**
+
 - Backend: nova coluna `surface` em `ai_threads` (page|sheet) + campo opcional `screen` no `ChatScope`. `chat_controller` aceita ambos via body; `list_threads_controller` filtra `surface='page'`. Persona gestor lê `scope.screen` e anexa contexto ao system prompt.
 - Frontend: novo container `AskAnuaSheet` que envolve `AiChatPane` (com novas props `hideHeader`/`screen`/`surface`/`suggestions`). Botão no header de `/escola` controla open state. `sessionStorage` por `schoolId` persiste `threadId` durante a sessão da aba. Prompts sugeridos e subtitle do header derivam dos filtros ativos.
 
 **Tech Stack:** AdonisJS 7, Lucid ORM (PostgreSQL), VineJS validators, Japa test runner / Inertia 2 / React 19 / TanStack Query / Vercel AI SDK v6 / Tailwind v4 / base-ui Dialog (Sheet primitive).
 
 **Constraints do usuário (NÃO violar):**
+
 - Sem tipos loose (`as`, `unknown`, `any`, `never`) — usar generics e type guards.
 - Sem `Co-Authored-By` trailer nos commits.
 - Tuyau inline (`api.api.v1.X.queryOptions(...)`), sem wrapper layer.
@@ -23,6 +25,7 @@
 ## File Structure (resumo)
 
 **Novos:**
+
 - `database/migrations/1788000000010_add_surface_to_ai_threads.ts`
 - `inertia/lib/contextual-prompts.ts`
 - `inertia/containers/ai/ask-anua-sheet.tsx`
@@ -31,6 +34,7 @@
 - `tests/functional/escola/contextual_prompts.spec.ts`
 
 **Modificados:**
+
 - `app/models/ai_thread.ts`
 - `app/ai/chat_scope.ts`
 - `app/ai/personas.ts`
@@ -47,6 +51,7 @@
 ## Task 1: Migration `add_surface_to_ai_threads`
 
 **Files:**
+
 - Create: `database/migrations/1788000000010_add_surface_to_ai_threads.ts`
 
 - [ ] **Step 1: Escrever a migration**
@@ -92,6 +97,7 @@ git commit -m "feat(ai): adiciona coluna surface em ai_threads (page|sheet)"
 ## Task 2: Adicionar atributo `surface` no model AiThread
 
 **Files:**
+
 - Modify: `app/models/ai_thread.ts`
 
 - [ ] **Step 1: Adicionar a coluna no model**
@@ -122,6 +128,7 @@ git commit -m "feat(ai): adiciona atributo surface no model AiThread"
 ## Task 3: Estender `ChatScope` com campo opcional `screen`
 
 **Files:**
+
 - Modify: `app/ai/chat_scope.ts:19-31`
 
 - [ ] **Step 1: Adicionar `screen?` ao tipo**
@@ -167,6 +174,7 @@ git commit -m "feat(ai): adiciona campo opcional screen em ChatScope"
 ## Task 4: Estender `chatValidator` para aceitar `surface` e `screen`
 
 **Files:**
+
 - Modify: `app/validators/ai.ts:7-15`
 
 - [ ] **Step 1: Estender o validator**
@@ -209,6 +217,7 @@ git commit -m "feat(ai): chatValidator aceita surface e screen no body"
 ## Task 5: `AiService.chat()` aceita `surface` e propaga ao criar thread
 
 **Files:**
+
 - Modify: `app/ai/ai_service.ts:30-38` (ChatRequest type)
 - Modify: `app/ai/ai_service.ts:167-180` (loadOrCreateThread)
 
@@ -273,6 +282,7 @@ git commit -m "feat(ai): AiService.chat aceita surface e propaga ao criar thread
 ## Task 6: Gestor persona anexa contexto de tela ao system prompt
 
 **Files:**
+
 - Modify: `app/ai/personas.ts:36-56` (gestorPrompt)
 - Test: `tests/functional/ai/persona_screen_context.spec.ts`
 
@@ -448,6 +458,7 @@ git commit -m "feat(ai): persona gestor anexa contexto de tela ao system prompt"
 ## Task 7: `chat_controller` lê `surface` e `screen` do body e injeta no scope/service
 
 **Files:**
+
 - Modify: `app/controllers/ai/chat_controller.ts:18` (extrair do validator)
 - Modify: `app/controllers/ai/chat_controller.ts:53-75` (passar pro service)
 - Test: estender `tests/functional/ai/sheet_surface.spec.ts` com test E2E do endpoint (opcional — depende de existir test infra pra POST /api/v1/ai/chat).
@@ -462,7 +473,10 @@ Expected: lista de specs (ou vazio). Se vazio: pular E2E test do controller — 
 Se Step 1 encontrou specs E2E (ex: `tests/functional/ai/chat_endpoint.spec.ts`), adicionar test:
 
 ```typescript
-test('POST /api/v1/ai/chat com body.surface=sheet cria thread sheet', async ({ client, assert }) => {
+test('POST /api/v1/ai/chat com body.surface=sheet cria thread sheet', async ({
+  client,
+  assert,
+}) => {
   // ...setup do user (gestor) e auth no estilo do spec existente
   const threadId = uuidv7()
   const response = await client
@@ -492,30 +506,30 @@ Expected: FAIL — controller ainda não lê surface.
 Em `app/controllers/ai/chat_controller.ts`, substituir a linha 18:
 
 ```typescript
-    const {
-      threadId,
-      persona: requestedPersona,
-      surface,
-      screen,
-    } = await request.validateUsing(chatValidator)
+const {
+  threadId,
+  persona: requestedPersona,
+  surface,
+  screen,
+} = await request.validateUsing(chatValidator)
 ```
 
 E na chamada do `aiService.chat()` (linha ~67), incluir surface e screen-into-scope:
 
 ```typescript
-    const scopeWithScreen: ChatScope = screen ? { ...scope, screen } : scope
+const scopeWithScreen: ChatScope = screen ? { ...scope, screen } : scope
 
-    const aiService = new AiService()
-    const { result } = await aiService.chat({
-      threadId,
-      personaId,
-      schoolId,
-      userId: user.id,
-      userMessage: lastUserMessage,
-      scope: scopeWithScreen,
-      surface,
-      abortSignal: abortController.signal,
-    })
+const aiService = new AiService()
+const { result } = await aiService.chat({
+  threadId,
+  personaId,
+  schoolId,
+  userId: user.id,
+  userMessage: lastUserMessage,
+  scope: scopeWithScreen,
+  surface,
+  abortSignal: abortController.signal,
+})
 ```
 
 Adicionar import no topo do arquivo (se ainda não houver):
@@ -554,6 +568,7 @@ git commit -m "feat(ai): chat_controller propaga surface e screen ao AiService"
 ## Task 8: `list_threads_controller` filtra `surface='page'` por padrão
 
 **Files:**
+
 - Modify: `app/controllers/ai/list_threads_controller.ts:8-13`
 
 - [ ] **Step 1: Escrever test failing**
@@ -645,6 +660,7 @@ Expected: PASS.
 
 Run: `grep -rn "AiThread.query()" app/ --include="*.ts"`
 Expected: rever cada resultado e confirmar que:
+
 - Queries que buscam thread por ID (`.where('id', threadId)`) NÃO precisam de filtro de surface (id é único).
 - Queries que listam threads pra um user devem decidir caso-a-caso. Se houver outras listas de threads no app que devem ignorar sheet threads, aplicar mesmo filtro. Para V1, só `list_threads_controller` faz isso.
 - Listar resultados encontrados como comentário no commit pra rastreabilidade.
@@ -661,6 +677,7 @@ git commit -m "feat(ai): list_threads_controller filtra surface=page por padrão
 ## Task 9: Utility `contextual-prompts.ts` (frontend)
 
 **Files:**
+
 - Create: `inertia/lib/contextual-prompts.ts`
 - Test: `tests/functional/escola/contextual_prompts.spec.ts`
 
@@ -834,10 +851,7 @@ function classPrompts(className: string): string[] {
   ]
 }
 
-export function buildContextualPrompts(
-  filters: TabFilterState,
-  labels: FilterLabels
-): string[] {
+export function buildContextualPrompts(filters: TabFilterState, labels: FilterLabels): string[] {
   if (isSet(filters.classId) && labels.className) {
     return classPrompts(labels.className)
   }
@@ -865,6 +879,7 @@ git commit -m "feat(escola): utility de prompts e label contextualizados por fil
 ## Task 10: Estender `AiChatPane` e `AiChatEmpty` com novas props
 
 **Files:**
+
 - Modify: `inertia/components/ai/ai-chat-empty.tsx:121-164`
 - Modify: `inertia/components/ai/ai-chat-pane.tsx:140-376`
 
@@ -1032,19 +1047,19 @@ type ActiveChatProps = {
 Modificar o `transport` pra incluir `screen` e `surface` no body:
 
 ```typescript
-  const transport = useMemo(
-    () =>
-      new DefaultChatTransport({
-        api: '/api/v1/ai/chat',
-        body: { threadId, persona, screen, surface },
+const transport = useMemo(
+  () =>
+    new DefaultChatTransport({
+      api: '/api/v1/ai/chat',
+      body: { threadId, persona, screen, surface },
+      credentials: 'include',
+      prepareReconnectToStreamRequest: ({ id }) => ({
+        api: `/api/v1/ai/chat/${id}/stream`,
         credentials: 'include',
-        prepareReconnectToStreamRequest: ({ id }) => ({
-          api: `/api/v1/ai/chat/${id}/stream`,
-          credentials: 'include',
-        }),
       }),
-    [threadId, persona, screen, surface]
-  )
+    }),
+  [threadId, persona, screen, surface]
+)
 ```
 
 > Nota crítica: `screen` é objeto — quando o objeto muda de identidade entre renders, o `useMemo` recria o transport, o que reinicia o `useChat` SSE. Pra evitar oscilação, o container parent (`AskAnuaSheet`) precisa estabilizar o `screen` via `useMemo` antes de passar pra cá (cobrir isso no Task 11).
@@ -1092,9 +1107,11 @@ git commit -m "feat(ai): AiChatPane aceita hideHeader, screen, surface e suggest
 ## Task 11: Container `AskAnuaSheet`
 
 **Files:**
+
 - Create: `inertia/containers/ai/ask-anua-sheet.tsx`
 
 **Modelo do estado:**
+
 - `threadId` vive no `sessionStorage` por `schoolId`. Reload da MESMA aba mantém; aba nova / fechar perde.
 - `isFresh` (flag separada em sessionStorage): controla se `AiChatPane` deve carregar histórico do server. `true` = empty state. Vira `false` quando a primeira mensagem é persistida (callback `onPersisted` do `AiChatPane`).
 - Reload da aba com thread persistida: `threadId` mantido, `isFresh=false` → `AiChatPane` faz `useQuery` pra carregar mensagens via API.
@@ -1278,6 +1295,7 @@ export function AskAnuaSheet({ open, onOpenChange, filters, labels }: AskAnuaShe
 ```
 
 > Notas:
+>
 > - `useAuthUser` é o store de auth — confirmar caminho de import (`~/stores/auth_store`) seguindo o uso já existente em `inertia/pages/escola/index.tsx:46`.
 > - `useIsMobile` em `inertia/hooks/use_mobile.ts` — confirmar o nome do export (`useIsMobile` ou `useMobile`); ajustar o import se diferente.
 > - `crypto.randomUUID()` é nativo do browser em todos os contextos modernos; sem polyfill necessário.
@@ -1300,6 +1318,7 @@ git commit -m "feat(escola): adiciona container AskAnuaSheet (assistente context
 ## Task 12: Botão + integração no `/escola/index.tsx`
 
 **Files:**
+
 - Modify: `inertia/pages/escola/index.tsx`
 
 - [ ] **Step 1: Importar componentes e helpers**
@@ -1319,7 +1338,7 @@ import type { FilterLabels } from '../../lib/contextual-prompts'
 Logo após os useState existentes (`activeTab`, `filters`, etc.):
 
 ```typescript
-  const [isAskAnuaOpen, setIsAskAnuaOpen] = useState(false)
+const [isAskAnuaOpen, setIsAskAnuaOpen] = useState(false)
 ```
 
 - [ ] **Step 3: Derivar labels pros filtros**
@@ -1327,7 +1346,8 @@ Logo após os useState existentes (`activeTab`, `filters`, etc.):
 Logo após os memos existentes (`selectedPeriodLabel` etc.):
 
 ```typescript
-  const askAnuaLabels: FilterLabels = useMemo(() => ({
+const askAnuaLabels: FilterLabels = useMemo(
+  () => ({
     academicPeriodName:
       filters.academicPeriodId === 'all'
         ? undefined
@@ -1337,13 +1357,11 @@ Logo após os memos existentes (`selectedPeriodLabel` etc.):
         ? undefined
         : courses.find((c) => c.courseId === filters.courseId)?.name,
     levelName:
-      filters.levelId === 'all'
-        ? undefined
-        : levels.find((l) => l.id === filters.levelId)?.name,
-    className: selectedClass
-      ? `${selectedClass.levelName} - ${selectedClass.name}`
-      : undefined,
-  }), [filters, academicPeriods, courses, levels, selectedClass])
+      filters.levelId === 'all' ? undefined : levels.find((l) => l.id === filters.levelId)?.name,
+    className: selectedClass ? `${selectedClass.levelName} - ${selectedClass.name}` : undefined,
+  }),
+  [filters, academicPeriods, courses, levels, selectedClass]
+)
 ```
 
 - [ ] **Step 4: Adicionar botão no `viewModeToggle`**
@@ -1351,7 +1369,7 @@ Logo após os memos existentes (`selectedPeriodLabel` etc.):
 Visibilidade do botão alinhada com `canViewFinancialTab` (lógica idêntica — admin/diretor/chain director). Encapsular num helper local:
 
 ```typescript
-  const canUseAskAnua = canViewFinancialTab
+const canUseAskAnua = canViewFinancialTab
 ```
 
 Modificar `viewModeToggle` pra incluir o botão (envolver no fragment existente):
@@ -1426,6 +1444,7 @@ git commit -m "feat(escola): botão 'Perguntar ao Anuá' abre Sheet contextual n
 ## Task 13: Manual E2E smoke + lint
 
 **Files:**
+
 - N/A (verificação manual)
 
 - [ ] **Step 1: Lint geral**
@@ -1482,26 +1501,26 @@ Tudo verde? Plano concluído. Se algum E2E falhar, criar issue de follow-up com 
 
 Cobertura por seção do spec:
 
-| Seção do spec | Task que cobre |
-|---|---|
-| Migration `add_surface_to_ai_threads` | Task 1 |
-| `AiThread.surface` no model | Task 2 |
-| `ChatScope.screen` opcional | Task 3 |
-| `chatValidator` aceita `screen`/`surface` | Task 4 |
-| `AiService.chat` propaga `surface` | Task 5 |
-| `AiService.chat` propaga `screen` no scope (via controller) | Task 7 (controller injeta no scope) |
-| Persona gestor system prompt com screen | Task 6 |
-| `chat_controller` lê body | Task 7 |
-| `list_threads_controller` filtra `surface='page'` | Task 8 |
-| `buildContextualPrompts` / `formatContextLabel` | Task 9 |
-| `AiChatPane` props `hideHeader`/`screen`/`surface`/`suggestions` | Task 10 |
-| `AiChatEmpty` prop `suggestions` | Task 10 |
-| `AskAnuaSheet` container | Task 11 |
-| Botão no header + integração na page | Task 12 |
-| Visibilidade do botão por role | Task 12 (`canUseAskAnua = canViewFinancialTab`) |
-| Mobile: bottom sheet + icon-only button | Tasks 11 (sheet side) + 12 (button label sr-only em < sm) |
-| sessionStorage por schoolId | Task 11 |
-| Out of scope V2 itens | Não implementado (correto) |
-| Manual E2E checklist | Task 13 |
+| Seção do spec                                                    | Task que cobre                                            |
+| ---------------------------------------------------------------- | --------------------------------------------------------- |
+| Migration `add_surface_to_ai_threads`                            | Task 1                                                    |
+| `AiThread.surface` no model                                      | Task 2                                                    |
+| `ChatScope.screen` opcional                                      | Task 3                                                    |
+| `chatValidator` aceita `screen`/`surface`                        | Task 4                                                    |
+| `AiService.chat` propaga `surface`                               | Task 5                                                    |
+| `AiService.chat` propaga `screen` no scope (via controller)      | Task 7 (controller injeta no scope)                       |
+| Persona gestor system prompt com screen                          | Task 6                                                    |
+| `chat_controller` lê body                                        | Task 7                                                    |
+| `list_threads_controller` filtra `surface='page'`                | Task 8                                                    |
+| `buildContextualPrompts` / `formatContextLabel`                  | Task 9                                                    |
+| `AiChatPane` props `hideHeader`/`screen`/`surface`/`suggestions` | Task 10                                                   |
+| `AiChatEmpty` prop `suggestions`                                 | Task 10                                                   |
+| `AskAnuaSheet` container                                         | Task 11                                                   |
+| Botão no header + integração na page                             | Task 12                                                   |
+| Visibilidade do botão por role                                   | Task 12 (`canUseAskAnua = canViewFinancialTab`)           |
+| Mobile: bottom sheet + icon-only button                          | Tasks 11 (sheet side) + 12 (button label sr-only em < sm) |
+| sessionStorage por schoolId                                      | Task 11                                                   |
+| Out of scope V2 itens                                            | Não implementado (correto)                                |
+| Manual E2E checklist                                             | Task 13                                                   |
 
 Sem gaps.

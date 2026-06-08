@@ -27,7 +27,10 @@ type ProposalStatus =
   | 'CANCELLED'
   | 'EXPIRED'
 
-const STATUS_CONFIG: Record<ProposalStatus, { label: string; variant: 'default' | 'secondary' | 'outline' | 'destructive' }> = {
+const STATUS_CONFIG: Record<
+  ProposalStatus,
+  { label: string; variant: 'default' | 'secondary' | 'outline' | 'destructive' }
+> = {
   PENDING_SCHOOL_APPROVAL: { label: 'Aguardando aprovação', variant: 'outline' },
   APPROVED: { label: 'Aprovada', variant: 'default' },
   SENT_TO_RESPONSIBLE: { label: 'Enviada ao responsável', variant: 'default' },
@@ -53,17 +56,11 @@ export function AgreementProposalsContainer() {
   const [rejectDialogId, setRejectDialogId] = useState<string | null>(null)
   const [rejectReason, setRejectReason] = useState('')
 
-  const proposalsQuery = useQuery(
-    api.api.v1.agreementProposals.index.queryOptions({})
-  )
+  const proposalsQuery = useQuery(api.api.v1.agreementProposals.index.queryOptions({}))
 
-  const approveMutation = useMutation(
-    api.api.v1.agreementProposals.approve.mutationOptions()
-  )
+  const approveMutation = useMutation(api.api.v1.agreementProposals.approve.mutationOptions())
 
-  const rejectMutation = useMutation(
-    api.api.v1.agreementProposals.reject.mutationOptions()
-  )
+  const rejectMutation = useMutation(api.api.v1.agreementProposals.reject.mutationOptions())
 
   async function handleApprove(id: string) {
     try {
@@ -85,7 +82,10 @@ export function AgreementProposalsContainer() {
   async function handleConfirmReject() {
     if (!rejectDialogId) return
     try {
-      await rejectMutation.mutateAsync({ params: { id: rejectDialogId }, body: { reason: rejectReason } })
+      await rejectMutation.mutateAsync({
+        params: { id: rejectDialogId },
+        body: { reason: rejectReason },
+      })
       toast.success('Proposta rejeitada')
       setRejectDialogId(null)
       setRejectReason('')
@@ -138,7 +138,9 @@ export function AgreementProposalsContainer() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4 text-muted-foreground" />
-                    <CardTitle className="text-base">{proposal.student?.user?.name ?? 'Aluno'}</CardTitle>
+                    <CardTitle className="text-base">
+                      {proposal.student?.user?.name ?? 'Aluno'}
+                    </CardTitle>
                   </div>
                   <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>
                 </div>
@@ -169,7 +171,8 @@ export function AgreementProposalsContainer() {
                   <div className="flex flex-wrap gap-1">
                     {proposal.invoices?.map((pi) => (
                       <Badge key={pi.id} variant="outline" className="text-xs">
-                        {pi.invoice?.month}/{pi.invoice?.year} — {formatCurrency(pi.amount)} ({pi.overdueDays}d)
+                        {pi.invoice?.month}/{pi.invoice?.year} — {formatCurrency(pi.amount)} (
+                        {pi.overdueDays}d)
                       </Badge>
                     ))}
                   </div>
@@ -231,7 +234,9 @@ export function AgreementProposalsContainer() {
 
       <Dialog
         open={rejectDialogId !== null}
-        onOpenChange={(open) => { if (!open) setRejectDialogId(null) }}
+        onOpenChange={(open) => {
+          if (!open) setRejectDialogId(null)
+        }}
       >
         <DialogContent className="z-[110]">
           <DialogHeader>

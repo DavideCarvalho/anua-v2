@@ -23,9 +23,7 @@ export default class AcceptAgreementProposalController {
       .firstOrFail()
 
     if (proposal.status !== 'SENT_TO_RESPONSIBLE') {
-      throw AppException.badRequest(
-        `Proposta não pode ser aceita no status "${proposal.status}"`
-      )
+      throw AppException.badRequest(`Proposta não pode ser aceita no status "${proposal.status}"`)
     }
 
     const isResponsible = await StudentHasResponsible.query()
@@ -135,10 +133,7 @@ export default class AcceptAgreementProposalController {
           .where('invoiceId', invoiceForPeriod.id)
           .whereNotIn('status', ['CANCELLED', 'RENEGOTIATED'])
 
-        invoiceForPeriod.totalAmount = linkedPayments.reduce(
-          (sum, p) => sum + Number(p.amount),
-          0
-        )
+        invoiceForPeriod.totalAmount = linkedPayments.reduce((sum, p) => sum + Number(p.amount), 0)
         await invoiceForPeriod.useTransaction(trx).save()
       }
 

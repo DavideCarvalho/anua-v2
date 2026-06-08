@@ -955,8 +955,7 @@ export function ScheduleGrid({
 
       const originalPositions = new Set(
         originalSlots.map(
-          (s) =>
-            `${s.classWeekDay}_${normalizeTime(s.startTime)}_${normalizeTime(s.endTime)}`
+          (s) => `${s.classWeekDay}_${normalizeTime(s.startTime)}_${normalizeTime(s.endTime)}`
         )
       )
       const newSlotCount = saveInput.filter(
@@ -975,7 +974,24 @@ export function ScheduleGrid({
         )
       }
     } catch (error) {
-      const errResponse = (error as { response?: { code?: string; meta?: { attendanceCount?: number; affectedAttendances?: Array<{ date: string; dayOfWeek: number; startTime: string; endTime: string; subjectName: string | null; studentCount: number }> } } })?.response
+      const errResponse = (
+        error as {
+          response?: {
+            code?: string
+            meta?: {
+              attendanceCount?: number
+              affectedAttendances?: Array<{
+                date: string
+                dayOfWeek: number
+                startTime: string
+                endTime: string
+                subjectName: string | null
+                studentCount: number
+              }>
+            }
+          }
+        }
+      )?.response
       if (errResponse?.code === 'SCHEDULE_HAS_ATTENDANCE') {
         setAttendanceConflict({
           attendanceCount: errResponse.meta?.attendanceCount ?? 0,
@@ -985,7 +1001,9 @@ export function ScheduleGrid({
         return
       }
       const description = (error as { response?: { description?: string } })?.response?.description
-      toast.error(description || (error instanceof Error ? error.message : 'Erro ao salvar horários'))
+      toast.error(
+        description || (error instanceof Error ? error.message : 'Erro ao salvar horários')
+      )
     }
   }, [pendingClasses, localSlots, originalSlots, saveMutation, classId, academicPeriodId])
 
@@ -1005,8 +1023,7 @@ export function ScheduleGrid({
       setIsDirty(false)
       setAttendanceConflict(null)
     } catch (error) {
-      const description = (error as { response?: { description?: string } })?.response
-        ?.description
+      const description = (error as { response?: { description?: string } })?.response?.description
       toast.error(
         description || (error instanceof Error ? error.message : 'Erro ao salvar horários')
       )
@@ -1333,10 +1350,7 @@ export function ScheduleGrid({
                         const slotKey = `${day.number}_${timeSlot}`
                         const slot = slotAssignments.get(slotKey)
                         return (
-                          <ReadOnlySlotCell
-                            key={day.key}
-                            teacherHasClass={slot?.teacherHasClass}
-                          />
+                          <ReadOnlySlotCell key={day.key} teacherHasClass={slot?.teacherHasClass} />
                         )
                       })}
                     </TableRow>

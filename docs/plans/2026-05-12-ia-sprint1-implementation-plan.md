@@ -13,6 +13,7 @@
 ### Task 1: Instalar e configurar Redis
 
 **Files:**
+
 - Modify: `package.json` (via ace)
 - Create: `config/redis.ts`
 - Create: `start/env.ts` (adicionar vars)
@@ -74,6 +75,7 @@ node ace repl
 ```
 
 No REPL:
+
 ```ts
 import redis from '@adonisjs/redis/services/main'
 await redis.set('test', 'hello')
@@ -95,6 +97,7 @@ git commit -m "feat: add redis configuration"
 ### Task 2: Instalar AI SDK + Zod
 
 **Files:**
+
 - Modify: `package.json`
 
 **Step 1: Instalar pacotes**
@@ -124,6 +127,7 @@ git commit -m "feat: add AI SDK and zod packages"
 ### Task 3: Configurar variáveis CroF AI
 
 **Files:**
+
 - Modify: `.env`
 - Modify: `start/env.ts` (ou equivalente)
 
@@ -137,6 +141,7 @@ ls /home/dudousxd/personal/anua-v2/start/
 **Step 2: Adicionar env vars**
 
 No `.env`:
+
 ```env
 CROF_API_URL=https://crof.ai/v1
 CROF_API_KEY=
@@ -144,6 +149,7 @@ CROF_MODEL=gpt-4o
 ```
 
 No validador de env (provavelmente `start/env.ts`):
+
 ```ts
 CROF_API_URL: env.string('CROF_API_URL'),
 CROF_API_KEY: env.string('CROF_API_KEY'),
@@ -162,6 +168,7 @@ git commit -m "feat: add CroF AI env vars"
 ### Task 4: Criar AiProvider
 
 **Files:**
+
 - Create: `app/ai/ai_provider.ts`
 
 **Step 1: Criar diretório e arquivo**
@@ -207,6 +214,7 @@ git commit -m "feat: create CroF AI provider"
 ### Task 5: Criar Models de Thread (migration + Lucid)
 
 **Files:**
+
 - Create: `database/migrations/[timestamp]_create_ai_threads.ts`
 - Create: `app/models/ai_thread.ts`
 - Create: `database/migrations/[timestamp]_create_ai_thread_messages.ts`
@@ -313,7 +321,12 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.uuid('id').primary().defaultTo(this.db.rawQuery('gen_random_uuid()').knexQuery)
-      table.uuid('thread_id').notNullable().references('id').inTable('ai_threads').onDelete('CASCADE')
+      table
+        .uuid('thread_id')
+        .notNullable()
+        .references('id')
+        .inTable('ai_threads')
+        .onDelete('CASCADE')
       table.string('role', 20).notNullable()
       table.text('content').nullable()
       table.jsonb('tool_calls').nullable()
@@ -390,6 +403,7 @@ git commit -m "feat: add ai_threads and ai_thread_messages models and migrations
 ### Task 6: Criar Personas + Tool System
 
 **Files:**
+
 - Create: `app/ai/personas.ts`
 - Create: `app/ai/tool.ts`
 - Create: `app/ai/tool_registry.ts`
@@ -502,6 +516,7 @@ git commit -m "feat: create personas and tool registry"
 ### Task 7: Criar Tools (getStudentAlerts, getSchoolStats)
 
 **Files:**
+
 - Create: `app/ai/tools/get_student_alerts.ts`
 - Create: `app/ai/tools/get_school_stats.ts`
 
@@ -516,7 +531,8 @@ import db from '@adonisjs/lucid/services/db'
 
 export const getStudentAlerts = defineTool({
   name: 'getStudentAlerts',
-  description: 'Obtém alertas pedagógicos atuais: alunos com risco por nota, frequência baixa, inadimplência. Retorna lista com nome, tipo de risco, descrição e prioridade.',
+  description:
+    'Obtém alertas pedagógicos atuais: alunos com risco por nota, frequência baixa, inadimplência. Retorna lista com nome, tipo de risco, descrição e prioridade.',
   parameters: z.object({
     schoolId: z.string().describe('ID da escola'),
     limit: z.number().default(10).describe('Máximo de alertas a retornar'),
@@ -560,19 +576,22 @@ import db from '@adonisjs/lucid/services/db'
 
 export const getSchoolStats = defineTool({
   name: 'getSchoolStats',
-  description: 'Obtém estatísticas gerais da escola: total de alunos, professores, inadimplência, frequência média.',
+  description:
+    'Obtém estatísticas gerais da escola: total de alunos, professores, inadimplência, frequência média.',
   parameters: z.object({
     schoolId: z.string().describe('ID da escola'),
   }),
   execute: async ({ schoolId }) => {
-    const studentCount = await db.from('students')
+    const studentCount = await db
+      .from('students')
       .join('users', 'users.id', 'students.id')
       .where('users.school_id', schoolId)
       .whereNull('users.deleted_at')
       .count('* as total')
       .first()
 
-    const overdueTotal = await db.from('student_payments')
+    const overdueTotal = await db
+      .from('student_payments')
       .join('students', 'students.id', 'student_payments.student_id')
       .join('users', 'users.id', 'students.id')
       .where('users.school_id', schoolId)
@@ -602,6 +621,7 @@ git commit -m "feat: add AI tools for student alerts and school stats"
 ### Task 8: Criar AiService
 
 **Files:**
+
 - Create: `app/ai/ai_service.ts`
 
 ```ts
@@ -615,7 +635,12 @@ import AiThreadMessage from '#models/ai_thread_message'
 import { DateTime } from 'luxon'
 
 export class AiService {
-  async chat(threadId: string, message: string, personaId: string, ctx: { schoolId: string; userId: string }) {
+  async chat(
+    threadId: string,
+    message: string,
+    personaId: string,
+    ctx: { schoolId: string; userId: string }
+  ) {
     const persona = getPersona(personaId)
     const thread = await this.loadOrCreateThread(threadId, personaId, ctx)
     const history = await this.loadThreadHistory(thread.id)
@@ -658,7 +683,11 @@ export class AiService {
     return text
   }
 
-  private async loadOrCreateThread(threadId: string | undefined, personaId: string, ctx: { schoolId: string; userId: string }) {
+  private async loadOrCreateThread(
+    threadId: string | undefined,
+    personaId: string,
+    ctx: { schoolId: string; userId: string }
+  ) {
     if (threadId) {
       const thread = await AiThread.find(threadId)
       if (thread) return thread
@@ -685,7 +714,8 @@ export class AiService {
     try {
       const { text } = await generateText({
         model: getModel('gpt-4o-mini'),
-        system: 'Gere um título curto (máximo 6 palavras) para esta conversa. Responda apenas o título, sem aspas.',
+        system:
+          'Gere um título curto (máximo 6 palavras) para esta conversa. Responda apenas o título, sem aspas.',
         messages: [{ role: 'user', content: firstMessage }],
       })
       await AiThread.query().where('id', threadId).update({ title: text.trim() })
@@ -708,6 +738,7 @@ git commit -m "feat: create AiService with chat and generate methods"
 ### Task 9: Criar Validators
 
 **Files:**
+
 - Create: `app/validators/ai.ts`
 
 ```ts
@@ -741,6 +772,7 @@ git commit -m "feat: add AI validators"
 ### Task 10: Criar ChatController (SSE streaming)
 
 **Files:**
+
 - Create: `app/controllers/ai/chat_controller.ts`
 
 ```ts
@@ -821,6 +853,7 @@ git commit -m "feat: create chat controller with SSE streaming"
 ### Task 11: Criar ThreadsController (CRUD)
 
 **Files:**
+
 - Create: `app/controllers/ai/list_threads_controller.ts`
 - Create: `app/controllers/ai/show_thread_controller.ts`
 - Create: `app/controllers/ai/delete_thread_controller.ts`
@@ -912,6 +945,7 @@ git commit -m "feat: create threads CRUD controllers"
 ### Task 12: Criar Routes
 
 **Files:**
+
 - Create: `start/routes/api/ai.ts`
 
 **Step 1: Encontrar estrutura de rotas**
@@ -932,13 +966,14 @@ const ListThreads = () => import('#controllers/ai/list_threads_controller')
 const ShowThread = () => import('#controllers/ai/show_thread_controller')
 const DeleteThread = () => import('#controllers/ai/delete_thread_controller')
 
-router.group(() => {
-  router.post('/chat', [Chat])
+router
+  .group(() => {
+    router.post('/chat', [Chat])
 
-  router.get('/threads', [ListThreads])
-  router.get('/threads/:id', [ShowThread])
-  router.delete('/threads/:id', [DeleteThread])
-})
+    router.get('/threads', [ListThreads])
+    router.get('/threads/:id', [ShowThread])
+    router.delete('/threads/:id', [DeleteThread])
+  })
   .prefix('/api/v1/ai')
   .use(middleware.auth())
 ```
@@ -964,6 +999,7 @@ git commit -m "feat: add AI routes"
 ### Task 13: Frontend — Componente de Chat
 
 **Files:**
+
 - Create: `resources/js/components/ai/ai-chat.tsx`
 - Create: `resources/js/components/ai/ai-message.tsx`
 - Create: `resources/js/pages/escola/ai.tsx` (ou página existente do dashboard)
@@ -1151,22 +1187,23 @@ Ou adicionar inline em uma rota existente de páginas.
 git add resources/js/components/ai/ resources/js/pages/escola/ai.tsx
 git commit -m "feat: add AI chat frontend component and page"
 ```
+
 ---
 
 ## Resumo dos Commits
 
-| # | Commit | Task |
-|---|---|---|
-| 1 | `feat: add redis configuration` | Redis setup |
-| 2 | `feat: add AI SDK and zod packages` | npm install |
-| 3 | `feat: add CroF AI env vars` | .env config |
-| 4 | `feat: create CroF AI provider` | AiProvider |
-| 5 | `feat: add thread models and migrations` | DB models |
-| 6 | `feat: create personas and tool registry` | Personas + tools |
-| 7 | `feat: add AI tools` | getStudentAlerts + getSchoolStats |
-| 8 | `feat: create AiService` | Core service |
-| 9 | `feat: add AI validators` | Validators |
-| 10 | `feat: create chat controller` | SSE streaming |
-| 11 | `feat: create threads CRUD controllers` | Threads |
-| 12 | `feat: add AI routes` | API routes |
-| 13 | `feat: add AI chat frontend` | React components |
+| #   | Commit                                    | Task                              |
+| --- | ----------------------------------------- | --------------------------------- |
+| 1   | `feat: add redis configuration`           | Redis setup                       |
+| 2   | `feat: add AI SDK and zod packages`       | npm install                       |
+| 3   | `feat: add CroF AI env vars`              | .env config                       |
+| 4   | `feat: create CroF AI provider`           | AiProvider                        |
+| 5   | `feat: add thread models and migrations`  | DB models                         |
+| 6   | `feat: create personas and tool registry` | Personas + tools                  |
+| 7   | `feat: add AI tools`                      | getStudentAlerts + getSchoolStats |
+| 8   | `feat: create AiService`                  | Core service                      |
+| 9   | `feat: add AI validators`                 | Validators                        |
+| 10  | `feat: create chat controller`            | SSE streaming                     |
+| 11  | `feat: create threads CRUD controllers`   | Threads                           |
+| 12  | `feat: add AI routes`                     | API routes                        |
+| 13  | `feat: add AI chat frontend`              | React components                  |

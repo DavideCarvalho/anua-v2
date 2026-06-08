@@ -136,11 +136,7 @@ export default class GetCalendarFeedController {
 
     for (const ev of events) {
       const dtStart = formatIcsDate(ev.startDate, ev.isAllDay)
-      const lines = [
-        'BEGIN:VEVENT',
-        `UID:event-${ev.id}@anua`,
-        `DTSTART${dtStart}`,
-      ]
+      const lines = ['BEGIN:VEVENT', `UID:event-${ev.id}@anua`, `DTSTART${dtStart}`]
 
       if (ev.endDate) {
         lines.push(`DTEND${formatIcsDate(ev.endDate, ev.isAllDay)}`)

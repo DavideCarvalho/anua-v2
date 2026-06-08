@@ -38,6 +38,9 @@ export interface PaymentGateway {
   createCharge(input: CreateChargeInput): Promise<ChargeResult>
   fetchCharge(chargeId: string): Promise<ChargeDetails>
   fetchPixQr(chargeId: string): Promise<PixQrResult>
-  updateCharge(chargeId: string, input: Partial<Pick<CreateChargeInput, 'value' | 'dueDate' | 'description'>>): Promise<ChargeResult>
+  updateCharge(
+    chargeId: string,
+    input: Partial<Pick<CreateChargeInput, 'value' | 'dueDate' | 'description'>>
+  ): Promise<ChargeResult>
   deleteCharge(chargeId: string): Promise<void>
 }

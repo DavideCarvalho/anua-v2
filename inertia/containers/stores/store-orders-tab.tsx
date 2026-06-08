@@ -389,9 +389,7 @@ export function StoreOrdersTab({ storeId }: StoreOrdersTabProps) {
               }
             >
               <SelectTrigger className="w-full md:w-[220px]">
-                <SelectValue>
-                  {status ? (statusLabels[status] ?? status) : 'Status'}
-                </SelectValue>
+                <SelectValue>{status ? (statusLabels[status] ?? status) : 'Status'}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>

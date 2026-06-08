@@ -13,6 +13,7 @@
 ### Task 1: Criar cobertura browser para layout simplificado nos modulos
 
 **Files:**
+
 - Create: `tests/browser/escola/simplified_layout_modules.spec.ts`
 - Reuse helper: `tests/helpers/escola_auth.ts`
 
@@ -30,7 +31,10 @@ test.group('Escola simplified layout across modules (browser)', (group) => {
     return () => db.rollbackGlobalTransaction()
   })
 
-  test('uses simplified layout in alunos when mode is simple', async ({ visit, browserContext }) => {
+  test('uses simplified layout in alunos when mode is simple', async ({
+    visit,
+    browserContext,
+  }) => {
     const { user } = await createEscolaAuthUser()
     await browserContext.loginAs(user)
 
@@ -63,6 +67,7 @@ git commit -m "test: add failing coverage for simplified layout in escola module
 ### Task 2: Extrair estado global de view mode para utilitario reutilizavel
 
 **Files:**
+
 - Create: `inertia/lib/escola-dashboard-view-mode.ts`
 - Modify: `inertia/pages/escola/index.tsx`
 - Modify: `tests/browser/escola/dashboard_view_mode.spec.ts`
@@ -72,7 +77,10 @@ git commit -m "test: add failing coverage for simplified layout in escola module
 Adicionar no `tests/browser/escola/dashboard_view_mode.spec.ts`:
 
 ```ts
-test('keeps simple mode when navigating to another escola module', async ({ visit, browserContext }) => {
+test('keeps simple mode when navigating to another escola module', async ({
+  visit,
+  browserContext,
+}) => {
   const { user } = await createEscolaAuthUser()
   await browserContext.loginAs(user)
 
@@ -130,6 +138,7 @@ git commit -m "refactor: extract global escola dashboard view mode state"
 ### Task 3: Criar layout e shell simplificados reutilizaveis
 
 **Files:**
+
 - Create: `inertia/components/layouts/escola-layout-simplificado.tsx`
 - Create: `inertia/components/escola/simplified-page-shell.tsx`
 - Create: `inertia/components/escola/simplified-basic-list.tsx`
@@ -155,7 +164,13 @@ Expected: FAIL porque os componentes ainda nao existem.
 
 ```tsx
 // inertia/components/layouts/escola-layout-simplificado.tsx
-export function EscolaLayoutSimplificado({ title, children }: { title: string; children: React.ReactNode }) {
+export function EscolaLayoutSimplificado({
+  title,
+  children,
+}: {
+  title: string
+  children: React.ReactNode
+}) {
   return (
     <div data-testid="escola-simplified-layout" className="min-h-screen bg-background">
       <header className="border-b px-4 py-3">
@@ -169,7 +184,15 @@ export function EscolaLayoutSimplificado({ title, children }: { title: string; c
 
 ```tsx
 // inertia/components/escola/simplified-page-shell.tsx
-export function SimplifiedPageShell({ title, actions, children }: { title: string; actions: React.ReactNode; children: React.ReactNode }) {
+export function SimplifiedPageShell({
+  title,
+  actions,
+  children,
+}: {
+  title: string
+  actions: React.ReactNode
+  children: React.ReactNode
+}) {
   return (
     <section className="space-y-4">
       <div data-testid="simplified-page-header" className="space-y-1">
@@ -210,6 +233,7 @@ git commit -m "feat: add reusable simplified escola layout and page shell compon
 ### Task 4: Aplicar modo simplificado nas 6 paginas principais
 
 **Files:**
+
 - Modify: `inertia/pages/escola/administrativo/alunos.tsx`
 - Modify: `inertia/pages/escola/pedagogico/turmas.tsx`
 - Modify: `inertia/pages/escola/pedagogico/calendario.tsx`
@@ -243,6 +267,7 @@ Expected: FAIL em paginas que ainda renderizam somente layout completo.
 **Step 3: Write minimal implementation**
 
 Em cada pagina listada:
+
 - ler `viewMode` global via utilitario;
 - quando `simple`, renderizar estrutura:
   - `EscolaLayoutSimplificado`
@@ -267,6 +292,7 @@ git commit -m "feat: apply simplified layout to six escola module entry pages"
 ### Task 5: Verificacao final e regressao do modo completo
 
 **Files:**
+
 - Verify only (sem novos arquivos obrigatorios)
 
 **Step 1: Run feature browser suite**

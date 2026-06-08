@@ -53,13 +53,7 @@ const STATUS_CONFIG = {
   },
 } as const
 
-const ALLOWED_MIME = [
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/gif',
-  'application/pdf',
-]
+const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf']
 const MAX_SIZE_BYTES = 5 * 1024 * 1024
 
 function getFileIcon(mimeType: string) {

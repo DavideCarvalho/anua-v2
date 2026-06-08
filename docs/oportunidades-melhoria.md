@@ -10,6 +10,7 @@
 O Anuá é um sistema de gestão escolar robusto com 89 módulos, 172 models, e features avançadas como gamificação (RPG + Fazendinha), IA conversacional com 23 ferramentas, e automações pesadas de pagamentos. A base técnica é sólida, mas existem oportunidades significativas de melhoria em performance, cobertura de testes, experiência mobile, e posicionamento competitivo.
 
 **Revisão de código revelou:**
+
 - Controllers de listagem com lógica de query complexa inline (192+ linhas)
 - Race conditions em serviços críticos (gamificação sem transações DB)
 - Dashboard pesado carregando 20+ containers sem priorização
@@ -23,6 +24,7 @@ O Anuá é um sistema de gestão escolar robusto com 89 módulos, 172 models, e 
 ### 1.1 Arquitetura e Código
 
 **Pontos Fortes:**
+
 - Separação clara em camadas (controllers → services → models)
 - 121 transformers para serialização consistente da API
 - Sistema de jobs bem estruturado com retry logic
@@ -32,6 +34,7 @@ O Anuá é um sistema de gestão escolar robusto com 89 módulos, 172 models, e 
 **Oportunidades:**
 
 #### Performance e Escalabilidade
+
 - **Query Optimization:** Com 172 models e relações complexas, há risco de N+1 queries em listagens pesadas (alunos, presenças, faturas)
   - **Ação:** Implementar eager loading estratégico e paginação server-side em todas as listagens
   - **Impacto:** Redução de 60-80% no tempo de resposta de páginas críticas
@@ -45,6 +48,7 @@ O Anuá é um sistema de gestão escolar robusto com 89 módulos, 172 models, e 
   - **Impacto:** Jobs críticos (pagamentos) não bloqueados por jobs menores (streaks)
 
 #### Qualidade de Código
+
 - **Type Safety:** Alguns `any` e `unknown` identificados em controllers e transformers
   - **Ação:** Refatorar para tipos estritos, usar Zod schemas já disponíveis
   - **Impacto:** Redução de bugs em runtime, melhor DX
@@ -56,6 +60,7 @@ O Anuá é um sistema de gestão escolar robusto com 89 módulos, 172 models, e 
 ### 1.2 Testes e Qualidade
 
 **Estado Atual:**
+
 - 53 arquivos de teste (funcionais + browser)
 - Cobertura focada em fluxos críticos (matrícula, pagamentos, IA)
 - Testes de browser com Playwright
@@ -78,6 +83,7 @@ O Anuá é um sistema de gestão escolar robusto com 89 módulos, 172 models, e 
 ### 1.3 Segurança e Compliance
 
 **Pontos Fortes:**
+
 - Autenticação OTP via email (sem senhas)
 - Rate limiting configurado
 - Middleware de scope por escola
@@ -100,6 +106,7 @@ O Anuá é um sistema de gestão escolar robusto com 89 módulos, 172 models, e 
 ### 1.4 Observabilidade e Monitoramento
 
 **Pontos Fortes:**
+
 - PostHog + OpenTelemetry configurados
 - Wide events via evlog
 - Traces distribuídos
@@ -129,6 +136,7 @@ O Anuá é um sistema de gestão escolar robusto com 89 módulos, 172 models, e 
 ### 2.1 Features Existentes
 
 **Diferenciais Fortes:**
+
 - **Gamificação Avançada:** RPG + Fazendinha + streaks + leaderboards (único no mercado com essa profundidade)
 - **IA Conversacional:** 23 ferramentas, contexto escolar, personas específicas
 - **Cantina Digital:** Reservas, fiado, transferências, restrições alimentares
@@ -138,6 +146,7 @@ O Anuá é um sistema de gestão escolar robusto com 89 módulos, 172 models, e 
 **Gaps Identificados:**
 
 #### Mobile Experience
+
 - **Problema:** App web-first, sem PWA ou app nativo
   - **Impacto:** Professores e pais usam predominantemente mobile
   - **Oportunidade:** PWA com offline-first para presenças e comunicados
@@ -145,12 +154,14 @@ O Anuá é um sistema de gestão escolar robusto com 89 módulos, 172 models, e 
   - **Prioridade:** Alta
 
 #### Comunicação
+
 - **Problema:** Comunicados e notificações existem, mas sem segmentação avançada
   - **Impacto:** Pais recebem comunicação genérica
   - **Oportunidade:** Segmentação por turma, série, comportamento, engajamento
   - **Esforço:** Baixo (1 mês)
 
 #### Relatórios e Analytics
+
 - **Problema:** Dashboards básicos, sem insights acionáveis
   - **Impacto:** Gestores tomam decisões no feeling
   - **Oportunidade:** Relatórios preditivos (evasão, inadimplência, desempenho)
@@ -159,18 +170,21 @@ O Anuá é um sistema de gestão escolar robusto com 89 módulos, 172 models, e 
 ### 2.2 Experiência do Usuário
 
 **Jornada do Responsável:**
+
 - ✅ Matrícula online fluida
 - ✅ Pagamentos integrados (Asaas)
 - ⚠️ Navegação confusa entre módulos (cantina, comunicados, notas)
 - ❌ Sem onboarding guiado para novos usuários
 
 **Jornada do Professor:**
+
 - ✅ Lançamento de presenças e notas
 - ✅ Calendário integrado
 - ⚠️ Interface densa, curva de aprendizado alta
 - ❌ Sem modo offline para escolas com internet instável
 
 **Jornada do Gestor:**
+
 - ✅ Visão consolidada de pagamentos
 - ✅ Gamificação configurável
 - ⚠️ Falta de benchmarks (como minha escola compara com outras?)
@@ -197,16 +211,16 @@ O Anuá é um sistema de gestão escolar robusto com 89 módulos, 172 models, e 
 
 **Principais Competidores:**
 
-| Competidor | Foco | Pontos Fortes | Pontos Fracos | Preço Estimado |
-|------------|------|---------------|---------------|----------------|
-| **Sponte** | Escolas K-12 | Market leader, app mobile, suporte 24/7 | UX datada, sem gamificação, caro | R$ 800-3000/mês |
-| **Escolaweb** | Escolas SMB | Simplicidade, preço acessível | Features limitadas, sem IA | R$ 200-800/mês |
-| **Qranber** | Escolas modernas | UX moderna, mobile-first | Recente, menos funcionalidades | R$ 400-1500/mês |
-| **SophiA** | Escolas + bibliotecas | Gestão de acervo, tradição | Interface antiga, foco em bibliotecas | R$ 500-2000/mês |
-| **SIGA** | Escolas grandes | Robustez, customização | Complexo, caro, suporte lento | R$ 1500-5000/mês |
-| **iEscolar** | Mobile-first | App nativo, offline | Features limitadas no web | R$ 300-1000/mês |
-| **Gestor Escolar** | Micro escolas | Muito barato, simples | Sem escala, features básicas | R$ 50-200/mês |
-| **Eduqz** | Comunicação | Chat escola-pais, notificações | Não é ERP completo | R$ 200-600/mês |
+| Competidor         | Foco                  | Pontos Fortes                           | Pontos Fracos                         | Preço Estimado   |
+| ------------------ | --------------------- | --------------------------------------- | ------------------------------------- | ---------------- |
+| **Sponte**         | Escolas K-12          | Market leader, app mobile, suporte 24/7 | UX datada, sem gamificação, caro      | R$ 800-3000/mês  |
+| **Escolaweb**      | Escolas SMB           | Simplicidade, preço acessível           | Features limitadas, sem IA            | R$ 200-800/mês   |
+| **Qranber**        | Escolas modernas      | UX moderna, mobile-first                | Recente, menos funcionalidades        | R$ 400-1500/mês  |
+| **SophiA**         | Escolas + bibliotecas | Gestão de acervo, tradição              | Interface antiga, foco em bibliotecas | R$ 500-2000/mês  |
+| **SIGA**           | Escolas grandes       | Robustez, customização                  | Complexo, caro, suporte lento         | R$ 1500-5000/mês |
+| **iEscolar**       | Mobile-first          | App nativo, offline                     | Features limitadas no web             | R$ 300-1000/mês  |
+| **Gestor Escolar** | Micro escolas         | Muito barato, simples                   | Sem escala, features básicas          | R$ 50-200/mês    |
+| **Eduqz**          | Comunicação           | Chat escola-pais, notificações          | Não é ERP completo                    | R$ 200-600/mês   |
 
 ### 3.2 Posicionamento do Anuá
 
@@ -466,7 +480,7 @@ tests/
 11. `send_enrollment_reminders` (10:00, seg-sex) - Lembretes de matrícula
 12. `send_daily_academic_digest` (19:00) - Resumo diário
 13. `send_weekly_academic_digest` (07:00, segunda) - Resumo semanal
-14. `retry_pending_events` (*/15 min) - Retry de eventos de gamificação
+14. `retry_pending_events` (\*/15 min) - Retry de eventos de gamificação
 15. `update_streaks` (00:00) - Atualiza streaks de alunos
 
 ---
@@ -482,12 +496,14 @@ Análise detalhada de código real (controllers, services, componentes) revelou 
 **Arquivo:** `app/controllers/invoices/list_invoices_controller.ts` (192 linhas)
 
 **Problema:**
+
 - Lógica de filtragem complexa com 5+ níveis de `whereHas` aninhados
 - Controller responsável por construir queries SQL complexas
 - Dificulta manutenção e testes
 - Inconsistência: alguns controllers são enxutos (45 linhas), outros são gordos (192 linhas)
 
 **Exemplo problemático:**
+
 ```typescript
 if (courseId) {
   query.whereHas('payments', (paymentsQuery) => {
@@ -503,6 +519,7 @@ if (courseId) {
 ```
 
 **Recomendação:**
+
 - Extrair lógica de query para `InvoiceQueryService` ou `InvoiceRepository`
 - Controller deve apenas orquestrar: validar input → chamar service → retornar response
 - Facilita caching, testes unitários e reuso de queries
@@ -516,6 +533,7 @@ if (courseId) {
 **Arquivo:** `app/services/gamification/points_service.ts`
 
 **Problema:**
+
 ```typescript
 async addPoints(params: { studentGamificationId: string; points: number; ... }) {
   let gamification = await StudentGamification.findOrFail(params.studentGamificationId)
@@ -526,6 +544,7 @@ async addPoints(params: { studentGamificationId: string; points: number; ... }) 
 ```
 
 **Cenário de race condition:**
+
 1. Job A lê `totalPoints = 100`
 2. Job B lê `totalPoints = 100` (antes de A salvar)
 3. Job A adiciona 50 → salva `totalPoints = 150`
@@ -534,6 +553,7 @@ async addPoints(params: { studentGamificationId: string; points: number; ... }) 
 **Resultado:** 20 pontos perdidos
 
 **Recomendação:**
+
 ```typescript
 // Opção 1: Transação com SELECT FOR UPDATE
 await db.transaction(async (trx) => {
@@ -541,7 +561,7 @@ await db.transaction(async (trx) => {
     .where('id', params.studentGamificationId)
     .forUpdate()
     .firstOrFail()
-  
+
   const newTotalPoints = gamification.totalPoints + params.points
   await gamification.merge({ totalPoints: newTotalPoints }).save({ client: trx })
   await PointTransaction.create({ ... }, { client: trx })
@@ -562,6 +582,7 @@ await StudentGamification.query()
 **Arquivo:** `app/controllers/invoices/list_invoices_controller.ts`
 
 **Problema:**
+
 ```typescript
 const query = Invoice.query()
   .preload('student', (q) => q.preload('user'))
@@ -578,11 +599,13 @@ const query = Invoice.query()
 ```
 
 **Problemas:**
+
 1. **Preload incondicional:** Carrega 5+ relacionamentos mesmo quando filtros não precisam
 2. **Performance:** Para 100 invoices, executa 500+ queries (100 × 5 preloads)
 3. **Memória:** Carrega dados desnecessários (ex: `individualDiscounts` quando só precisa de `totalAmount`)
 
 **Recomendação:**
+
 ```typescript
 // Preload condicional baseado nos campos solicitados
 const needsStudent = fields.includes('studentName')
@@ -612,6 +635,7 @@ query.select('id', 'dueDate', 'amount', 'status')
 **Arquivo:** `app/controllers/attendance/list_attendance_controller.ts`
 
 **Problema:**
+
 ```typescript
 if (date) {
   query.whereHas('attendance', (q) => q.whereRaw('DATE(date) = ?', [date]))
@@ -619,17 +643,17 @@ if (date) {
 ```
 
 **Problemas:**
+
 1. **`DATE(date)` não usa índice:** Aplica função na coluna, impedindo uso de índice
 2. **Performance ruim:** Full table scan em tabelas grandes
 
 **Recomendação:**
+
 ```typescript
 if (date) {
   const startOfDay = DateTime.fromISO(date).startOf('day').toSQL()
   const endOfDay = DateTime.fromISO(date).endOf('day').toSQL()
-  query.whereHas('attendance', (q) => 
-    q.whereBetween('date', [startOfDay, endOfDay])
-  )
+  query.whereHas('attendance', (q) => q.whereBetween('date', [startOfDay, endOfDay]))
 }
 ```
 
@@ -642,6 +666,7 @@ if (date) {
 **Arquivo:** `inertia/containers/dashboard/financial-kpi-strip.tsx`
 
 **Problema:**
+
 ```typescript
 const { data, isLoading } = useQuery(
   api.api.v1.dashboard.escolaStats.queryOptions({ query } as any)
@@ -649,11 +674,13 @@ const { data, isLoading } = useQuery(
 ```
 
 **Problemas:**
+
 1. **`as any` quebra type safety:** Perde autocomplete e validação de tipos
 2. **Inconsistência:** Alguns lugares usam tipos corretos, outros usam `any`
 3. **Dificulta refactoring:** Mudanças na API não são detectadas pelo TypeScript
 
 **Recomendação:**
+
 ```typescript
 // Definir tipo explícito para query params
 type EscolaStatsQuery = {
@@ -664,9 +691,7 @@ type EscolaStatsQuery = {
 }
 
 const query: EscolaStatsQuery = { academicPeriodId, courseId, levelId, classId }
-const { data, isLoading } = useQuery(
-  api.api.v1.dashboard.escolaStats.queryOptions({ query })
-)
+const { data, isLoading } = useQuery(api.api.v1.dashboard.escolaStats.queryOptions({ query }))
 ```
 
 **Impacto:** Melhor DX, catch de erros em compile-time
@@ -678,6 +703,7 @@ const { data, isLoading } = useQuery(
 **Arquivo:** `inertia/pages/escola/index.tsx`
 
 **Problema:**
+
 ```typescript
 import { FinancialKpiStrip } from '../../containers/dashboard/financial-kpi-strip'
 import { EnrollmentConversionStrip } from '../../containers/dashboard/enrollment-conversion-strip'
@@ -689,15 +715,17 @@ import { GradeTrendsChartWithFilters } from '../../containers/pedagogical/grade-
 ```
 
 **Problemas:**
+
 1. **20+ containers carregando em paralelo:** Cada um faz sua própria query
 2. **Sem priorização:** Gráficos menos importantes bloqueiam KPIs críticos
 3. **Sem lazy loading:** Todos os containers carregados mesmo se usuário não scrollar
 
 **Recomendação:**
+
 ```typescript
 // Opção 1: React.lazy para containers below-the-fold
-const GradeDistributionChart = lazy(() => 
-  import('../../containers/grades/grade-distribution-chart')
+const GradeDistributionChart = lazy(
+  () => import('../../containers/grades/grade-distribution-chart')
 )
 
 // Opção 2: TanStack Query com prioridade
@@ -730,6 +758,7 @@ useQuery({
 **Arquivo:** `inertia/components/layouts/escola-layout.tsx`
 
 **Problema:**
+
 ```typescript
 function UnreadMessagesBadge() {
   const [count, setCount] = useState<number | null>(null)
@@ -750,12 +779,14 @@ function UnreadMessagesBadge() {
 ```
 
 **Problemas:**
+
 1. **Inconsistência:** Todo o app usa TanStack Query, exceto este componente
 2. **Sem cache:** Refetch a cada render, mesmo se dados não mudaram
 3. **Sem retry:** Se falhar, fica em `count = 0` sem tentar novamente
 4. **Carrega 50 inquiries só pra contar unread:** Ineficiente
 
 **Recomendação:**
+
 ```typescript
 function UnreadMessagesBadge() {
   const { data } = useQuery({
@@ -764,9 +795,7 @@ function UnreadMessagesBadge() {
     refetchInterval: 2 * 60 * 1000, // Poll a cada 2 min
   })
 
-  const count = useMemo(() => 
-    (data?.data ?? []).filter((i) => i.hasUnread).length
-  , [data])
+  const count = useMemo(() => (data?.data ?? []).filter((i) => i.hasUnread).length, [data])
 
   // Ou melhor: endpoint dedicado /api/v1/escola/inquiries/unread-count
 }
@@ -781,17 +810,20 @@ function UnreadMessagesBadge() {
 **Arquivo:** Múltiplos controllers (`list_invoices_controller.ts`, `list_events_controller.ts`, etc.)
 
 **Problema:**
+
 ```typescript
 const invoices = await query.paginate(page, limit)
 // Offset pagination: SELECT ... LIMIT 20 OFFSET 1000
 ```
 
 **Problemas:**
+
 1. **Performance degradante:** OFFSET 1000 é lento (precisa scanear 1000 registros antes)
 2. **Inconsistência em tempo real:** Se novos itens são inseridos, paginação "pula" itens
 3. **Escalabilidade:** Fica pior conforme dataset cresce
 
 **Recomendação:**
+
 ```typescript
 // Cursor-based pagination
 const invoices = await query
@@ -816,6 +848,7 @@ return {
 **Arquivo:** `app/services/gamification/points_service.ts`
 
 **Problema:**
+
 ```typescript
 async addPoints(params: { studentGamificationId: string; points: number; ... }) {
   // Sem verificação de frequência
@@ -824,13 +857,15 @@ async addPoints(params: { studentGamificationId: string; points: number; ... }) 
 ```
 
 **Cenários de exploit:**
+
 1. **Bug em job:** Job de "presença em evento" executa 10x → 10x pontos
 2. **Race condition:** Dois requests simultâneos → pontos duplicados
 3. **Falta de idempotência:** Mesma ação gera pontos múltiplas vezes
 
 **Recomendação:**
+
 ```typescript
-async addPoints(params: { 
+async addPoints(params: {
   studentGamificationId: string
   points: number
   type: string
@@ -841,7 +876,7 @@ async addPoints(params: {
   const existing = await PointTransaction.query()
     .where('idempotencyKey', params.idempotencyKey)
     .first()
-  
+
   if (existing) {
     return { transaction: existing, gamification: await StudentGamification.find(...) }
   }
@@ -851,7 +886,7 @@ async addPoints(params: {
     .where('studentGamificationId', params.studentGamificationId)
     .where('createdAt', '>', DateTime.now().minus({ hours: 1 }).toSQL())
     .sum('points as total')
-  
+
   if (recentPoints[0].total > MAX_POINTS_PER_HOUR) {
     throw new Error('Rate limit exceeded')
   }
@@ -869,29 +904,34 @@ async addPoints(params: {
 Nem tudo é problema! O código também tem padrões excelentes que devem ser mantidos:
 
 #### **AI Service Bem Estruturado**
+
 - `app/ai/ai_service.ts` tem streaming com resumable streams
 - Comments explicativos sobre decisões de design
 - AbortController para cancelar streams quando client desconecta
 - Quota checking antes de processar
 
 #### **Design System Maduro**
+
 - 50+ componentes UI baseados em shadcn/Radix
 - Componentes customizados úteis: `currency-input`, `masked-input`, `date-picker`, `stepper`
 - Consistência visual em todo o app
 
 #### **IA Contextual (AskAnua)**
+
 - Sheet/Panel pattern bem implementado
 - Thread management com sessionStorage
 - Contextual prompts por tela
 - Streaming com cancelamento
 
 #### **Dashboard Rico**
+
 - KPIs financeiros com toggle de visibilidade
 - Filtros por período letivo, curso, nível, turma
 - Múltiplas abas (pedagógico, administrativo, financeiro)
 - Skeleton loading em todos os containers
 
 #### **Multi-Tenancy Bem Implementado**
+
 - `selectedSchoolIds` no middleware
 - School chains com override de configurações
 - Permissões granulares por role
@@ -975,6 +1015,7 @@ O Anuá tem uma base técnica sólida e diferenciais competitivos fortes (gamifi
 Com execução focada nessas áreas, o Anuá pode se posicionar como a alternativa moderna e inteligente aos players tradicionais (Sponte, SIGA), capturando market share no segmento de escolas K-12 e expandindo para cursos livres.
 
 **Prioridade imediata (próximas 2 semanas):**
+
 - Fix race condition em gamificação
 - Otimizar queries SQL ineficientes
 - Padronizar fetch com TanStack Query

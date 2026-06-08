@@ -45,11 +45,7 @@ export default function ProvaDetalhesPage({ examId }: Props) {
           </Badge>
         )
       case 'CANCELLED':
-        return (
-          <Badge variant="destructive">
-            Cancelada
-          </Badge>
-        )
+        return <Badge variant="destructive">Cancelada</Badge>
       default:
         return <Badge variant="outline">Indefinido</Badge>
     }

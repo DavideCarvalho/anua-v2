@@ -57,7 +57,9 @@ export default class ExportStudentsCsvJob extends Job<ExportStudentsCsvPayload> 
     }
     if (filters.courseId) {
       query.whereHas('levels', (lq) => {
-        lq.whereNull('deletedAt').whereHas('level', (lvlQ) => lvlQ.where('courseId', filters.courseId!))
+        lq.whereNull('deletedAt').whereHas('level', (lvlQ) =>
+          lvlQ.where('courseId', filters.courseId!)
+        )
       })
     }
     if (filters.search) {

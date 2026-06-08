@@ -69,8 +69,10 @@ export default class SaveClassScheduleController {
           )
         }
 
-        const existingSlots = await CalendarSlot.query({ client: trx })
-          .where('calendarId', calendar.id)
+        const existingSlots = await CalendarSlot.query({ client: trx }).where(
+          'calendarId',
+          calendar.id
+        )
 
         const existingByPosition = new Map<string, CalendarSlot>()
         for (const slot of existingSlots) {

@@ -40,7 +40,7 @@ _Avoid_: "Nível" (isso é `Level`/turma/série, conceito diferente)
 Modelo de cobrança e cláusulas atrelado a um **Nível**. Define mensalidade, taxa de matrícula, parcelamento, descontos e quais **Documentos Contratuais** são exigidos. Uma **Matrícula** herda os termos do **Contrato** do seu **Nível**.
 
 **Documento Contratual**:
-Tipo de documento exigido pelo **Contrato** para uma **Matrícula** (ex: RG, comprovante de residência). Cada exigência vira uma `ContractDocument` no banco. É um *slot* — não é o arquivo enviado.
+Tipo de documento exigido pelo **Contrato** para uma **Matrícula** (ex: RG, comprovante de residência). Cada exigência vira uma `ContractDocument` no banco. É um _slot_ — não é o arquivo enviado.
 _Avoid_: "Arquivo", "Anexo" (genéricos demais)
 
 **Submissão de Documento** (`StudentDocumentSubmission`):

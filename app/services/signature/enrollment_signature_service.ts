@@ -101,9 +101,10 @@ export async function startEnrollmentSignature(
     // CPF só é enviado se válido (11 dígitos) — em muitos cadastros o campo
     // documentNumber guarda RG/outros.
     const signers: SignerInput[] = financialResponsibles.map((user) => {
-      const cpf = user.documentNumber && isValidCpf(user.documentNumber)
-        ? user.documentNumber.replace(/\D/g, '')
-        : undefined
+      const cpf =
+        user.documentNumber && isValidCpf(user.documentNumber)
+          ? user.documentNumber.replace(/\D/g, '')
+          : undefined
       if (user.email) {
         return {
           name: user.name,
@@ -168,9 +169,7 @@ export async function applySignatureWebhook(
   submissionId: string,
   status: 'SIGNED' | 'DECLINED' | 'EXPIRED'
 ): Promise<{ updated: boolean; studentHasLevelId: string | null }> {
-  const shl = await StudentHasLevel.query()
-    .where('signatureSubmissionId', submissionId)
-    .first()
+  const shl = await StudentHasLevel.query().where('signatureSubmissionId', submissionId).first()
 
   if (!shl) {
     logger.warn({ submissionId }, 'Webhook recebido para submissionId desconhecido')

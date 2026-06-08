@@ -21,7 +21,9 @@ export default function MatriculasPage({ hasActivePeriod }: { hasActivePeriod: b
         <div className="space-y-6">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Matrículas</h1>
-            <p className="text-muted-foreground">Gerencie o processo de matrícula de novos alunos</p>
+            <p className="text-muted-foreground">
+              Gerencie o processo de matrícula de novos alunos
+            </p>
           </div>
 
           <EmptyState
@@ -92,7 +94,9 @@ export default function MatriculasPage({ hasActivePeriod }: { hasActivePeriod: b
               <CardHeader>
                 <FileText className="h-8 w-8 text-primary mb-2" />
                 <CardTitle>Alunos Matriculados</CardTitle>
-                <CardDescription>Lista completa de alunos com filtros por turma e curso</CardDescription>
+                <CardDescription>
+                  Lista completa de alunos com filtros por turma e curso
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <Button variant="outline" className="w-full gap-2">

@@ -161,9 +161,7 @@ export function PurchaseRequestsTable({
                             ) : (
                               <ArrowDown className="h-4 w-4 text-muted-foreground" />
                             )}
-                            <span className="text-foreground">
-                              {row.finalQuantity}*
-                            </span>
+                            <span className="text-foreground">{row.finalQuantity}*</span>
                           </div>
                         </HoverCardTrigger>
                         <HoverCardContent>

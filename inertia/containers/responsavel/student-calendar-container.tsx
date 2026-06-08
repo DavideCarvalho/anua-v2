@@ -129,9 +129,7 @@ function ItemCard({ item, compact = false }: { item: CalendarItem; compact?: boo
   )
 }
 
-type ConsentInfo = NonNullable<
-  Extract<CalendarItem, { sourceType: 'event' }>['consent']
->
+type ConsentInfo = NonNullable<Extract<CalendarItem, { sourceType: 'event' }>['consent']>
 
 function ConsentBadge({ consent, compact = false }: { consent: ConsentInfo; compact?: boolean }) {
   const className = 'text-[10px] py-0 px-1.5'
@@ -153,7 +151,10 @@ function ConsentBadge({ consent, compact = false }: { consent: ConsentInfo; comp
   }
   if (consent.status === 'EXPIRED') {
     return (
-      <Badge variant="outline" className={cn('border-muted-foreground text-muted-foreground', className)}>
+      <Badge
+        variant="outline"
+        className={cn('border-muted-foreground text-muted-foreground', className)}
+      >
         Expirado
       </Badge>
     )
@@ -348,7 +349,8 @@ function MonthView({ items, monthDate }: { items: CalendarItem[]; monthDate: Dat
                 {dayItems.slice(0, 3).map((item) => {
                   const itemConsent = item.sourceType === 'event' ? item.consent : null
                   const needsAction = itemConsent?.status === 'PENDING'
-                  const baseClasses = 'flex items-center gap-1 truncate rounded px-1 py-0.5 text-[10px]'
+                  const baseClasses =
+                    'flex items-center gap-1 truncate rounded px-1 py-0.5 text-[10px]'
 
                   const inner = (
                     <>

@@ -2,14 +2,7 @@ import { useQuery, QueryErrorResetBoundary } from '@tanstack/react-query'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useQueryStates, parseAsInteger, parseAsString } from 'nuqs'
 import { Link } from '@adonisjs/inertia/react'
-import {
-  FileText,
-  PenLine,
-  CreditCard,
-  Users,
-  AlertCircle,
-  ChevronRight,
-} from 'lucide-react'
+import { FileText, PenLine, CreditCard, Users, AlertCircle, ChevronRight } from 'lucide-react'
 
 import { Button } from '../../components/ui/button'
 import { Card, CardContent } from '../../components/ui/card'

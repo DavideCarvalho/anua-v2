@@ -337,13 +337,14 @@ export function SubPeriodsForm({
         body: {
           academicPeriodId,
           schoolId,
-          periodStructure: (resolvedPeriodStructure as
-            | 'BIMESTRAL'
-            | 'TRIMESTRAL'
-            | 'SEMESTRAL'
-            | 'ANUAL'
-            | undefined
-            | null) || undefined,
+          periodStructure:
+            (resolvedPeriodStructure as
+              | 'BIMESTRAL'
+              | 'TRIMESTRAL'
+              | 'SEMESTRAL'
+              | 'ANUAL'
+              | undefined
+              | null) || undefined,
           currentSubPeriods,
         },
       })
@@ -373,13 +374,14 @@ export function SubPeriodsForm({
           academicPeriodId,
           schoolId,
           overwrite,
-          periodStructure: (resolvedPeriodStructure as
-            | 'BIMESTRAL'
-            | 'TRIMESTRAL'
-            | 'SEMESTRAL'
-            | 'ANUAL'
-            | undefined
-            | null) || undefined,
+          periodStructure:
+            (resolvedPeriodStructure as
+              | 'BIMESTRAL'
+              | 'TRIMESTRAL'
+              | 'SEMESTRAL'
+              | 'ANUAL'
+              | undefined
+              | null) || undefined,
         },
       })
       // Normalizamos o response: o controller devolve DateTime do Luxon que
@@ -440,7 +442,7 @@ export function SubPeriodsForm({
   const usesSubPeriods = resolvedPeriodStructure && resolvedPeriodStructure !== ''
   const isFromPeriod = propPeriodStructure && propPeriodStructure !== ''
 
-  const subPeriods = (localSubPeriods ?? (subPeriodsData?.data ?? [])) as SubPeriod[]
+  const subPeriods = (localSubPeriods ?? subPeriodsData?.data ?? []) as SubPeriod[]
 
   const expectedCount = resolvedPeriodStructure
     ? (STRUCTURE_COUNT[resolvedPeriodStructure] ?? 0)
@@ -739,12 +741,24 @@ export function SubPeriodsForm({
               De{' '}
               <span className="font-medium">
                 {subPeriods.length}{' '}
-                {subPeriods.length === 4 ? 'Bimestres' : subPeriods.length === 3 ? 'Trimestres' : subPeriods.length === 2 ? 'Semestres' : 'período'}
+                {subPeriods.length === 4
+                  ? 'Bimestres'
+                  : subPeriods.length === 3
+                    ? 'Trimestres'
+                    : subPeriods.length === 2
+                      ? 'Semestres'
+                      : 'período'}
               </span>{' '}
               para{' '}
               <span className="font-medium">
                 {expectedCount}{' '}
-                {resolvedPeriodStructure === 'BIMESTRAL' ? 'Bimestres' : resolvedPeriodStructure === 'TRIMESTRAL' ? 'Trimestres' : resolvedPeriodStructure === 'SEMESTRAL' ? 'Semestres' : 'período'}
+                {resolvedPeriodStructure === 'BIMESTRAL'
+                  ? 'Bimestres'
+                  : resolvedPeriodStructure === 'TRIMESTRAL'
+                    ? 'Trimestres'
+                    : resolvedPeriodStructure === 'SEMESTRAL'
+                      ? 'Semestres'
+                      : 'período'}
               </span>
             </DialogDescription>
           </DialogHeader>
@@ -761,9 +775,15 @@ export function SubPeriodsForm({
                     <thead className="bg-muted/50 sticky top-0">
                       <tr>
                         <th className="w-10 px-2 py-2 text-left text-xs font-medium text-muted-foreground"></th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">Nome</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">Data Início</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">Data Fim</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">
+                          Nome
+                        </th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">
+                          Data Início
+                        </th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">
+                          Data Fim
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
@@ -789,9 +809,14 @@ export function SubPeriodsForm({
 
                         if (item.type === 'added' && item.new) {
                           return (
-                            <tr key={`added-${index}`} className="bg-emerald-50 dark:bg-emerald-950/20">
+                            <tr
+                              key={`added-${index}`}
+                              className="bg-emerald-50 dark:bg-emerald-950/20"
+                            >
                               <td className="px-2 py-2">
-                                <span className="text-emerald-600 dark:text-emerald-400 font-bold">+</span>
+                                <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                                  +
+                                </span>
                               </td>
                               <td className="px-3 py-2 text-emerald-700 dark:text-emerald-400">
                                 {item.new.name}
@@ -808,9 +833,14 @@ export function SubPeriodsForm({
 
                         if (item.type === 'modified' && item.old && item.new) {
                           return (
-                            <tr key={`modified-${index}`} className="bg-yellow-50 dark:bg-yellow-950/20">
+                            <tr
+                              key={`modified-${index}`}
+                              className="bg-yellow-50 dark:bg-yellow-950/20"
+                            >
                               <td className="px-2 py-2">
-                                <span className="text-yellow-600 dark:text-yellow-400 font-bold">~</span>
+                                <span className="text-yellow-600 dark:text-yellow-400 font-bold">
+                                  ~
+                                </span>
                               </td>
                               <td className="px-3 py-2">
                                 <div className="space-y-0.5">
@@ -875,7 +905,8 @@ export function SubPeriodsForm({
           )}
 
           <div className="text-xs text-muted-foreground bg-muted p-2 rounded-md">
-            As datas serão distribuídas proporcionalmente. Atividades e provas já vinculadas serão reconciliadas em background.
+            As datas serão distribuídas proporcionalmente. Atividades e provas já vinculadas serão
+            reconciliadas em background.
           </div>
 
           <DialogFooter>

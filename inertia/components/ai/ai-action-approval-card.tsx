@@ -17,7 +17,10 @@ function isStringArray(value: unknown): value is string[] {
 
 // Extrai IDs do input que precisam ser resolvidos pra nome, por tool. As
 // listas estão em sync com o que cada renderInputSummary consome.
-function idsToResolve(toolName: string, input: unknown): {
+function idsToResolve(
+  toolName: string,
+  input: unknown
+): {
   studentIds: string[]
   examIds: string[]
   classIds: string[]
@@ -49,11 +52,7 @@ function idsToResolve(toolName: string, input: unknown): {
   if (toolName === 'sendCommunication') {
     // Quando o público é uma turma específica, resolvemos pra mostrar o nome.
     const audience = isObject(input.audience) ? input.audience : null
-    if (
-      audience &&
-      audience.scopeType === 'CLASS' &&
-      typeof audience.scopeId === 'string'
-    ) {
+    if (audience && audience.scopeType === 'CLASS' && typeof audience.scopeId === 'string') {
       classIds.add(audience.scopeId)
     }
   }
@@ -204,8 +203,8 @@ function renderInputSummary(toolName: string, input: unknown, names: ResolvedNam
           </div>
         ) : null}
         <div className="text-[10px] text-muted-foreground">
-          Demais alunos serão marcados como presentes. Se você tem mais de uma aula
-          nessa turma no dia, o registro vai pra primeira ainda não preenchida.
+          Demais alunos serão marcados como presentes. Se você tem mais de uma aula nessa turma no
+          dia, o registro vai pra primeira ainda não preenchida.
         </div>
       </div>
     )
@@ -287,10 +286,8 @@ function renderInputSummary(toolName: string, input: unknown, names: ResolvedNam
     const title = typeof input.title === 'string' ? input.title : null
     const body = typeof input.body === 'string' ? input.body : null
     const audience = isObject(input.audience) ? input.audience : null
-    const scopeType =
-      audience && typeof audience.scopeType === 'string' ? audience.scopeType : null
-    const scopeId =
-      audience && typeof audience.scopeId === 'string' ? audience.scopeId : undefined
+    const scopeType = audience && typeof audience.scopeType === 'string' ? audience.scopeType : null
+    const scopeId = audience && typeof audience.scopeId === 'string' ? audience.scopeId : undefined
     const requiresAck = input.requiresAcknowledgement === true
     const audienceLabel = scopeType
       ? scopeType === 'SCHOOL'
@@ -355,7 +352,7 @@ export function AiActionApprovalCard(props: Props) {
     queryFn: async (): Promise<ResolvedNames> => {
       const res = await fetch('/api/v1/ai/resolve-names', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         credentials: 'include',
         body: JSON.stringify(idsForCard),
       })
@@ -379,7 +376,11 @@ export function AiActionApprovalCard(props: Props) {
   })
   const names: ResolvedNames = resolvedRaw ?? EMPTY_NAMES
 
-  if (props.state === 'output-available' || props.state === 'output-error' || props.state === 'output-denied') {
+  if (
+    props.state === 'output-available' ||
+    props.state === 'output-error' ||
+    props.state === 'output-denied'
+  ) {
     if (isCancelledOutput(props.output)) {
       return (
         <div className="rounded-lg border border-border bg-muted/40 p-3 text-sm">
@@ -442,7 +443,9 @@ export function AiActionApprovalCard(props: Props) {
       decision === 'reject'
         ? { cancelled: true, reason: 'user declined' }
         : 'status' in result && result.status === 'executed'
-          ? ('output' in result ? (result.output ?? { ok: true }) : { ok: true })
+          ? 'output' in result
+            ? (result.output ?? { ok: true })
+            : { ok: true }
           : { error: extractError(result) }
 
     await props.addToolOutput({

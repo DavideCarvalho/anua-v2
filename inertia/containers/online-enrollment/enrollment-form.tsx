@@ -274,8 +274,8 @@ export function EnrollmentForm({
             <p className="text-muted-foreground max-w-md mx-auto">
               {completionInfo.otpSentTo ? (
                 <>
-                  Enviamos um código de acesso para <strong>{completionInfo.otpSentTo}</strong>.
-                  Use o código pra entrar no portal e acompanhar os próximos passos.
+                  Enviamos um código de acesso para <strong>{completionInfo.otpSentTo}</strong>. Use
+                  o código pra entrar no portal e acompanhar os próximos passos.
                 </>
               ) : (
                 'Sua matrícula foi registrada. Acesse o portal pra acompanhar os próximos passos.'
